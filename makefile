@@ -14,7 +14,7 @@ venv/bin/activate: requirements.txt
 	. venv/bin/activate && pip install -Uqr requirements.txt
 	touch venv/bin/activate
 
-output/figure%.svg: genFigures.py tfac/figures/figure%.py venv
+output/figure%.svg: genFigures.py de/figures/figure%.py venv
 	@ mkdir -p ./output
 	. venv/bin/activate && ./genFigures.py $*
 
