@@ -5,9 +5,11 @@ from .figureCommon import subplotLabel, getSetup
 
 
 def makeFigure():
-    """ Make figure 7. """
-    ax, f = getSetup((7, 6), (3, 3))
+    """ Get a list of the axis objects and create a figure. """
+    # Get list of axis objects
+    ax, f = getSetup((15, 8), (3, 2))
 
+    # Add subplot labels
     subplotLabel(ax)
 
     return f
