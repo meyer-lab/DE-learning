@@ -7,12 +7,12 @@ path_here = dirname(dirname(__file__))
 
 def importLINCSprotein():
     """ An example data import function. """
-    dataA = pd.read_csv(join(path_here, "tfac/data/01_Laura_Heiser__Sean_Gross_A.csv"))
-    dataB = pd.read_csv(join(path_here, "tfac/data/01_Laura_Heiser__Sean_Gross_B.csv"))
-    dataC = pd.read_csv(join(path_here, "tfac/data/01_Laura_Heiser__Sean_Gross_C.csv"))
+    dataA = pd.read_csv(join(path_here, "rpmCounts_allRuns_matrix.tsv.xz"))
+#     dataB = pd.read_csv(join(path_here, "tfac/data/01_Laura_Heiser__Sean_Gross_B.csv"))
+#     dataC = pd.read_csv(join(path_here, "tfac/data/01_Laura_Heiser__Sean_Gross_C.csv"))
 
     dataA["File"] = "A"
-    dataB["File"] = "B"
-    dataC["File"] = "C"
+#     dataB["File"] = "B"
+#     dataC["File"] = "C"
 
-    return pd.concat([dataA, dataB, dataC])
+    return dataA
