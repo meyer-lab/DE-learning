@@ -50,7 +50,6 @@ def plottingPCs(KO_genes_list, fname):
     KO_genes = df.loc[:, "KO Gene"]
 
     # Set the color map to match the number of species
-    z = range(1, len(KO_genes_unique))
     rainbow = plt.get_cmap("rainbow")
     cNorm = colors.Normalize(vmin=0, vmax=len(KO_genes_unique))
     scalarMap = cmx.ScalarMappable(norm=cNorm, cmap=rainbow)
