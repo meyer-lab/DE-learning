@@ -16,7 +16,7 @@ def form_matrix(data_in):
     """Takes in parameter of dataframe read in by importRNAseqKO() and forms matrix: rows = gene, columns = knockout model.
     There are 85 knockout models (including negative control) and 84 corresponding genes measured."""
     # average knockout replicate values and remove duplicate gene rows
-    data_combined = data_in.groupby(by=data.columns, axis=1).mean() # knockout replicates
+    data_combined = data_in.groupby(by=data_in.columns, axis=1).mean() # knockout replicates
     data_combined = data_combined.groupby(["GeneSymbol"]).max() # duplicate genes
 
     # average negative controls into 1 value, drop WT (control = neg)
@@ -30,6 +30,6 @@ def form_matrix(data_in):
     matrix = pd.DataFrame()
     for i, gene in enumerate(data_combined.columns):
         if gene != "neg":
-            matrix[gene] = data_combined.loc[gene,:]
+            matrix[gene] = data_combined.loc[gene, :]
     matrix = matrix.T
     return matrix
