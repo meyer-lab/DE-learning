@@ -9,14 +9,14 @@ from sklearn.decomposition import PCA
 
 #------------------------- Perform PCA using sklearn
 def performPCA(data_in, num_components):
-    "Function takes in parameter for number of components. Returns list containing: [PCA object, fitted model]"
+    """Function takes in parameter for number of components. Returns list containing: [PCA object, fitted model]"""
     pca_object = PCA(n_components=num_components)
     X_r = pca_object.fit_transform(normalize(data_in))
     return [pca_object, X_r]
 
 #------------------------- Calculate cumulative variance based on number of PCs included and create r2x plot
 def r2x(num_components, pca_object, fname):
-    "Function takes in parameters for number of components, PCA object returned from pca(), and filename for plot image and creates r2x plot"
+    """Function takes in parameters for number of components, PCA object returned from pca(), and filename for plot image and creates r2x plot"""
     total_variance = np.array([])
     tot = 0.0
     for i in range(0, num_components):

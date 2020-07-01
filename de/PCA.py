@@ -1,6 +1,6 @@
 """ Performs PCA analysis on RNAseq knockout data using functions from PCA_helpers.py"""
-from PCA_helpers import *
-from importData import *
+from .PCA_helpers import *
+from .importData import *
 
 data = importRNAseqKO()
 # Analyze data with replicates
