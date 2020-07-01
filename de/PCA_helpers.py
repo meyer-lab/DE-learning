@@ -30,7 +30,6 @@ def r2x(num_components, pca_object, fname):
     plt.xticks(np.arange(num_components+1))
     plt.plot(list(range(1, num_components+1)), total_variance)
     ax.grid()
-    plt.savefig("PCA Images/"+fname)
 
 #-------------------------- Create dataframe of PC scores returned from pca() and associated KO gene
 def KOdataframe(data, X_r):
@@ -120,7 +119,7 @@ def plottingPCs(KO_genes_list, fname):
     ax.grid()
     for i, txt in enumerate(KO_genes):
         ax.annotate(txt, (df.iloc[i, 2], df.iloc[i, 3]), fontsize=6)
-    plt.savefig("PCA Images/"+fname)
+
 #-------------------------- Create individual plots for each knockout gene's replicates on PCy v PCx
 def plottingPCreplicates(KO_list, PCx, PCy):
     """Function takes in 3 parameters: list returned from KOdataframe(), and integers for the 2 PCs to be plotted in order (x,y).
@@ -141,4 +140,3 @@ def plottingPCreplicates(KO_list, PCx, PCy):
     fig.text(0.06, 0.5, "PC"+str(PCy), ha="center", va="center", rotation="vertical")
     fig.tight_layout()
     fig.subplots_adjust(top=0.975)
-    plt.savefig("PCA Images/"+"PC"+str(PCy)+"vPC"+str(PCx)+"_all.png")
