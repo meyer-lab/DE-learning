@@ -19,3 +19,5 @@ class TestModel(unittest.TestCase):
         """Tests that matrix formed is reasonable"""
         matrix = formMatrix(importRNAseqKO())
         self.assertTrue(isinstance(matrix, pd.DataFrame))
+        for i in enumerate(matrix.rows):
+            self.assertTrue(matrix.iloc[i][i]==0)
