@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[2]:
-
-
 '''Add a test to the simulation of ODE. 
    The dimension of parameters(eps,w,alpha,beta) should be n_x, n_x*n_x, n_x, n_x.
    Expected results would be an array with N_t columns and nx rows.
@@ -32,16 +26,3 @@ class Test_ODE(unittest.TestCase):
         self.assertEqual(len(test1.sol[:,0]), test1.N_t)
         self.assertEqual(len(test1.sol[0,:]), test1.n_x)
         self.assertEqual(int(test1.sol[50,0]), 0)
-
-
-# In[4]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
