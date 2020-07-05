@@ -8,7 +8,7 @@ import math
 from ODE import solver,ODE
 
 class Model(object):
-    def __init__(self, n_x=83, pert=50, index=np.loadtxt('./params/node_Index.csv', delimiter=',', dtype=str), dt=0.1, N_t=100, filename='./figures/simulation_1.jpg'):
+    def __init__(self, n_x=83, pert=50, index=np.loadtxt('./data/node_Index.csv', delimiter=',', dtype=str), dt=0.1, N_t=100, filename='./figures/simulation_1.jpg'):
         self.n_x = n_x #The number of components involved
         self.x0 = np.ones(n_x) #Initial values
         self.pert = pert # The strength of pertubation
