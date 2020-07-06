@@ -18,7 +18,7 @@ class Model():
         self.dt, self.N_t = dt, N_t # Time series
         self.filename = filename #Path for saving simulation result
         self.t, self.sol = self.sim(self) #Time series and simulation of ODE
-        self.eps, self.w, self.alpha, self.beta = self.random_params(self) #Randomly initialized parametersi
+        self.eps, self.w, self.alpha, self.beta = self.random_params(self) #Randomly initialized parameters
 
     def graph(self):
         '''Function receives simulation of ODE and the number of components involved, then generate the graph'''
