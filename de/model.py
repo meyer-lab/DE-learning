@@ -31,7 +31,7 @@ class Model(object):
         
     def sim(self):
         '''Run the ODE model'''
-        self.t, self.sol = solver(self.n_x,self.x0,self.eps,self.w,self.alpha,self.beta,self.dt,self.N_t)
+        self.t, self.sol = solver(self.x0,self.eps,self.w,self.alpha,self.beta,self.dt,self.N_t)
         
     def random_params(self):
         '''Randomly initialize the parameters based on the number of components and pertubation strength.
