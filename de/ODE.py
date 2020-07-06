@@ -18,7 +18,4 @@ def ODE(y, t, eps, w, alpha, beta):
                  alpha: Degradation rate
                  beta: Knock-out effects
     '''
-    envelop_fn = np.tanh
-    x = y
-    dydt = eps * envelop_fn(np.dot(w, x)) - (alpha*beta) * x
-    return dydt
+    return eps * np.tanh(np.dot(w, y)) - (alpha*beta) * y
