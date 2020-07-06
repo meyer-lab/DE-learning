@@ -5,7 +5,7 @@ Basic Model simulation
 import numpy as np
 import matplotlib.pyplot as plt
 import math
-from ODE import solver,ODE
+from ODE import solver
 
 class Model(object):
     def __init__(self, n_x=83, pert=50, index=np.loadtxt('./data/node_Index.csv', delimiter=',', dtype=str), dt=0.1, N_t=100, filename='./figures/simulation_1.jpg'):
