@@ -12,14 +12,13 @@ def solver(x0, eps, w, alpha, beta, dt, N_t):
     sol = odeint(ODE, x0, t, args=(eps, w, alpha, beta))
     return t, sol
 def ODE(y, t, eps, w, alpha, beta):
-    '''The system of ODE'''
+    '''The ODE system:
+    Parameters = eps: Value that bound the saturation effect
+                 w: Interaction between components
+                 alpha: Degradation rate
+                 beta: Knock-out effects
+    '''
     envelop_fn = np.tanh
     x = y
     dydt = eps * envelop_fn(np.dot(w, x)) - (alpha*beta) * x 
-    '''
-    eps: Value that bound the saturation effect
-    w: Interaction between components
-    alpha: Degradation rate
-    beta: Knock-out effects
-    '''
     return dydt
