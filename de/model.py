@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from ODE import solver
 
-class Model(object):
+class Model():
     '''
     The class for basic model simulation
     '''
