@@ -15,6 +15,8 @@ class Model(object):
         self.index = index # The gene name for each component
         self.dt, self.N_t = dt, N_t # Time series
         self.filename = filename #Path for saving simulation result
+        self.t, self.sol= self.sim(self) #Time series and simulation of ODE
+        self.eps, self.w, self.alpha, self.beta = self.random_params(self) #Randomly initialized parametersi
 
     def graph(self):
         '''Function receives simulation of ODE and the number of components involved, then generate the graph'''
@@ -31,16 +33,18 @@ class Model(object):
         
     def sim(self):
         '''Run the ODE model'''
-        self.t, self.sol = solver(self.x0,self.eps,self.w,self.alpha,self.beta,self.dt,self.N_t)
+        t, sol= solver(self.x0,self.eps,self.w,self.alpha,self.beta,self.dt,self.N_t)
+        return t, sol
         
     def random_params(self):
         '''Randomly initialize the parameters based on the number of components and pertubation strength.
            only consider one knock-out condition here.
         '''
-        self.eps = np.random.normal(1,1.0,size=(self.n_x))
+        eps = np.random.normal(1,1.0,size=(self.n_x))
         W = np.random.normal(0.01,1.0,size=(self.n_x,self.n_x))
         W_mask = (1.0 - np.diag(np.ones([self.n_x]))) #remove self-interaction
-        self.w = W_mask*W
-        self.alpha = np.random.normal(2,1.0,size=(self.n_x))
-        self.beta = np.ones(self.n_x)
-        self.beta[0] = self.pert
+        w = W_mask*W
+        alpha = np.random.normal(2,1.0,size=(self.n_x))
+        beta = np.ones(self.n_x)
+        beta[0] = self.pert
+        return eps, w, alpha, beta
