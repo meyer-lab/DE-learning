@@ -20,5 +20,5 @@ def ODE(y, t, eps, w, alpha, beta):
     '''
     envelop_fn = np.tanh
     x = y
-    dydt = eps * envelop_fn(np.dot(w, x)) - (alpha*beta) * x 
+    dydt = eps * envelop_fn(np.dot(w, x)) - (alpha*beta) * x
     return dydt
