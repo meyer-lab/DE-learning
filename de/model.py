@@ -44,4 +44,3 @@ class Model(object):
         self.alpha = np.random.normal(2,1.0,size=(self.n_x))
         self.beta = np.ones(self.n_x)
         self.beta[0] = self.pert
-
