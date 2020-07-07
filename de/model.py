@@ -79,7 +79,7 @@ class Model():
         fig = plt.figure(figsize=(8, 8))
         ax = fig.add_subplot(1, 1, 1)
         for i in range(self.n_x):
-            plt.scatter(x_exp[:, i], x_sim[:, i], s=10, color=scalarMap.to_rgba(i), label=self.index[i])
+            plt.scatter(x_exp[i, :], x_sim[i, :], s=10, color=scalarMap.to_rgba(i), label=self.index[i])
         plt.xlabel('RNAseq Data')
         plt.ylabel('Model Solution at t = 48 hours')
         plt.title("Model vs Data at t=48 hours")
