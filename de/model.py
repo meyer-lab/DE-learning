@@ -49,11 +49,11 @@ class Model():
         Randomly initialize the parameters based on the number of components and pertubation strength.
         only consider one knock-out condition here.
         '''
-        self.eps = np.random.normal(1, 1.0, size=(self.n_x))
+        self.eps = np.abs(np.random.normal(1, 1.0, size=(self.n_x)))
         W = np.random.normal(0.01, 1.0, size=(self.n_x, self.n_x))
         W_mask = (1.0 - np.diag(np.ones([self.n_x]))) #remove self-interaction
         self.w = W_mask*W
-        self.alpha = np.random.normal(2, 1.0, size=(self.n_x))
+        self.alpha = np.abs(np.random.normal(2, 1.0, size=(self.n_x)))
         beta = 1 + (np.diag(self.pert*np.ones(self.n_x)-1))
         neg = np.ones((83))
         self.beta = np.insert(beta, 83, values=neg, axis=1)
