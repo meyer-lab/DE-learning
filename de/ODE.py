@@ -20,4 +20,4 @@ def ODE(y, t, eps, w, alpha, beta):
                  alpha: Degradation rate
                  beta: Knock-out effects
     '''
-    return eps * np.tanh(np.dot(w, y)) - (alpha*beta) * y
+    return eps * (1 + np.tanh(np.dot(w, y))) - (alpha*beta) * y

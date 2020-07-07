@@ -4,6 +4,8 @@ Basic Model simulation
 import math
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.colors as colors
+import matplotlib.cm as cmx
 from ODE import solver
 
 class Model():
@@ -64,3 +66,23 @@ class Model():
         x_exp = np.loadtxt(self.expdata_path, delimiter=',')
         x_sim = np.transpose(self.sol[:, -1, :])
         self.sse = np.sum(np.square(x_sim - x_exp))
+    def scatterplot(self):
+        '''
+        Create scatterplot of model data vs experimental data
+        '''
+        rainbow = plt.get_cmap("rainbow")
+        cNorm = colors.Normalize(vmin=0, vmax=self.n_x)
+        scalarMap = cmx.ScalarMappable(norm=cNorm, cmap=rainbow)
+        self.save_path = "./figures/modelvsdata_scatter.jpg"
+        x_exp = np.loadtxt(self.expdata_path, delimiter=',')
+        x_sim = np.transpose(self.sol[:, -1, :])
+        fig = plt.figure(figsize=(8, 8))
+        ax = fig.add_subplot(1, 1, 1)
+        for i in range(self.n_x):
+            plt.scatter(x_exp[:, i], x_sim[:, i], s=10, color=scalarMap.to_rgba(i), label=self.index[i])
+        plt.xlabel('RNAseq Data')
+        plt.ylabel('Model Solution at t = 48 hours')
+        plt.title("Model vs Data at t=48 hours")
+        fig.tight_layout()
+        plt.savefig(self.save_path)
+        plt.show()
