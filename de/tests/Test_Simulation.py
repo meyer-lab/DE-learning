@@ -19,7 +19,7 @@ class Test_ODE(unittest.TestCase):
         self.assertEqual(np.shape(test1.eps), (test1.n_x, ))
         self.assertEqual(np.shape(test1.w), (test1.n_x, test1.n_x))
         self.assertEqual(np.shape(test1.alpha), (test1.n_x, ))
-        self.assertEqual(np.shape(test1.beta), (test1.n_x, ))
+        self.assertEqual(np.shape(test1.beta), (test1.n_x, test1.N))
     def test_simulation(self):
         '''
         Test the simulation of ODE model
@@ -27,7 +27,8 @@ class Test_ODE(unittest.TestCase):
         test1 = Model()
         test1.random_params()
         test1.sim()
+        test1.comparison()
         self.assertTrue(isinstance(test1.sol, np.ndarray))
-        self.assertEqual(len(test1.sol[:, 0]), test1.N_t)
-        self.assertEqual(len(test1.sol[0, :]), test1.n_x)
-        self.assertEqual(int(test1.sol[50, 0]), 0)
+        self.assertEqual(len(test1.sol[0, :, 0]), test1.N_t)
+        self.assertEqual(len(test1.sol[0, 0, :]), test1.n_x)
+        self.assertEqual(int(test1.sol[0, 50, 0]), 0)
