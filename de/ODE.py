@@ -2,14 +2,19 @@
 This file contains ODE equations, solver and calculator for Jacobian Matrix
 '''
 import numpy as np
-import autograd.numpy as anp
 from scipy.integrate import odeint
+import autograd.numpy as anp
 from autograd import jacobian
 
-def solver(n_x, N, x0, eps, w, alpha, beta, dt, N_t):
-    '''Function receives time series and a set of parameters,
-       then return the simulation of ODE.
+def solver(n_x, N, x0, p, beta, dt, N_t):
     '''
+    Function receives time series and a set of parameters,
+       then return the simulation of ODE.
+       p = [eps, w, alpha] as 1D array
+    '''
+    eps = p[0:n_x]
+    w = p[n_x:(n_x ** 2 + n_x)].reshape((n_x,n_x))
+    alpha = p[(n_x ** 2 + n_x):]
     t = np.linspace(0, dt*N_t, N_t)
     sol = np.ones((N, N_t, n_x))
     for i in range(N):
