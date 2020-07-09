@@ -6,7 +6,7 @@ In addition, the relative concentration of knockout component should approach ze
 '''
 import unittest
 import numpy as np
-from model import Model
+from ..model import Model
 
 class Test_ODE(unittest.TestCase):
     '''Test class for basic simulation of ODE systems'''
