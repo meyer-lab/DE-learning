@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.optimize import least_squares
-from model import Model
-from importData import importRNAseqKO, formMatrix
+from .model import Model
+from .importData import importRNAseqKO, formMatrix
 
 def residual_fun(params, model, exp_data):
     model_data = model.sim(params)
