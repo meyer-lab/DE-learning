@@ -72,14 +72,6 @@ class Model():
         self.p = np.concatenate([eps, w.flatten(), alpha])
         return self.p
 
-    def comparison(self):
-        '''
-        Compute the sum of square error across all the knock-out measurements
-        '''
-        x_exp = np.loadtxt(self.expdata_path, delimiter=',')
-        x_sim = np.transpose(self.sol[:, -1, :])
-        self.sse = np.sum(np.square(x_sim - x_exp))
-
     def scatterplot(self):
         '''
         Create scatterplot of model data vs experimental data

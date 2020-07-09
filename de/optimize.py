@@ -5,8 +5,7 @@ from .importData import importRNAseqKO, formMatrix
 
 def residual_fun(params, model, exp_data):
     model_data = model.sim(params)
-    # Combine squared errors from all knockout models to form 1D array of residuals
-    return np.sum(np.square(model_data - exp_data), axis=1)
+    return model_data.flatten()-exp_data.flatten()
 
 # Import experimental data
 data = importRNAseqKO()
@@ -17,4 +16,4 @@ model = Model()
 params = model.random_params()
 
 # Perform least squares optimization
-opt_params = least_squares(residual_fun, params, args=(model, exp_data))
+#opt_params = least_squares(residual_fun, params, args=(model, exp_data))
