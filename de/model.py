@@ -47,8 +47,7 @@ class Model():
 
     def sim(self, p):
         '''Run the ODE model'''
-        # Pass in params as p instead of individually
-        self.t, self.sol = solver(self.n_x, self.N, self.x0, p, self.beta, self.dt, self.N_t)
+        self.t, self.sol = solver(self.n_x, self.N, self.x0, p, self.beta, self.N_t)
         return np.transpose(self.sol[:, -1, :])
 
     def jac(self):
