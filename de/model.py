@@ -18,7 +18,7 @@ class Model():
         self.x0 = np.ones(n_x) #Initial values
         self.pert = pert # The strength of pertubation
         #TODO: Fix paths for loading data
-        #self.index = np.loadtxt(index, delimiter=',', dtype=str) # The gene name for each component
+        self.index = np.loadtxt(index, delimiter=',', dtype=str) # The gene name for each component
         self.dt, self.N_t = dt, N_t # Time step and total length of time for generating time series
         self.save_path = save_path #Path for saving simulation result
         self.expdata_path = expdata_path #Path for inputing experiment data
@@ -39,7 +39,7 @@ class Model():
             axes.plot(self.t, self.sol[cond, :, i], 'r')
             axes.set_title(self.index[i])
         plt.xlabel('t')
-        plt.ylabel('relative concentration')   # x(t)/x(0)
+        plt.ylabel('Expression Level')
         fig.tight_layout()
         plt.savefig(self.save_path)
         plt.show()
@@ -51,7 +51,7 @@ class Model():
 
     def jac(self):
         ''' Obtain the jacobian matrix of the system'''
-        self.jacb = jacobian_autograd(self.sol, self.eps, self.w, self.alpha, self.beta, self.N, self.n_x)
+        self.jacb = jacobian_autograd(self.sol, self.p, self.beta, self.N, self.n_x)
 
     def random_params(self):
         '''
