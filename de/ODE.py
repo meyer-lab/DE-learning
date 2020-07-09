@@ -12,6 +12,7 @@ def solver(n_x, N, x0, p, beta, dt, N_t):
        then return the simulation of ODE.
        p = [eps, w, alpha] as 1D array
     '''
+    # Added code to expand p into individual parameters for odeint
     eps = p[0:n_x]
     w = p[n_x:(n_x ** 2 + n_x)].reshape((n_x,n_x))
     alpha = p[(n_x ** 2 + n_x):]

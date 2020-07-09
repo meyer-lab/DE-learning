@@ -24,6 +24,7 @@ class Model():
         self.expdata_path = expdata_path #Path for inputing experiment data
         self.t = None #Time series
         self.sol = None #Simulation of ODE
+        # Changes were made here to combine eps, w, and alpha into an array
         self.p = None # Array of eps (value that bounds saturation effect), w (interaction strength), alpha (degradation rate)
         self.beta = None #Knock-out effects
         self.sse = None # The sum of square error across all measurements
@@ -46,6 +47,7 @@ class Model():
 
     def sim(self, p):
         '''Run the ODE model'''
+        # Pass in params as p instead of individually
         self.t, self.sol = solver(self.n_x, self.N, self.x0, p, self.beta, self.dt, self.N_t)
         return np.transpose(self.sol[:, -1, :])
 
@@ -66,6 +68,7 @@ class Model():
         beta = 1 + (np.diag(self.pert*np.ones(self.n_x)-1))
         neg = np.ones((self.n_x))
         self.beta = np.insert(beta, self.n_x, values=neg, axis=1)
+        # Combine all parameters into p
         self.p = np.concatenate([eps, w.flatten(), alpha])
         return self.p
 
