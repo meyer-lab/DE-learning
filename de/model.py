@@ -28,6 +28,7 @@ class Model():
         self.beta = None #Knock-out effects
         self.sse = None # The sum of square error across all measurements
         self.jacb = None # The jacobian matrix of the system
+
     def graph(self, cond):
         '''Function receives simulation of ODE and the number of components involved, then generate the graph.
            Parameters: cond = assigns a specific knockout condition.
@@ -42,13 +43,16 @@ class Model():
         fig.tight_layout()
         plt.savefig(self.save_path)
         plt.show()
+
     def sim(self, p):
         '''Run the ODE model'''
         self.t, self.sol = solver(self.n_x, self.N, self.x0, p, self.beta, self.dt, self.N_t)
         return np.transpose(self.sol[:, -1, :])
+
     def jac(self):
         ''' Obtain the jacobian matrix of the system'''
         self.jacb = jacobian_autograd(self.sol, self.eps, self.w, self.alpha, self.beta, self.N, self.n_x)
+
     def random_params(self):
         '''
         Randomly initialize the parameters based on the number of components and pertubation strength.
@@ -64,6 +68,7 @@ class Model():
         self.beta = np.insert(beta, self.n_x, values=neg, axis=1)
         self.p = np.concatenate([eps, w.flatten(), alpha])
         return self.p
+
     def comparison(self):
         '''
         Compute the sum of square error across all the knock-out measurements
@@ -71,6 +76,7 @@ class Model():
         x_exp = np.loadtxt(self.expdata_path, delimiter=',')
         x_sim = np.transpose(self.sol[:, -1, :])
         self.sse = np.sum(np.square(x_sim - x_exp))
+
     def scatterplot(self):
         '''
         Create scatterplot of model data vs experimental data
