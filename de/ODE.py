@@ -5,6 +5,7 @@ import numpy as np
 from scipy.integrate import solve_ivp
 import autograd.numpy as anp
 from autograd import jacobian
+from numba import njit
 
 def solver(n_x, N, x0, p, beta, N_t):
     '''
@@ -18,9 +19,10 @@ def solver(n_x, N, x0, p, beta, N_t):
     sol = np.ones((N, N_t, n_x))
     t = np.arange(N_t)
     for i in range(N):
-        sol[i, :, :] = np.transpose(solve_ivp(ODE, (0, N_t), x0, args=(eps, w, alpha, beta[:, i]), t_eval=t).y)
+        sol[i, :, :] = np.transpose(solve_ivp(ODE, (0, N_t), x0, args=(eps, w, alpha, beta[:, i]), t_eval=t, method="LSODA").y)
     return t, sol
 
+@njit
 def ODE(t, y, eps, w, alpha, beta):
     '''The ODE system:
     Parameters = eps: Value that bound the saturation effect
