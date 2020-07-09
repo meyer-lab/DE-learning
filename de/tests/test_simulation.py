@@ -28,4 +28,4 @@ class Test_ODE(unittest.TestCase):
         self.assertTrue(isinstance(test1.sol, np.ndarray))
         self.assertEqual(len(test1.sol[0, :, 0]), test1.N_t)
         self.assertEqual(len(test1.sol[0, 0, :]), test1.n_x)
-        self.assertEqual(int(test1.sol[0, 50, 0]), 0)
+        self.assertEqual(int(test1.sol[0, -1, 0]), 0)
