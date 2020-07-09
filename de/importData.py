@@ -35,6 +35,4 @@ def formMatrix(data_in):
         if gene != "neg":
             matrix[gene] = data_combined.loc[gene, :]
     matrix = matrix.T
-    # Convert dataframe to numpy array for comparison with model
-    matrix = matrix.to_numpy()
     return matrix
