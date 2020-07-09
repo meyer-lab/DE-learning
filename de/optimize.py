@@ -10,13 +10,14 @@ def residual_fun(params, model, exp_data):
     model_data = model.sim(params)
     return model_data.flatten()-exp_data.flatten()
 
-# Import experimental data
-data = importRNAseqKO()
-exp = formMatrix(data)
-
-# Set up ODE model
-m = Model()
-p = model.random_params()
-
-# Perform least squares optimization
-#opt_params = least_squares(residual_fun, params, args=(model, exp_data))
+def lsq(params, model, exp_data, residual_fun):
+    """
+    Parameters:
+    - params: 1D array of eps, w, and alpha values to be optimized
+    - model: Model() object to be simulated
+    - exp_data: 2D (83x84) array of RNAseq KO data
+    - residual_fun: function that returns 1D array of residuals
+    Returns 1D array of optimized parameters and minimized value of Cost function using scipy.optimize.least_squares
+    """
+    opt_params, cost = least_squares(residual_fun, params, args=(model, exp_data))
+    return opt_params, cost
