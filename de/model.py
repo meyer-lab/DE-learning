@@ -83,7 +83,7 @@ class Model():
         x_exp = np.loadtxt(self.expdata_path, delimiter=',')
         x_sim = np.transpose(self.sol[:, -1, :])
         fig = plt.figure(figsize=(8, 8))
-        ax = fig.add_subplot(1, 1, 1)
+        plt.subplot(1, 1, 1)
         for i in range(self.n_x):
             plt.scatter(x_exp[i, :], x_sim[i, :], s=10, color=scalarMap.to_rgba(i), label=self.index[i])
         plt.xlabel('RNAseq Data')
