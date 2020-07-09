@@ -19,6 +19,6 @@ class TestModel(unittest.TestCase):
     def test_matrix(self):
         """Tests that matrix formed is an 83x84 DataFrame with matching knockouts/gene measurements on the diagonal"""
         matrix = formMatrix(importRNAseqKO())
-        self.assertTrue(isinstance(matrix, np.array))
+        self.assertTrue(isinstance(matrix, np.ndarray))
         self.assertEqual(matrix.shape[0], 83) # there were 83 knockout models and thus associated genes
         self.assertEqual(matrix.shape[1], 84) # there is an extra column due to the negative control
