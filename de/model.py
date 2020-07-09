@@ -18,7 +18,7 @@ class Model():
         self.x0 = np.ones(n_x) #Initial values
         self.pert = pert # The strength of pertubation
         #TODO: Fix paths for loading data
-        self.index = np.loadtxt(index, delimiter=',', dtype=str) # The gene name for each component
+        #self.index = np.loadtxt(index, delimiter=',', dtype=str) # The gene name for each component
         self.dt, self.N_t = dt, N_t # Time step and total length of time for generating time series
         self.save_path = save_path #Path for saving simulation result
         self.expdata_path = expdata_path #Path for inputing experiment data
