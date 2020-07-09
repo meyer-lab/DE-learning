@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import matplotlib.cm as cmx
-from ODE import solver, jacobian_autograd
+from .ODE import solver, jacobian_autograd
 
 class Model():
     '''
