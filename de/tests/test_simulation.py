@@ -6,7 +6,7 @@ In addition, the relative concentration of knockout component should approach ze
 '''
 import unittest
 import numpy as np
-from model import Model
+from ..model import Model
 
 class Test_ODE(unittest.TestCase):
     '''Test class for basic simulation of ODE systems'''
@@ -16,18 +16,16 @@ class Test_ODE(unittest.TestCase):
         '''
         test1 = Model()
         test1.random_params()
-        self.assertEqual(np.shape(test1.eps), (test1.n_x, ))
-        self.assertEqual(np.shape(test1.w), (test1.n_x, test1.n_x))
-        self.assertEqual(np.shape(test1.alpha), (test1.n_x, ))
-        self.assertEqual(np.shape(test1.beta), (test1.n_x, ))
+        self.assertEqual(np.shape(test1.p), (test1.n_x ** 2 + 2 * test1.n_x, ))
+        self.assertEqual(np.shape(test1.beta), (test1.n_x, test1.N))
     def test_simulation(self):
         '''
         Test the simulation of ODE model
         '''
         test1 = Model()
-        test1.random_params()
-        test1.sim()
+        p = test1.random_params()
+        test1.sim(p)
         self.assertTrue(isinstance(test1.sol, np.ndarray))
-        self.assertEqual(len(test1.sol[:, 0]), test1.N_t)
-        self.assertEqual(len(test1.sol[0, :]), test1.n_x)
-        self.assertEqual(int(test1.sol[50, 0]), 0)
+        self.assertEqual(len(test1.sol[0, :, 0]), test1.N_t)
+        self.assertEqual(len(test1.sol[0, 0, :]), test1.n_x)
+        self.assertEqual(int(test1.sol[0, -1, 0]), 0)
