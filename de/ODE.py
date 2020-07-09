@@ -20,6 +20,7 @@ def solver(n_x, N, x0, p, beta, dt, N_t):
     for i in range(N):
         sol[i, :, :] = odeint(ODE, x0, t, args=(eps, w, alpha, beta[:, i]))
     return t, sol
+
 def ODE(y, t, eps, w, alpha, beta):
     '''The ODE system:
     Parameters = eps: Value that bound the saturation effect
@@ -28,19 +29,15 @@ def ODE(y, t, eps, w, alpha, beta):
                  beta: Knock-out effects
     '''
     return eps * (1 + np.tanh(np.dot(w, y))) - (alpha*beta) * y
-def jacobian_autograd(y, eps, w, alpha, beta, N, n_x):
+
+def jacobian_autograd(t, y, eps, w, alpha, beta):
     '''
     Given a set of parameters and the state of system, it will return the Jacobian of the system.
     '''
-    jac = np.zeros((N, n_x, n_x))
-    for i in range(N):
-        jac[i, :, :] = jacobian(ODE_anp)(y[i, -1, :], eps, w, alpha, beta[:, i])
-    return jac
+    return jacobian(ODE_anp)(y, eps, w, alpha, beta)
+
 def ODE_anp(y, eps, w, alpha, beta):
     '''
     Autograd-packed ODE function.
     '''
-    a1 = anp.exp(-2.0 * anp.dot(y, w))
-    a1 = (1.0 - a1) / (1.0 + a1)
-    a2 = eps * (1+a1) - (alpha*beta) * y
-    return a2
+    return eps * (1 + anp.tanh(anp.dot(w, y))) - (alpha*beta) * y
