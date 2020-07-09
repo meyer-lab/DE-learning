@@ -16,7 +16,7 @@ class Test_ODE(unittest.TestCase):
         '''
         test1 = Model()
         test1.random_params()
-        self.assertEqual(np.shape(test1.p), (test1.n_x ** 2 + 2 * tes1.n_x, ))
+        self.assertEqual(np.shape(test1.p), (test1.n_x ** 2 + 2 * test1.n_x, ))
         self.assertEqual(np.shape(test1.beta), (test1.n_x, test1.N))
     def test_simulation(self):
         '''
@@ -25,7 +25,6 @@ class Test_ODE(unittest.TestCase):
         test1 = Model()
         p = test1.random_params()
         test1.sim(p)
-        test1.comparison()
         self.assertTrue(isinstance(test1.sol, np.ndarray))
         self.assertEqual(len(test1.sol[0, :, 0]), test1.N_t)
         self.assertEqual(len(test1.sol[0, 0, :]), test1.n_x)
