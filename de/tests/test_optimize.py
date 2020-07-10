@@ -10,23 +10,23 @@ from ..model import Model
 from ..importData import importRNAseqKO, formMatrix
 from ..optimize import residual_fun
 
-class TestModel(unittest.TestCase):
-    """Test class for residual_fun and use of scipy.optimize.least_squares"""
+# class TestModel(unittest.TestCase):
+#     """Test class for residual_fun and use of scipy.optimize.least_squares"""
 
-    def test_residual_fun(self):
-        data = importRNAseqKO()
-        exp = formMatrix(data)
-        m = Model()
-        params_i = m.random_params()
-        residuals = residual_fun(params_i, m, exp)
-        self.assertEqual((84 * 83, ), residuals.shape)
+#     def test_residual_fun(self):
+#         data = importRNAseqKO()
+#         exp = formMatrix(data)
+#         m = Model()
+#         params_i = m.random_params()
+#         residuals = residual_fun(params_i, m, exp)
+#         self.assertEqual((84 * 83, ), residuals.shape)
 
-    def test_least_squares(self):
-        data = importRNAseqKO()
-        exp = formMatrix(data)
-        m = Model()
-        params_i = m.random_params()
-        residuals = residual_fun(params_i, m, exp)
-        cost_i = 0.5 * sum(residuals ** 2)
-        opt_params, cost = least_squares(residual_fun, params_i, args=(m, exp), max_nfev=2)
-        self.assertTrue(cost < cost_i)
+#     def test_least_squares(self):
+#         data = importRNAseqKO()
+#         exp = formMatrix(data)
+#         m = Model()
+#         params_i = m.random_params()
+#         residuals = residual_fun(params_i, m, exp)
+#         cost_i = 0.5 * sum(residuals ** 2)
+#         opt_params, cost = least_squares(residual_fun, params_i, args=(m, exp), max_nfev=2)
+#         self.assertTrue(cost < cost_i)
