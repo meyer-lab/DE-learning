@@ -32,7 +32,7 @@ def ODE(t, y, eps, w, alpha, beta):
     '''
     return eps * (1 + np.tanh(np.dot(w, y))) - (alpha*beta) * y
 
-def jacobian_autograd(t, y, eps, w, alpha, beta):
+def jacobian_autograd(y, eps, w, alpha, beta):
     '''
     Given a set of parameters and the state of system, it will return the Jacobian of the system.
     '''
