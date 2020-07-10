@@ -29,7 +29,7 @@ def ODE(y, t, eps, w, alpha, beta):
                  beta: Knock-out effects
     '''
     return eps * (1 + np.tanh(np.dot(w, y))) - (alpha*beta) * y
-
+  
 def jacobian_autograd(y, p, beta, N, n_x):
     '''
     Given a set of parameters and the state of system, it will return the Jacobian of the system.
@@ -46,7 +46,4 @@ def ODE_anp(y, eps, w, alpha, beta):
     '''
     Autograd-packed ODE function.
     '''
-    a1 = anp.exp(-2.0 * anp.dot(y, w))
-    a1 = (1.0 - a1) / (1.0 + a1)
-    a2 = eps * (1+a1) - (alpha*beta) * y
-    return a2
+    return eps * (1 + anp.tanh(anp.dot(w, y))) - (alpha*beta) * y
