@@ -33,10 +33,10 @@ class Model():
         plt.savefig(save_path)
         plt.show()
 
-    def sim(self, p, beta, N_t):
+    def sim(self, params, beta_in, N_t):
         '''Function receives simulation of ODE, 1D array of optimizable parameters, array of beta parameter, and time series.
         Runs the ODE model and returns solution at last timepoint.'''
-        t, sol = solver(self.n_x, self.N, self.x0, p, beta, N_t)
+        t, sol = solver(self.n_x, self.N, self.x0, params, beta_in, N_t)
         return np.transpose(sol[:, -1, :])
 
     def jac(self, p, beta, sol):
