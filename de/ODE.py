@@ -19,7 +19,7 @@ def solver(n_x, N, x0, N_t, p, beta):
     sol = np.ones((N, n_x))
     t = np.arange(N_t)
     for i in range(N):
-        sol[i, :] = np.transpose(solve_ivp(ODE, (0, N_t), x0, args=(eps, w, alpha, beta[:, i]), t_eval=[N_t], jac = jacobian_autograd, method="LSODA").y)
+        sol[i, :] = np.transpose(solve_ivp(ODE, (0, N_t), x0, args=(eps, w, alpha, beta[:, i]), t_eval=[N_t], jac=jacobian_autograd, method="LSODA").y)
     return sol
 
 @njit

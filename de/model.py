@@ -12,14 +12,15 @@ class Model():
     '''
     The class for basic model simulation
     '''
-    def __init__(self, n_x=83, N=84, N_t = 48):
+    def __init__(self, n_x=83, N=84, N_t=48):
         self.n_x = n_x #The number of components/genes involved
         self.N = N #The number of knockout conditions
         self.x0 = np.ones(n_x) #Initial values
         self.N_t = N_t #Total length of simulation time
 
     def graph(self, cond, t, sol, save_path):
-        '''Function receives simulation of ODE, the number of components involved, time series, model solution, and path at which to save image. 
+        '''
+        Function receives simulation of ODE, the number of components involved, time series, model solution, and path at which to save image. 
         Generates graphs of the solution over time.
         '''
         # TODO: Will we be able to graph over time given we are only solving for 1 timepoint?
@@ -39,7 +40,7 @@ class Model():
         Runs the ODE model and returns solution at last timepoint.'''
         sol = solver(self.n_x, self.N, self.x0, self.N_t, params, beta_in)
         return np.transpose(sol)
-    
+
     def random_params(self, pert):
         '''
         Function receives simulation of ODE and perturbation strength and randomly initialize the parameters based on the number of components.
