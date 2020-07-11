@@ -12,10 +12,11 @@ class Model():
     '''
     The class for basic model simulation
     '''
-    def __init__(self, n_x=83, N=84):
+    def __init__(self, n_x=83, N=84, N_t = 48):
         self.n_x = n_x #The number of components/genes involved
         self.N = N #The number of knockout conditions
         self.x0 = np.ones(n_x) #Initial values
+        self.N_t = N_t #Total length of simulation time
 
     def graph(self, cond, t, sol, save_path):
         '''Function receives simulation of ODE, the number of components involved, time series, model solution, and path at which to save image. 
@@ -33,22 +34,12 @@ class Model():
         plt.savefig(save_path)
         plt.show()
 
-    def sim(self, params, beta_in, N_t):
+    def sim(self, params, beta_in):
         '''Function receives simulation of ODE, 1D array of optimizable parameters, array of beta parameter, and time series.
         Runs the ODE model and returns solution at last timepoint.'''
-        t, sol = solver(self.n_x, self.N, self.x0, params, beta_in, N_t)
-        return np.transpose(sol[:, -1, :])
-
-    def jac(self, p, beta, sol):
-        '''Function receives simulation of ODE, 1D array of optimizable parameters, array of beta parameter, and model solution. 
-        Returns the jacobian matrix of the system'''
-        # TODO: Does jacobian require solution over time?
-        eps = p[0:self.n_x]
-        w = p[self.n_x:(self.n_x ** 2 + self.n_x)].reshape((self.n_x, self.n_x))
-        alpha = p[(self.n_x ** 2 + self.n_x):]
-        jacb = jacobian_autograd(sol, eps, w, alpha, beta)
-        return jacb
-
+        sol = solver(self.n_x, self.N, self.x0, self.N_t, params, beta_in)
+        return np.transpose(sol)
+    
     def random_params(self, pert):
         '''
         Function receives simulation of ODE and perturbation strength and randomly initialize the parameters based on the number of components.

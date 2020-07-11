@@ -25,6 +25,6 @@ class Test_ODE(unittest.TestCase):
         '''
         test1 = Model()
         p, beta = test1.random_params(1000)
-        sol = test1.sim(p, beta, 48)
+        sol = test1.sim(p, beta)
         self.assertTrue(isinstance(sol, np.ndarray))
         self.assertEqual(sol.shape, (test1.n_x, test1.N))
