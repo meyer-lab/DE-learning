@@ -76,7 +76,8 @@ function sol_matrix(pIn)
 end
 
 " Cost function. Returns SSE + sum(abs(w)) between model and experimental RNAseq data. "
-function cost(pIn, exp_data)
+function cost(pIn)
+    exp_data = get_data("./de/data/exp_data.csv")
     sse = 0
     for i = 1:83
         sol_temp = simKO(pIn, i)
@@ -84,7 +85,7 @@ function cost(pIn, exp_data)
     end
     neg = solveODE(pIn)
     sse += sum((neg .- exp_data[:, 84]) .^ 2)
-    c = sse + sum(abs(p[1:6889]))
+    c = sse + sum(abs.(pIn[1:6889]))
     return c
 end
 
@@ -95,9 +96,8 @@ function g!(G, x)
 end
 
 " Single calculation of cost gradient. "
-#ps = ones(7055)
-#grads = Zygote.gradient(cost, ps)
+ps = ones(7055)
+grads = Zygote.gradient(cost, ps)
 
 " Run optimization. "
-#exp = get_data("./de/data/exp_data.csv")
-#optimize(ps -> cost(ps, exp), g!, ps, LBFGS(), Optim.Options(iterations = 10, show_trace = true))
+#optimize(cost, g!, ps, LBFGS(), Optim.Options(iterations = 10, show_trace = true))
