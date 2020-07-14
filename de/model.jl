@@ -6,12 +6,12 @@ using Zygote
 
 " Reshape a vector of parameters into the variables we know. "
 @views function reshapeParams(p)
-    w = reshape(p[1:9216], (96, 96))
+    w = reshape(p[1:7056], (84, 84))
     alpha = p[9217:9312]
     eps = p[9313:9408]
     
-    @assert length(eps) == 96
-    @assert length(alpha) == 96
+    @assert length(eps) == 84
+    @assert length(alpha) == 84
     
     return w, alpha, eps
 end
@@ -30,7 +30,7 @@ end
 
 " Solve the ODE system. "
 function solveODE(ps)
-    u0 = zeros(96)
+    u0 = zeros(84)
     tspan = (0.0, 10000.0)
     prob = ODEProblem(ODEeq, u0, tspan, ps)
     sol = last(solve(prob, AutoTsit5(TRBDF2()); saveat = tspan[2], reltol=1e-8, abstol=1e-8))
