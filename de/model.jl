@@ -56,7 +56,7 @@ function simKO(pIn, geneNum)
         w = hcat(zeros(Float64, 83, 1), w_temp[:, 2:83])
     elseif geneNum == 83
         w = hcat(w_temp[:, 1:82], zeros(Float64, 83, 1))
-        else geneNum != 1 || geneNum != 83
+    else
         w= hcat(w_temp[:, 1:geneNum - 1], zeros(Float64, 83, 1), w_temp[:, geneNum + 1:83])
     end
     
