@@ -23,7 +23,7 @@ class Test_ODE(unittest.TestCase):
         '''
         test1 = Model()
         p = test1.random_params()
-        t, sol = test1.py_sim(p)
+        t, sol = test1.py_sim(p, 48, np.ones(83))
         self.assertTrue(isinstance(sol, np.ndarray))
-        self.assertEqual(len(test1.sol[:, 0]), test1.N_t)
-        self.assertEqual(len(test1.sol[0, :]), test1.n_x)
+        self.assertEqual(len(sol[:, 0]), 48)
+        self.assertEqual(len(sol[0, :]), test1.n_x)
