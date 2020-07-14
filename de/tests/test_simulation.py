@@ -19,7 +19,7 @@ class Test_ODE(unittest.TestCase):
         self.assertEqual(np.shape(p), (test1.n_x ** 2 + 2 * test1.n_x, ))
     def test_simulation(self):
         '''
-        Test the simulation of ODE model
+        Test the simulation of ODE model in python
         '''
         test1 = Model()
         p = test1.random_params()
