@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import matplotlib.cm as cmx
-from .ODE import solver, jacobian_autograd
+from .ODE import solver
 
 class Model():
     '''
@@ -46,12 +46,8 @@ class Model():
 
     def sim(self, p):
         '''Run the ODE model'''
-        self.t, self.sol = solver(self.n_x, self.N, self.x0, p, self.beta, self.dt, self.N_t)
+        self.sol = solver(p)
         return np.transpose(self.sol[:, -1, :])
-
-    def jac(self):
-        ''' Obtain the jacobian matrix of the system'''
-        self.jacb = jacobian_autograd(self.sol, self.eps, self.w, self.alpha, self.beta, self.N, self.n_x)
 
     def random_params(self):
         '''
