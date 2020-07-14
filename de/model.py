@@ -12,88 +12,67 @@ class Model():
     '''
     The class for basic model simulation
     '''
-    def __init__(self, n_x=83, N=84, pert=50, index='./data/node_Index.csv', dt=0.1, N_t=48, save_path='./figures/simulation_1.jpg', expdata_path='./data/exp_data.csv'):
-        self.n_x = n_x #The number of components involved
+    def __init__(self, n_x=83, N=84, N_t=48):
+        self.n_x = n_x #The number of components/genes involved
         self.N = N #The number of knockout conditions
         self.x0 = np.ones(n_x) #Initial values
-        self.pert = pert # The strength of pertubation
-        #TODO: Fix paths for loading data
-        #self.index = np.loadtxt(index, delimiter=',', dtype=str) # The gene name for each component
-        self.dt, self.N_t = dt, N_t # Time step and total length of time for generating time series
-        self.save_path = save_path #Path for saving simulation result
-        self.expdata_path = expdata_path #Path for inputing experiment data
-        self.t = None #Time series
-        self.sol = None #Simulation of ODE
-        self.p = None # Array of eps (value that bounds saturation effect), w (interaction strength), alpha (degradation rate)
-        self.beta = None #Knock-out effects
-        self.sse = None # The sum of square error across all measurements
-        self.jacb = None # The jacobian matrix of the system
+        self.N_t = N_t #Total length of simulation time
 
-    def graph(self, cond):
-        '''Function receives simulation of ODE and the number of components involved, then generate the graph.
-           Parameters: cond = assigns a specific knockout condition.
+    def graph(self, cond, t, sol, save_path):
         '''
+        Function receives simulation of ODE, the number of components involved, time series, model solution, and path at which to save image. 
+        Generates graphs of the solution over time.
+        '''
+        # TODO: Will we be able to graph over time given we are only solving for 1 timepoint?
         fig = plt.figure(figsize=(100, 300.0))
         for i in range(self.n_x):
             axes = fig.add_subplot(math.ceil(self.n_x/5), 5, i+1)
-            axes.plot(self.t, self.sol[cond, :, i], 'r')
-            axes.set_title(self.index[i])
+            axes.plot(t, sol[cond, :, i], 'r')
+            axes.set_title(cond)
         plt.xlabel('t')
-        plt.ylabel('relative concentration')   # x(t)/x(0)
+        plt.ylabel('Expression Level')   # x(t)/x(0)
         fig.tight_layout()
-        plt.savefig(self.save_path)
+        plt.savefig(save_path)
         plt.show()
 
-    def sim(self, p):
-        '''Run the ODE model'''
-        self.t, self.sol = solver(self.n_x, self.N, self.x0, p, self.beta, self.dt, self.N_t)
-        return np.transpose(self.sol[:, -1, :])
+    def sim(self, params, beta_in):
+        '''Function receives simulation of ODE, 1D array of optimizable parameters, array of beta parameter, and time series.
+        Runs the ODE model and returns solution at last timepoint.'''
+        sol = solver(self.n_x, self.N, self.x0, self.N_t, params, beta_in)
+        return np.transpose(sol)
 
-    def jac(self):
-        ''' Obtain the jacobian matrix of the system'''
-        self.jacb = jacobian_autograd(self.sol, self.eps, self.w, self.alpha, self.beta, self.N, self.n_x)
-
-    def random_params(self):
+    def random_params(self, pert):
         '''
-        Randomly initialize the parameters based on the number of components and pertubation strength.
-        only consider one knock-out condition here.
+        Function receives simulation of ODE and perturbation strength and randomly initialize the parameters based on the number of components.
+        Returns 1D array of parameters eps (n_x), w (n_x ** 2), and alpha (n_x) as well as beta
         '''
         eps = np.abs(np.random.normal(1, 1.0, size=(self.n_x)))
         W = np.random.normal(0.01, 1.0, size=(self.n_x, self.n_x))
         W_mask = (1.0 - np.diag(np.ones([self.n_x]))) #remove self-interaction
         w = W_mask*W
         alpha = np.abs(np.random.normal(2, 1.0, size=(self.n_x)))
-        beta = 1 + (np.diag(self.pert*np.ones(self.n_x)-1))
+        beta = 1 + (np.diag(pert*np.ones(self.n_x)-1))
         neg = np.ones((self.n_x))
-        self.beta = np.insert(beta, self.n_x, values=neg, axis=1)
-        self.p = np.concatenate([eps, w.flatten(), alpha])
-        return self.p
+        beta = np.insert(beta, self.n_x, values=neg, axis=1)
+        # Combine all parameters into p
+        p = np.concatenate([eps, w.flatten(), alpha])
+        return p, beta
 
-    def comparison(self):
+    def scatterplot(self, exp_data, model_data, save_path):
         '''
-        Compute the sum of square error across all the knock-out measurements
-        '''
-        x_exp = np.loadtxt(self.expdata_path, delimiter=',')
-        x_sim = np.transpose(self.sol[:, -1, :])
-        self.sse = np.sum(np.square(x_sim - x_exp))
-
-    def scatterplot(self):
-        '''
-        Create scatterplot of model data vs experimental data
+        Function receives simulation of ODE, matrix of RNAseq data, matrix of model solution, and save path for image.
+        Creates scatterplot of model data vs experimental data
         '''
         rainbow = plt.get_cmap("rainbow")
         cNorm = colors.Normalize(vmin=0, vmax=self.n_x)
         scalarMap = cmx.ScalarMappable(norm=cNorm, cmap=rainbow)
-        self.save_path = "./figures/modelvsdata_scatter.jpg"
-        x_exp = np.loadtxt(self.expdata_path, delimiter=',')
-        x_sim = np.transpose(self.sol[:, -1, :])
         fig = plt.figure(figsize=(8, 8))
-        ax = fig.add_subplot(1, 1, 1)
+        plt.subplot(1, 1, 1)
         for i in range(self.n_x):
-            plt.scatter(x_exp[i, :], x_sim[i, :], s=10, color=scalarMap.to_rgba(i), label=self.index[i])
+            plt.scatter(exp_data[i, :], model_data[i, :], s=10, color=scalarMap.to_rgba(i))
         plt.xlabel('RNAseq Data')
-        plt.ylabel('Model Solution at t = 48 hours')
-        plt.title("Model vs Data at t = 48 hours")
+        plt.ylabel('Model Solution')
+        plt.title("Model vs Data")
         fig.tight_layout()
-        plt.savefig(self.save_path)
+        plt.savefig(save_path)
         plt.show()
