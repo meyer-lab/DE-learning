@@ -17,7 +17,7 @@ def importRNAseqKO():
 
 def formMatrix(data_in):
     """Takes in parameter of dataframe read in by importRNAseqKO() and forms matrix: rows = gene, columns = knockout model.
-    There are 85 knockout models (including negative control) and 84 corresponding genes measured."""
+    There are 84 knockout models (including negative control) and 83 corresponding genes measured."""
     # average knockout replicate values and remove duplicate gene rows
     data_combined = data_in.groupby(by=data_in.columns, axis=1).mean() # knockout replicates
     data_combined = data_combined.groupby(["GeneSymbol"]).max() # duplicate genes
