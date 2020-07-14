@@ -75,7 +75,7 @@ function sol_matrix(pIn)
     return sol
 end
 
-" Cost function. Returns SSE between model and experimental RNAseq data. "
+" Cost function. Returns SSE + sum(abs(w)) between model and experimental RNAseq data. "
 function cost(pIn)
     exp_data = get_data("./de/data/exp_data.csv")
     sse = 0
@@ -85,7 +85,8 @@ function cost(pIn)
     end
     neg = solveODE(pIn)
     sse += sum((neg .- exp_data[:, 84]) .^ 2)
-    return sse
+    c = sse + sum(abs(p[1:6889]))
+    return c
 end
 
 " Calculates gradient of cost function. "
