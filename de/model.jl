@@ -38,12 +38,23 @@ function ODEeq(du, u, p, t)
 end
 
 " Solve the ODE system. "
-function solveODE(ps)
+function solveODE(ps, tps=nothing)
     u0 = zeros(83)
-    tspan = (0.0, 10000.0)
+
+    if isnothing(tps)
+        tspan = (0.0, 10000.0)
+    else
+        tspan = (0.0, maximum(tps))
+    end
+    
     prob = ODEProblem(ODEeq, u0, tspan, ps)
-    sol = last(solve(prob, AutoTsit5(TRBDF2()); saveat = tspan[2], reltol=1e-8, abstol=1e-8))
-    return sol
+    sol = solve(prob, AutoTsit5(TRBDF2()); reltol=1e-8, abstol=1e-8)
+
+    if isnothing(tps)
+        return last(sol)
+    end
+
+    return sol(tps)
 end
 
 " Remove the effect of one gene across all others to simulate the KO experiments. "
