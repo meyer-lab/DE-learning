@@ -78,15 +78,15 @@ end
 " Cost function. Returns SSE + sum(abs(w)) between model and experimental RNAseq data. "
 function cost(pIn)
     exp_data = get_data("./de/data/exp_data.csv")
-    sse = 0
+    neg = solveODE(pIn)
+    sse = norm(neg .- exp_data[:, 84])
+
     for i = 1:83
         sol_temp = simKO(pIn, i)
-        sse += sum((sol_temp .- exp_data[:, i]) .^ 2)
+        sse += norm(sol_temp .- exp_data[:, i])
     end
-    neg = solveODE(pIn)
-    sse += sum((neg .- exp_data[:, 84]) .^ 2)
-    c = sse + sum(abs.(pIn[1:6889]))
-    return c
+
+    return sse + sum(abs.(pIn[1:6889])) # TODO: Add regularization strength param
 end
 
 " Calculates gradient of cost function. "
@@ -96,8 +96,8 @@ function g!(G, x)
 end
 
 " Single calculation of cost gradient. "
-ps = ones(7055)
-grads = Zygote.gradient(cost, ps)
+# ps = ones(7055)
+# grads = Zygote.gradient(cost, ps)
 
 " Run optimization. "
 #optimize(cost, g!, ps, LBFGS(), Optim.Options(iterations = 10, show_trace = true))
