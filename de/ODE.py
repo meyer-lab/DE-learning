@@ -1,5 +1,5 @@
 '''
-This file contains ODE equations, solver and calculator for Jacobian Matrix
+This file contains ODE equation solvers from Julia
 '''
 import numpy as np
 from scipy.integrate import solve_ivp
@@ -28,31 +28,3 @@ def julia_sol_matrix(ps):
         p = [eps, w, alpha] as 1D array
     '''
     return jl.eval('sol_matrix')(ps)
-
-def reshape_params(ps):
-    '''
-    Function receives a set of parameters then returns eps, w, and alpha as separate arrays
-    p = [eps, w, alpha] as 1D array
-    '''
-    eps = ps[0:83]
-    w = ps[83:(83 ** 2 + 83)].reshape((83, 83))
-    alpha = ps[(83 ** 2 + 83):]
-    return eps, w, alpha
-
-def ODE(t, y, eps, w, alpha):
-    '''
-    Function receives a set of parameters,
-       then return the simulation of ODE over time.
-    '''
-    return eps * (1 + np.tanh(np.dot(w, y))) - alpha * y
-
-def solver(x0, N_t, p):
-    '''
-    Function receives initial values, time series, and a set of parameters,
-       then return the simulation of ODE.
-       p = [eps, w, alpha] as 1D array
-    '''
-    t = np.arange(N_t)
-    eps, w, alpha = reshape_params(p)
-    sol = np.transpose(solve_ivp(ODE, (0, N_t), x0, args=(eps, w, alpha), t_eval=t, method="LSODA").y)
-    return t, sol
