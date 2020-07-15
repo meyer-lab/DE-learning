@@ -8,7 +8,7 @@ import matplotlib.cm as cmx
 
 def graph(cond, t, sol, save_path=""):
     '''
-    Function receives condition name, time series, model solution, and path at which to save image. 
+    Function receives condition name, time series, model solution, and path at which to save image.
     Generates graphs of the solution over time.
     '''
     fig = plt.figure(figsize=(100, 300.0))

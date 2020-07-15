@@ -1,8 +1,6 @@
 '''
 This file contains ODE equation solvers from Julia
 '''
-import numpy as np
-from scipy.integrate import solve_ivp
 from os.path import join, dirname
 from julia.api import Julia
 jl = Julia(compiled_modules=False)
