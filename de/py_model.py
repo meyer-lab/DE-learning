@@ -5,9 +5,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import matplotlib.cm as cmx
-from .ODE import solver, julia_solver, julia_sol_matrix
 
-def graph(cond, t, sol, save_path):
+def graph(cond, t, sol, save_path=""):
     '''
     Function receives condition name, time series, model solution, and path at which to save image. 
     Generates graphs of the solution over time.
@@ -20,7 +19,8 @@ def graph(cond, t, sol, save_path):
     plt.xlabel('t')
     plt.ylabel('Expression Level')   # x(t)/x(0)
     fig.tight_layout()
-    plt.savefig(save_path)
+    if save_path:
+        plt.savefig(save_path)
     plt.show()
 
 def random_params():
@@ -37,7 +37,7 @@ def random_params():
     p = np.concatenate([eps, w.flatten(), alpha])
     return p
 
-def scatterplot(exp_data, model_data, save_path):
+def scatterplot(exp_data, model_data, save_path=""):
     '''
     Function receives matrix of RNAseq data, matrix of model solution, and the save path for image.
     Creates scatterplot of model data vs experimental data
@@ -53,5 +53,6 @@ def scatterplot(exp_data, model_data, save_path):
     plt.ylabel('Model Solution')
     plt.title("Model vs Data")
     fig.tight_layout()
-    plt.savefig(save_path)
+    if save_path:
+        plt.savefig(save_path)
     plt.show()
