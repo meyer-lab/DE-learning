@@ -9,8 +9,7 @@ using DelimitedFiles
 function get_data(path_RNAseq)
     # Import RNAseq data as 83 x 84 matrix preprocessed using python
     exp = DelimitedFiles.readdlm(path_RNAseq, ',', Float64)
-    exp = Matrix(exp)
-    return exp
+    return Matrix(exp)
 end
 
 " Reshape a vector of parameters into the variables we know. "
@@ -32,10 +31,23 @@ end
 
 " The ODE equations we're using. "
 function ODEeq(du, u, p, t)
-    w, alpha, eps = reshapeParams(p)
-    
-    du .= eps .* (1 .+ tanh.(w * u)) .- alpha .* u
+    w, alpha, epss = reshapeParams(p)
+
+    mul!(du, w, u)
+    @. du = epss * (1 + tanh(du)) - alpha * u
+    nothing
 end
+
+
+" The Jacobian of the ODE equations. "
+function ODEjac(J, u, p, t)
+    # TODO: Test this if we end up using it.
+    w, alpha, epss = reshapeParams(p)
+
+    J .= diag(epss .* (1 .+ (tanh.(w * u) .^ 2))) * w - diag(alpha)
+    nothing
+end
+
 
 " Solve the ODE system. "
 function solveODE(ps, tps=nothing)
