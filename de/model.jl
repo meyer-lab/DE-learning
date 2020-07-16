@@ -32,9 +32,7 @@ end
 " The ODE equations we're using. "
 function ODEeq(du, u, p, t)
     w, alpha, epss = reshapeParams(p)
-
-    mul!(du, w, u)
-    @. du = epss * (1 + tanh(du)) - alpha * u
+    du .= epss .* (1 .+ tanh.(w * u)) .- alpha .* u
     nothing
 end
 
@@ -99,8 +97,8 @@ function sol_matrix(pIn)
 end
 
 " Cost function. Returns SSE + sum(abs(w)) between model and experimental RNAseq data. "
-function cost(pIn)
-    exp_data = get_data("./de/data/exp_data.csv")
+function cost(pIn, exp_data)
+    #exp_data = get_data("./de/data/exp_data.csv")
     neg = solveODE(pIn)
     sse = norm(neg .- exp_data[:, 84])
 
@@ -119,8 +117,12 @@ function g!(G, x)
 end
 
 " Single calculation of cost gradient. "
-# ps = ones(7055)
-# grads = Zygote.gradient(cost, ps)
+function grad(pIn)
+    return Zygote.gradient(cost, pIn)
+end
+#e = get_data("./de/exp_data.csv")
+#ps = ones(7055)
+#grads = Zygote.gradient(ps -> cost(ps, e), ps)
 
 " Run optimization. "
-#optimize(cost, g!, ps, LBFGS(), Optim.Options(iterations = 10, show_trace = true))
+#optimize(ps -> cost(ps, e), g!, ps, LBFGS(), Optim.Options(iterations = 10, show_trace = true))
