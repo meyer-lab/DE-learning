@@ -111,8 +111,8 @@ function cost(pIn, exp_data)
 end
 
 " Calculates gradient of cost function. "
-function g!(G, x)
-    grads = Zygote.gradient(cost, x)
+function g!(G, x, exp_data)
+    grads = Zygote.gradient(x -> cost(x, exp_data), x)
     G[:] .= grads[1]
 end
 
