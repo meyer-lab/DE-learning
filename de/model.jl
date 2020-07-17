@@ -49,8 +49,7 @@ end
 
 " Solve the ODE system. "
 function solveODE(ps, tps=nothing)
-    w, alpha, eps = reshapeParams(ps)
-    u0 = eps ./ alpha #initial value
+    u0 = zeros(83)
 
     if isnothing(tps)
         tspan = (0.0, 10000.0)
@@ -68,23 +67,17 @@ function solveODE(ps, tps=nothing)
     return sol(tps)
 end
 
-" Remove the effect of one gene across all others to simulate the KO experiments. "
+" Remove the effect of one gene across all others to simulate the KO experiments. Returns parameters to be used in solveODE(). "
 function simKO(pIn, geneNum)
     pIn = copy(pIn) # Need to copy as we're using views
-    w_temp, alpha, eps = reshapeParams(pIn)
+    w, alpha, eps = reshapeParams(pIn)
     
     # Think we remove a column since this is the effect of one gene across all genes
-    if geneNum == 1
-        w = hcat(zeros(Float64, 83, 1), w_temp[:, 2:83])
-    elseif geneNum == 83
-        w = hcat(w_temp[:, 1:82], zeros(Float64, 83, 1))
-    else
-        w= hcat(w_temp[:, 1:geneNum - 1], zeros(Float64, 83, 1), w_temp[:, geneNum + 1:83])
-    end
+    w[:, geneNum] .= 0.0
     
     pIn = unshapeParams(w, alpha, eps)
     
-    return solveODE(pIn)
+    return pIn
 end
 
 " Solves ODE system with given parameters to create comparable 83 x 84 matrix to experimental data. "
@@ -97,31 +90,28 @@ function sol_matrix(pIn)
     return sol
 end
 
-" Cost function. Returns SSE + sum(abs(w)) between model and experimental RNAseq data. "
-function cost(pIn, exp_data)
-    neg = solveODE(pIn)
-    sse = norm(neg .- exp_data[:, 84])
-
-    for i = 1:83
-        sol_temp = simKO(pIn, i)
-        sse += norm(sol_temp .- exp_data[:, i])
-    end
-
-    return sse + sum(abs.(pIn[1:6889])) # TODO: Add regularization strength param
+" Singular simulation cost function. "
+function sim_cost(pIn, exp_data)
+    return norm(solveODE(pIn) .- exp_data)
 end
 
-" Calculates gradient of cost function. "
+" Cost function. Returns SSE + sum(abs(w)) between model and experimental RNAseq data. "
+function cost(pIn, exp_data)
+    c = sum(abs.(Zygote.gradient(pIn -> sim_cost(pIn, exp_data[:, 84]), pIn)[1])) # negative controls
+    for i = 1:83 # knockout simulations
+        p_temp = simKO(pIn, i)
+        g_temp = Zygote.gradient(p_temp -> sim_cost(p_temp, exp_data[:, i]), p_temp)[1]
+        g_temp[1:6889] .= 0.0
+        c += sum(abs.(g_temp))
+    end
+    return c # TODO: Add regularization strength param
+end
+
+" Calculates gradient of cost function. " #TODO: Do we need this function?
 function g!(G, x, exp_data)
-    grads = Zygote.gradient(x -> cost(x, exp_data), x)
+    grads = Zygote.gradient(x -> sim_cost(x, exp_data), x)
     G[:] .= grads[1]
 end
 
-" Single calculation of cost gradient. "
-function grad(pIn)
-    return Zygote.gradient(cost, pIn)
-end
-#e = get_data("./de/exp_data.csv")
-#ps = ones(7055)
-#grads = Zygote.gradient(ps -> cost(ps, e), ps)
-
+" Run optimization. "
 #optimize(ps -> cost(ps, e), g!, ps, LBFGS(), Optim.Options(iterations = 10, show_trace = true))
