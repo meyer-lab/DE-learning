@@ -17,7 +17,7 @@ def julia_solver(ps):
        then return the simulation of ODE over time.
        p = [eps, w, alpha] as 1D array
     '''
-    return jl.eval('solveODE')(ps)
+    return Base.MainInclude.solveODE(ps)
 
 def julia_sol_matrix(ps):
     '''
@@ -25,4 +25,4 @@ def julia_sol_matrix(ps):
         mimicking the experimental data.
         p = [eps, w, alpha] as 1D array
     '''
-    return jl.eval('sol_matrix')(ps)
+    return Base.MainInclude.sol_matrix(ps)
