@@ -48,7 +48,8 @@ end
 
 " Solve the ODE system. "
 function solveODE(ps, tps=nothing)
-    u0 = zeros(83)
+    w, alpha, eps = reshapeParams(ps)
+    u0 = eps ./ alpha #initial value
 
     if isnothing(tps)
         tspan = (0.0, 10000.0)
