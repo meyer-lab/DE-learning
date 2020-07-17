@@ -59,7 +59,7 @@ function solveODE(ps, tps=nothing)
 
     fun = ODEFunction(ODEeq; jac=ODEjac)
     prob = ODEProblem(fun, u0, tspan, ps)
-    sol = solve(prob, AutoTsit5(TRBDF2()))
+    sol = solve(prob, Tsit5(); sensealg = QuadratureAdjoint(; compile=true))
 
     if isnothing(tps)
         return last(sol)
@@ -91,27 +91,33 @@ function sol_matrix(pIn)
     return sol
 end
 
-" Singular simulation cost function. "
+" Single simulation cost function. "
 function sim_cost(pIn, exp_data)
     return norm(solveODE(pIn) .- exp_data)
 end
 
-" Cost function. Returns SSE + sum(abs(w)) between model and experimental RNAseq data. "
+" Returns SSE between model and experimental RNAseq data. "
 function cost(pIn, exp_data)
-    c = sum(abs.(Zygote.gradient(pIn -> sim_cost(pIn, exp_data[:, 84]), pIn)[1])) # negative controls
+    return norm(sol_matrix(pIn) - exp_data)
+end
+
+" Cost function gradient. Returns SSE between model and experimental RNAseq data. "
+function costG!(G, pIn, exp_data)
+    # negative control
+    G .= Zygote.gradient(x -> sim_cost(x, exp_data[:, 84]), pIn)[1]
+
     for i = 1:83 # knockout simulations
+        println(i)
         p_temp = simKO(pIn, i)
-        g_temp = Zygote.gradient(p_temp -> sim_cost(p_temp, exp_data[:, i]), p_temp)[1]
-        g_temp[1:6889] .= 0.0
-        c += sum(abs.(g_temp))
+        g_temp = Zygote.gradient(x -> sim_cost(x, exp_data[:, i]), p_temp)[1]
+
+        # Zero out corresponding parameters in gradient
+        g_temp = simKO(g_temp, i)
+        G .+= g_temp
     end
-    return c # TODO: Add regularization strength param
+
+    nothing
 end
 
-" Calculates gradient of cost function. " #TODO: Do we need this function?
-function g!(G, x, exp_data)
-    grads = Zygote.gradient(x -> sim_cost(x, exp_data), x)
-    G[:] .= grads[1]
-end
 
-#optimize(ps -> cost(ps, e), g!, ps, LBFGS(), Optim.Options(iterations = 10, show_trace = true))
+#optimize(ps -> cost(ps, e), costG!, ps, LBFGS(), Optim.Options(iterations = 10, show_trace = true))
