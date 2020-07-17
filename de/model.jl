@@ -85,7 +85,7 @@ end
 function sol_matrix(pIn)
     sol = ones(83, 84)
     for i = 1:83
-        sol[:, i] = simKO(pIn, i)
+        sol[:, i] = solveODE(simKO(pIn, i))
     end
     sol[:, 84] = solveODE(pIn)
     return sol
