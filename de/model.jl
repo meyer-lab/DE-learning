@@ -48,7 +48,7 @@ end
 
 
 " Solve the ODE system. "
-function solveODE(ps, tps=nothing)
+function solveODE(ps::AbstractVector{<:Number}, tps=nothing)
     w, alpha, eps = reshapeParams(ps)
     u0 = eps ./ alpha #initial value
 
@@ -88,7 +88,7 @@ function simKO(pIn, geneNum)
 end
 
 " Solves ODE system with given parameters to create comparable 83 x 84 matrix to experimental data. "
-function sol_matrix(pIn)
+function sol_matrix(pIn::AbstractVector{<:Number})
     sol = ones(83, 84)
     for i = 1:83
         sol[:, i] = simKO(pIn, i)
