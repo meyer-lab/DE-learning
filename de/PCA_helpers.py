@@ -15,7 +15,7 @@ def performPCA(data_in, num_components):
     return [pca_object, X_r]
 
 #------------------------- Calculate cumulative variance based on number of PCs included and create r2x plot
-def r2x(num_components, pca_object, fname):
+def r2x(num_components, pca_object):
     """Function takes in parameters for number of components, PCA object returned from pca(), and filename for plot image and creates r2x plot"""
     total_variance = np.array([])
     tot = 0.0
@@ -41,7 +41,7 @@ def KOdataframe(data, X_r):
     return [df, KO_genes_unique]
 
 #-------------------------- Create PC plots
-def plottingPCs(KO_genes_list, fname):
+def plottingPCs(KO_genes_list):
     """Function takes in list returned from KOdataframe() containing PC scores and set of unique KO genes, filename to save plots as.
     Creates 2x3 figure displaying 2d plot comparisons of first 4 PCs. Points are colored by knockout gene and annotated."""
     df = KO_genes_list[0]
@@ -53,7 +53,7 @@ def plottingPCs(KO_genes_list, fname):
     cNorm = colors.Normalize(vmin=0, vmax=len(KO_genes_unique))
     scalarMap = cmx.ScalarMappable(norm=cNorm, cmap=rainbow)
 
-    fig = plt.figure(figsize=(50, 40))
+    plt.figure(figsize=(50, 40))
     # PC1 vs PC2
     ax = plt.subplot(231)
     ax.set_xlabel("PC1", fontsize=15)

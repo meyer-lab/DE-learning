@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-.PHONY: clean test
+.PHONY: clean test juliaInstall
 
 flist = 1 2 3 4 5 6
 flistFull = $(patsubst %, output/figure%.svg, $(flist))
@@ -13,6 +13,11 @@ venv/bin/activate: requirements.txt
 	test -d venv || virtualenv venv
 	. venv/bin/activate && pip install -Uqr requirements.txt
 	touch venv/bin/activate
+
+juliaInstall:
+	julia -e 'using Pkg; Pkg.add("OrdinaryDiffEq"); Pkg.add("DiffEqSensitivity"); Pkg.precompile()'
+	julia -e 'using Pkg; Pkg.add("Optim"); Pkg.add("Zygote"); Pkg.precompile()'
+	julia -e 'using Pkg; Pkg.add("PyCall"); Pkg.precompile()'
 
 output/figure%.svg: genFigures.py de/figures/figure%.py venv
 	@ mkdir -p ./output

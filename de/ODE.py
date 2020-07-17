@@ -1,43 +1,28 @@
 '''
-This file contains ODE equations, solver and calculator for Jacobian Matrix
+This file contains ODE equation solvers from Julia
 '''
-import numpy as np
-from scipy.integrate import odeint
-import autograd.numpy as anp
-from autograd import jacobian
+from os.path import join, dirname
+from julia.api import Julia
+jl = Julia(compiled_modules=False)
 
-def solver(n_x, N, x0, p, beta, dt, N_t):
+from julia import Base
+
+
+path_here = dirname(dirname(__file__))
+Base.MainInclude.include(join(path_here, "de/model.jl"))
+
+def julia_solver(ps):
     '''
-    Function receives time series and a set of parameters,
-       then return the simulation of ODE.
+    Function receives a set of parameters,
+       then return the simulation of ODE over time.
        p = [eps, w, alpha] as 1D array
     '''
-    eps = p[0:n_x]
-    w = p[n_x:(n_x ** 2 + n_x)].reshape((n_x,n_x))
-    alpha = p[(n_x ** 2 + n_x):]
-    t = np.linspace(0, dt*N_t, N_t)
-    sol = np.ones((N, N_t, n_x))
-    for i in range(N):
-        sol[i, :, :] = odeint(ODE, x0, t, args=(eps, w, alpha, beta[:, i]))
-    return t, sol
+    return jl.eval('solveODE')(ps)
 
-def ODE(y, t, eps, w, alpha, beta):
-    '''The ODE system:
-    Parameters = eps: Value that bound the saturation effect
-                 w: Interaction between components
-                 alpha: Degradation rate
-                 beta: Knock-out effects
+def julia_sol_matrix(ps):
     '''
-    return eps * (1 + np.tanh(np.dot(w, y))) - (alpha*beta) * y
-
-def jacobian_autograd(t, y, eps, w, alpha, beta):
+    Function receives a set of parameters then returns the simulation of ODE at the last timepoint for all KO models,
+        mimicking the experimental data.
+        p = [eps, w, alpha] as 1D array
     '''
-    Given a set of parameters and the state of system, it will return the Jacobian of the system.
-    '''
-    return jacobian(ODE_anp)(y, eps, w, alpha, beta)
-
-def ODE_anp(y, eps, w, alpha, beta):
-    '''
-    Autograd-packed ODE function.
-    '''
-    return eps * (1 + anp.tanh(anp.dot(w, y))) - (alpha*beta) * y
+    return jl.eval('sol_matrix')(ps)
