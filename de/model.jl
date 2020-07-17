@@ -59,7 +59,7 @@ function solveODE(ps, tps=nothing)
 
     fun = ODEFunction(ODEeq; jac=ODEjac)
     prob = ODEProblem(fun, u0, tspan, ps)
-    sol = solve(prob, AutoTsit5(TRBDF2()))
+    sol = solve(prob, Tsit5(); sensealg = QuadratureAdjoint(; compile=true))
 
     if isnothing(tps)
         return last(sol)
@@ -68,60 +68,56 @@ function solveODE(ps, tps=nothing)
     return sol(tps)
 end
 
-" Remove the effect of one gene across all others to simulate the KO experiments. "
+" Remove the effect of one gene across all others to simulate the KO experiments. Returns parameters to be used in solveODE(). "
 function simKO(pIn, geneNum)
     pIn = copy(pIn) # Need to copy as we're using views
-    w_temp, alpha, eps = reshapeParams(pIn)
+    w, alpha, eps = reshapeParams(pIn)
     
     # Think we remove a column since this is the effect of one gene across all genes
-    if geneNum == 1
-        w = hcat(zeros(Float64, 83, 1), w_temp[:, 2:83])
-    elseif geneNum == 83
-        w = hcat(w_temp[:, 1:82], zeros(Float64, 83, 1))
-    else
-        w= hcat(w_temp[:, 1:geneNum - 1], zeros(Float64, 83, 1), w_temp[:, geneNum + 1:83])
-    end
+    w[:, geneNum] .= 0.0
     
     pIn = unshapeParams(w, alpha, eps)
     
-    return solveODE(pIn)
+    return pIn
 end
 
 " Solves ODE system with given parameters to create comparable 83 x 84 matrix to experimental data. "
 function sol_matrix(pIn)
     sol = ones(83, 84)
     for i = 1:83
-        sol[:, i] = simKO(pIn, i)
+        sol[:, i] = solveODE(simKO(pIn, i))
     end
     sol[:, 84] = solveODE(pIn)
     return sol
 end
 
-" Cost function. Returns SSE + sum(abs(w)) between model and experimental RNAseq data. "
-function cost(pIn, exp_data)
-    neg = solveODE(pIn)
-    sse = norm(neg .- exp_data[:, 84])
+" Single simulation cost function. "
+function sim_cost(pIn, exp_data)
+    return norm(solveODE(pIn) .- exp_data)
+end
 
-    for i = 1:83
-        sol_temp = simKO(pIn, i)
-        sse += norm(sol_temp .- exp_data[:, i])
+" Returns SSE between model and experimental RNAseq data. "
+function cost(pIn, exp_data)
+    return norm(sol_matrix(pIn) - exp_data)
+end
+
+" Cost function gradient. Returns SSE between model and experimental RNAseq data. "
+function costG!(G, pIn, exp_data)
+    # negative control
+    G .= Zygote.gradient(x -> sim_cost(x, exp_data[:, 84]), pIn)[1]
+
+    for i = 1:83 # knockout simulations
+        println(i)
+        p_temp = simKO(pIn, i)
+        g_temp = Zygote.gradient(x -> sim_cost(x, exp_data[:, i]), p_temp)[1]
+
+        # Zero out corresponding parameters in gradient
+        g_temp = simKO(g_temp, i)
+        G .+= g_temp
     end
 
-    return sse + sum(abs.(pIn[1:6889])) # TODO: Add regularization strength param
+    nothing
 end
 
-" Calculates gradient of cost function. "
-function g!(G, x, exp_data)
-    grads = Zygote.gradient(x -> cost(x, exp_data), x)
-    G[:] .= grads[1]
-end
 
-" Single calculation of cost gradient. "
-function grad(pIn)
-    return Zygote.gradient(cost, pIn)
-end
-#e = get_data("./de/exp_data.csv")
-#ps = ones(7055)
-#grads = Zygote.gradient(ps -> cost(ps, e), ps)
-
-#optimize(ps -> cost(ps, e), g!, ps, LBFGS(), Optim.Options(iterations = 10, show_trace = true))
+#optimize(ps -> cost(ps, e), costG!, ps, LBFGS(), Optim.Options(iterations = 10, show_trace = true))
