@@ -113,5 +113,4 @@ function g!(G, x, exp_data)
     G[:] .= grads[1]
 end
 
-" Run optimization. "
 #optimize(ps -> cost(ps, e), g!, ps, LBFGS(), Optim.Options(iterations = 10, show_trace = true))
