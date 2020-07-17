@@ -7,7 +7,7 @@ from ..py_model import random_params
 from ..ODE import julia_solver, julia_sol_matrix
 
 
-def test_ODErun(self):
+def test_ODErun():
     """ Test that we get a reasonable model output. """
     p = random_params()
     output = julia_solver(p)
@@ -15,8 +15,8 @@ def test_ODErun(self):
     assert output.shape == (83, )
     assert np.all(np.isfinite(output))
 
-def test_ODErunMatrix(self):
-    """ Test that we get a reasonable model output. """
+def test_ODErunMatrix():
+    """ Test that we get a reasonable model output with knockdowns. """
     p = random_params()
     output = julia_sol_matrix(p)
 
