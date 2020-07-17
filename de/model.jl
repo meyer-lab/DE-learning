@@ -59,7 +59,7 @@ function solveODE(ps, tps=nothing)
 
     fun = ODEFunction(ODEeq; jac=ODEjac)
     prob = ODEProblem(fun, u0, tspan, ps)
-    sol = solve(prob, AutoTsit5(TRBDF2()); reltol=1e-8, abstol=1e-8)
+    sol = solve(prob, AutoTsit5(TRBDF2()))
 
     if isnothing(tps)
         return last(sol)
