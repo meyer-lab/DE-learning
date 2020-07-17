@@ -98,7 +98,9 @@ end
 
 " Returns SSE between model and experimental RNAseq data. "
 function cost(pIn, exp_data)
-    return norm(sol_matrix(pIn) - exp_data)
+    w = reshapeParams(pIn)[1]
+
+    return norm(sol_matrix(pIn) - exp_data) + 0.01 * sum(abs.(w))
 end
 
 " Cost function gradient. Returns SSE between model and experimental RNAseq data. "
@@ -115,6 +117,9 @@ function costG!(G, pIn, exp_data)
         g_temp = simKO(g_temp, i)
         G .+= g_temp
     end
+
+    # Regularization
+    @. G[1:6889] += 0.01 * sign(pIn[1:6889])
 
     nothing
 end
