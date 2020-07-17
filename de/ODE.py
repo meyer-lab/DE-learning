@@ -18,7 +18,7 @@ def julia_solver(ps):
        p = [eps, w, alpha] as 1D array
     '''
     Main.ps = ps
-    return Main.eval('solveODE(ps)')
+    return Main.eval('invokelatest(solveODE(ps))')
 
 def julia_sol_matrix(ps):
     '''
@@ -27,4 +27,4 @@ def julia_sol_matrix(ps):
         p = [eps, w, alpha] as 1D array
     '''
     Main.ps = ps
-    return jl.eval('sol_matrix(ps)')
+    return jl.eval('invokelatest(sol_matrix(ps))')
