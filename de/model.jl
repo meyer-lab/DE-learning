@@ -99,7 +99,6 @@ end
 
 " Cost function. Returns SSE + sum(abs(w)) between model and experimental RNAseq data. "
 function cost(pIn, exp_data)
-    #exp_data = get_data("./de/data/exp_data.csv")
     neg = solveODE(pIn)
     sse = norm(neg .- exp_data[:, 84])
 
@@ -125,5 +124,4 @@ end
 #ps = ones(7055)
 #grads = Zygote.gradient(ps -> cost(ps, e), ps)
 
-" Run optimization. "
 #optimize(ps -> cost(ps, e), g!, ps, LBFGS(), Optim.Options(iterations = 10, show_trace = true))
