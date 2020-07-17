@@ -39,10 +39,9 @@ end
 
 " The Jacobian of the ODE equations. "
 function ODEjac(J, u, p, t)
-    # TODO: Test this if we end up using it.
     w, alpha, epss = reshapeParams(p)
 
-    J .= diag(epss .* (1 .+ (tanh.(w * u) .^ 2))) * w - diag(alpha)
+    J .= diagm(epss .* (1 .- (tanh.(w * u) .^ 2))) * w - diagm(alpha)
     nothing
 end
 
@@ -56,9 +55,10 @@ function solveODE(ps, tps=nothing)
     else
         tspan = (0.0, maximum(tps))
     end
-    
-    prob = ODEProblem(ODEeq, u0, tspan, ps)
-    sol = solve(prob, AutoTsit5(TRBDF2()); reltol=1e-8, abstol=1e-8)
+
+    fun = ODEFunction(ODEeq; jac=ODEjac)
+    prob = ODEProblem(fun, u0, tspan, ps)
+    sol = solve(prob, AutoTsit5(TRBDF2()))
 
     if isnothing(tps)
         return last(sol)
