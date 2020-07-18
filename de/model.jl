@@ -46,6 +46,26 @@ function ODEjac(J, u, p, t)
 end
 
 
+" The Jacobian w.r.t. parameters. "
+function paramjac(J, u, p, t)
+    w, alpha, epss = reshapeParams(p)
+
+    # w.r.t. alpha
+    Ja = @view J[:, 6890:6972]
+    Ja .= -diagm(u)
+
+    # w.r.t. epss
+    Je = @view J[:, 6973:7055]
+    Je = diagm(1 .+ tanh.(w * u))
+
+    # w.r.t. w
+    Jw = @view J[:, 1:6889]
+    Jw = u' .* diagm(epss .* (1 .- (tanh.(w * u) .^ 2)))
+
+    nothing
+end
+
+
 " Solve the ODE system. "
 function solveODE(ps, tps=nothing)
     w, alpha, eps = reshapeParams(ps)
@@ -57,9 +77,9 @@ function solveODE(ps, tps=nothing)
         tspan = (0.0, maximum(tps))
     end
 
-    fun = ODEFunction(ODEeq; jac=ODEjac)
+    fun = ODEFunction(ODEeq; jac=ODEjac, paramjac=paramjac)
     prob = ODEProblem(fun, u0, tspan, ps)
-    sol = solve(prob, Tsit5(); sensealg = QuadratureAdjoint(; compile=true))
+    sol = solve(prob, AutoDP5(TRBDF2(); stifftol=2.0, nonstifftol=2.0))
 
     if isnothing(tps)
         return last(sol)
@@ -125,4 +145,4 @@ function costG!(G, pIn, exp_data)
 end
 
 
-#optimize(ps -> cost(ps, e), costG!, ps, LBFGS(), Optim.Options(iterations = 10, show_trace = true))
+#optimize(ps -> cost(ps, e), (a, b) -> costG!(a, b, e), fill(0.0, 7055), fill(10.0, 7055), ps, Fminbox(LBFGS()), Optim.Options(iterations = 10, show_trace = true))
