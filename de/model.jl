@@ -12,14 +12,13 @@ function get_data(path_RNAseq)
     return Matrix(exp)
 end
 
-"Initialize the parameters. "
+" Initialize the parameters based on the data. "
 function initialize_params(exp)
-    #TODO: adjust the initial conditions according to the bounds
-    eps = exp[:,84] ./100
-    w = zeros(6889)
-    alpha = 0.1 .* ones(83)
-    
-    return unshapeParams(w, alpha, eps)
+    epss = exp[:, 84] ./ 100
+    w = zeros(83, 83)
+    alpha = fill(0.1, 83)
+
+    return unshapeParams(w, alpha, epss)
 end
 
 " Reshape a vector of parameters into the variables we know. "
