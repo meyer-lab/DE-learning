@@ -12,6 +12,16 @@ function get_data(path_RNAseq)
     return Matrix(exp)
 end
 
+"Initialize the parameters. "
+function initialize_params(exp)
+    #TODO: adjust the initial conditions according to the bounds
+    eps = exp[:,84] ./100
+    w = zeros(6889)
+    alpha = 0.1 .* ones(83)
+    
+    return unshapeParams(w, alpha, eps)
+end
+
 " Reshape a vector of parameters into the variables we know. "
 @views function reshapeParams(p)
     w = reshape(p[1:6889], (83, 83))
