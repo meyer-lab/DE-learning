@@ -25,18 +25,19 @@ end
 @views function reshapeParams(p)
     w = reshape(p[1:6889], (83, 83))
     alpha = p[6890:6972]
-    eps = p[6973:7055]
-    
-    @assert length(eps) == 83
+    epss = p[6973:7055]
+
+    @assert length(epss) == 83
     @assert length(alpha) == 83
-    
-    return w, alpha, eps
+
+    return w, alpha, epss
 end
 
 " Melt the variables back into a parameter vector. "
 function unshapeParams(w, alpha, eps)
     return vcat(vec(w), alpha, eps)
 end
+
 
 " The ODE equations we're using. "
 function ODEeq(du, u, p, t)
@@ -50,7 +51,8 @@ end
 function ODEjac(J, u, p, t)
     w, alpha, epss = reshapeParams(p)
 
-    J .= diagm(epss .* (1 .- (tanh.(w * u) .^ 2))) * w - diagm(alpha)
+    J .= Diagonal(epss .* (sech.(w * u) .^ 2)) * w
+    J[diagind(J)] .-= alpha
     nothing
 end
 
@@ -61,18 +63,23 @@ function paramjac(J, u, p, t)
 
     # w.r.t. alpha
     Ja = @view J[:, 6890:6972]
-    Ja .= -diagm(u)
+    Ja[diagind(Ja)] .= -u
 
     # w.r.t. epss
     Je = @view J[:, 6973:7055]
-    Je = diagm(1 .+ tanh.(w * u))
+    Je[diagind(Je)] = 1 .+ tanh.(w * u)
 
     # w.r.t. w
     Jw = @view J[:, 1:6889]
-    Jw = u' .* diagm(epss .* (1 .- (tanh.(w * u) .^ 2)))
+    Jw = u' .* Diagonal(epss .* (sech.(w * u) .^ 2))
 
     nothing
 end
+
+
+const ODEfun = ODEFunction(ODEeq; jac=ODEjac, paramjac=paramjac)
+const ODEalg = AutoDP5(TRBDF2(); stifftol=2.0, nonstifftol=2.0)
+const senseALG = QuadratureAdjoint(; autojacvec=ReverseDiffVJP(true))
 
 
 " Solve the ODE system. "
@@ -86,9 +93,8 @@ function solveODE(ps, tps=nothing)
         tspan = (0.0, maximum(tps))
     end
 
-    fun = ODEFunction(ODEeq; jac=ODEjac, paramjac=paramjac)
-    prob = ODEProblem(fun, u0, tspan, ps)
-    sol = solve(prob, AutoDP5(TRBDF2(); stifftol=2.0, nonstifftol=2.0))
+    prob = ODEProblem(ODEfun, u0, tspan, ps)
+    sol = solve(prob, ODEalg; sensealg=senseALG)
 
     if isnothing(tps)
         return last(sol)
