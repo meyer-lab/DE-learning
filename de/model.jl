@@ -3,6 +3,7 @@ using LinearAlgebra
 using DiffEqSensitivity
 using Optim
 using Zygote
+using ProgressMeter
 import DelimitedFiles: readdlm
 
 " Load the experimental data matrix. "
@@ -128,27 +129,21 @@ function sol_matrix(pIn::AbstractVector{<:Number})
     return sol
 end
 
-" Single simulation cost function. "
-function sim_cost(pIn, exp_data)
-    return norm(solveODE(pIn) .- exp_data)
-end
-
 " Returns SSE between model and experimental RNAseq data. "
 function cost(pIn, exp_data)
     w = reshapeParams(pIn)[1]
 
-    return norm(sol_matrix(pIn) - exp_data) + 0.01 * sum(abs.(w))
+    return norm(sol_matrix(pIn) - exp_data) + 0.01 * norm(w, 1)
 end
 
 " Cost function gradient. Returns SSE between model and experimental RNAseq data. "
 function costG!(G, pIn, exp_data)
     # negative control
-    G .= Zygote.gradient(x -> sim_cost(x, exp_data[:, 84]), pIn)[1]
+    G .= Zygote.gradient(x -> norm(solveODE(x) - exp_data[:, 84]), pIn)[1]
 
-    for i = 1:83 # knockout simulations
-        println(i)
+    @showprogress 1 "Computing gradient..." for i = 1:83 # knockout simulations
         p_temp = simKO(pIn, i)
-        g_temp = Zygote.gradient(x -> sim_cost(x, exp_data[:, i]), p_temp)[1]
+        g_temp = Zygote.gradient(x -> norm(solveODE(x) - exp_data[:, i]), p_temp)[1]
 
         # Zero out corresponding parameters in gradient
         g_temp = simKO(g_temp, i)
@@ -161,5 +156,16 @@ function costG!(G, pIn, exp_data)
     nothing
 end
 
+" Run the optimization. "
+function runOptim(exp_data)
+    x₀ = initialize_params(exp_data)
+    func = ps -> cost(ps, exp_data)
+    Gfunc = (a, b) -> costG!(a, b, exp_data)
+    options = Optim.Options(iterations = 10, show_trace = true)
+    x₋ = zeros(length(x₀))
+    x₋[1:6889] .= -10.0
+    x₊ = fill(1000.0, length(x₀))
 
-#optimize(ps -> cost(ps, e), (a, b) -> costG!(a, b, e), fill(0.0, 7055), fill(10.0, 7055), ps, Fminbox(LBFGS()), Optim.Options(iterations = 10, show_trace = true))
+    optt = optimize(func, Gfunc, x₋, x₊, x₀, Fminbox(LBFGS()), options)
+    return optt
+end
