@@ -11,6 +11,15 @@ function get_data(path_RNAseq)
     return Matrix(readdlm(path_RNAseq, ',', Float64))
 end
 
+" Initialize the parameters based on the data. "
+function initialize_params(exp)
+    alpha = fill(0.1, 83)
+    epss = exp[:, 84] .* alpha
+    w = zeros(83, 83)
+
+    return unshapeParams(w, alpha, epss)
+end
+
 " Reshape a vector of parameters into the variables we know. "
 @views function reshapeParams(p)
     w = reshape(p[1:6889], (83, 83))
