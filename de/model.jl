@@ -3,13 +3,12 @@ using LinearAlgebra
 using DiffEqSensitivity
 using Optim
 using Zygote
-using DelimitedFiles
+import DelimitedFiles: readdlm
 
 " Load the experimental data matrix. "
 function get_data(path_RNAseq)
     # Import RNAseq data as 83 x 84 matrix preprocessed using python
-    exp = DelimitedFiles.readdlm(path_RNAseq, ',', Float64)
-    return Matrix(exp)
+    return Matrix(readdlm(path_RNAseq, ',', Float64))
 end
 
 " Reshape a vector of parameters into the variables we know. "
