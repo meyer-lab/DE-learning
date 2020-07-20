@@ -1,7 +1,6 @@
 '''
 Basic Model simulation
 '''
-import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import matplotlib.cm as cmx
@@ -23,19 +22,6 @@ def graph(cond, t, sol, save_path=""):
         plt.savefig(save_path)
     plt.show()
 
-def random_params():
-    '''
-    Function receives simulation of ODE and randomly initialize the parameters based on the number of components.
-    Returns 1D array of parameters p = [eps (n_x), w (n_x ** 2), alpha (n_x)]
-    '''
-    eps = np.abs(np.random.normal(1, 1.0, size=(83)))
-    W = np.random.normal(0.01, 1.0, size=(83, 83))
-    W_mask = (1.0 - np.diag(np.ones([83]))) #remove self-interaction
-    w = W_mask*W
-    alpha = np.abs(np.random.normal(2, 1.0, size=(83)))
-    # Combine all parameters into p
-    p = np.concatenate([eps, w.flatten(), alpha])
-    return p
 
 def scatterplot(exp_data, model_data, save_path=""):
     '''
