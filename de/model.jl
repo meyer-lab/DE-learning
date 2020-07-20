@@ -14,9 +14,9 @@ end
 
 " Initialize the parameters based on the data. "
 function initialize_params(exp)
-    epss = exp[:, 84] ./ 100
-    w = zeros(83, 83)
     alpha = fill(0.1, 83)
+    epss = exp[:, 84] .* alpha
+    w = zeros(83, 83)
 
     return unshapeParams(w, alpha, epss)
 end
