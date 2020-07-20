@@ -15,9 +15,10 @@ def importRNAseqKO():
     data.columns = KO_genes
     return data
 
-def formMatrix(data_in):
+def formMatrix():
     """Takes in parameter of dataframe read in by importRNAseqKO() and forms matrix: rows = gene, columns = knockout model.
     There are 84 knockout models (including negative control) and 83 corresponding genes measured."""
+    data_in = importRNAseqKO()
     # average knockout replicate values and remove duplicate gene rows
     data_combined = data_in.groupby(by=data_in.columns, axis=1).mean() # knockout replicates
     data_combined = data_combined.groupby(["GeneSymbol"]).max() # duplicate genes
@@ -38,3 +39,13 @@ def formMatrix(data_in):
     # Convert dataframe to numpy array for comparison with model
     matrix = matrix.to_numpy()
     return matrix
+
+def prepData():
+    """ Load RNAseq data then average replicates and negative controls for PCA """
+    d = importRNAseqKO()
+    data_prepped = d.groupby(by=d.columns, axis=1).mean()
+    data_prepped['neg'] = data_prepped[['neg01', 'neg10']].mean(axis=1)
+    for i in range(1, 10):
+        data_prepped = data_prepped.drop(["neg0"+str(i)], axis=1)
+    data_prepped = data_prepped.drop(["neg10"], axis=1)
+    return data_prepped
