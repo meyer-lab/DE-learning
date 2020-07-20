@@ -4,17 +4,7 @@ This creates Figure 1: PCA plots
 import numpy as np
 from .figureCommon import subplotLabel, getSetup
 from ..PCA_helpers import performPCA, KOdataframe
-from ..importData import importRNAseqKO
-
-def prepData():
-    """ Load RNAseq data then average replicates and negative controls """
-    d = importRNAseqKO()
-    data_prepped = d.groupby(by=d.columns, axis=1).mean()
-    data_prepped['neg'] = data_prepped[['neg01', 'neg10']].mean(axis=1)
-    for i in range(1, 10):
-        data_prepped = data_prepped.drop(["neg0"+str(i)], axis=1)
-    data_prepped = data_prepped.drop(["neg10"], axis=1)
-    return data_prepped
+from ..importData import prepData
 
 def makeFigure():
     """ Get a list of the axis objects and create a figure. """
