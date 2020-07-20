@@ -32,7 +32,10 @@ end
 " The ODE equations we're using. "
 function ODEeq(du, u, p, t)
     w, ɑ, ε = reshapeParams(p)
-    du .= ε .* (1 .+ tanh.(w * u)) .- ɑ .* u
+
+    temp = w * u
+    temp = map(tanh, temp)
+    @. du = ε * (1 + temp) - ɑ * u
     nothing
 end
 
@@ -75,7 +78,7 @@ const senseALG = QuadratureAdjoint(; autojacvec=ReverseDiffVJP(true))
 " Solve the ODE system. "
 function solveODE(ps::AbstractVector{<:Number}, tps=nothing)
     w, ɑ, ε = reshapeParams(ps)
-    u0 = ε ./ ɑ #initial value
+    u0 = ε ./ ɑ # initial value
 
     if isnothing(tps)
         tspan = (0.0, 10000.0)
