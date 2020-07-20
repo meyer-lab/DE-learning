@@ -133,7 +133,13 @@ end
 function cost(pIn, exp_data)
     w = reshapeParams(pIn)[1]
 
-    return norm(sol_matrix(pIn) - exp_data) + 0.01 * norm(w, 1)
+    costt = norm(sol_matrix(pIn) - exp_data)
+    @assert costt >= 0.0
+    costt += 0.01 * norm(w, 1)
+    @assert costt >= 0.0
+    println(costt)
+
+    return costt
 end
 
 " Cost function gradient. Returns SSE between model and experimental RNAseq data. "
@@ -146,8 +152,7 @@ function costG!(G, pIn, exp_data)
         g_temp = Zygote.gradient(x -> norm(solveODE(x) - exp_data[:, i]), p_temp)[1]
 
         # Zero out corresponding parameters in gradient
-        g_temp = simKO(g_temp, i)
-        G .+= g_temp
+        G .+= simKO(g_temp, i)
     end
 
     # Regularization
