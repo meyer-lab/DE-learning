@@ -14,54 +14,54 @@ end
 " Reshape a vector of parameters into the variables we know. "
 @views function reshapeParams(p)
     w = reshape(p[1:6889], (83, 83))
-    alpha = p[6890:6972]
-    epss = p[6973:7055]
+    ɑ = p[6890:6972]
+    ε = p[6973:7055]
 
-    @assert length(epss) == 83
-    @assert length(alpha) == 83
+    @assert length(ε) == 83
+    @assert length(ɑ) == 83
 
-    return w, alpha, epss
+    return w, ɑ, ε
 end
 
 " Melt the variables back into a parameter vector. "
-function unshapeParams(w, alpha, eps)
-    return vcat(vec(w), alpha, eps)
+function unshapeParams(w, ɑ, ε)
+    return vcat(vec(w), ɑ, ε)
 end
 
 
 " The ODE equations we're using. "
 function ODEeq(du, u, p, t)
-    w, alpha, epss = reshapeParams(p)
-    du .= epss .* (1 .+ tanh.(w * u)) .- alpha .* u
+    w, ɑ, ε = reshapeParams(p)
+    du .= ε .* (1 .+ tanh.(w * u)) .- ɑ .* u
     nothing
 end
 
 
 " The Jacobian of the ODE equations. "
 function ODEjac(J, u, p, t)
-    w, alpha, epss = reshapeParams(p)
+    w, ɑ, ε = reshapeParams(p)
 
-    J .= Diagonal(epss .* (sech.(w * u) .^ 2)) * w
-    J[diagind(J)] .-= alpha
+    J .= Diagonal(ε .* (sech.(w * u) .^ 2)) * w
+    J[diagind(J)] .-= ɑ
     nothing
 end
 
 
 " The Jacobian w.r.t. parameters. "
 function paramjac(J, u, p, t)
-    w, alpha, epss = reshapeParams(p)
+    w, ɑ, ε = reshapeParams(p)
 
-    # w.r.t. alpha
+    # w.r.t. ɑ
     Ja = @view J[:, 6890:6972]
     Ja[diagind(Ja)] .= -u
 
-    # w.r.t. epss
+    # w.r.t. ε
     Je = @view J[:, 6973:7055]
     Je[diagind(Je)] = 1 .+ tanh.(w * u)
 
     # w.r.t. w
     Jw = @view J[:, 1:6889]
-    Jw = u' .* Diagonal(epss .* (sech.(w * u) .^ 2))
+    Jw = u' .* Diagonal(ε .* (sech.(w * u) .^ 2))
 
     nothing
 end
@@ -74,8 +74,8 @@ const senseALG = QuadratureAdjoint(; autojacvec=ReverseDiffVJP(true))
 
 " Solve the ODE system. "
 function solveODE(ps::AbstractVector{<:Number}, tps=nothing)
-    w, alpha, eps = reshapeParams(ps)
-    u0 = eps ./ alpha #initial value
+    w, ɑ, ε = reshapeParams(ps)
+    u0 = ε ./ ɑ #initial value
 
     if isnothing(tps)
         tspan = (0.0, 10000.0)
@@ -96,12 +96,12 @@ end
 " Remove the effect of one gene across all others to simulate the KO experiments. Returns parameters to be used in solveODE(). "
 function simKO(pIn, geneNum)
     pIn = copy(pIn) # Need to copy as we're using views
-    w, alpha, eps = reshapeParams(pIn)
+    w, ɑ, ε = reshapeParams(pIn)
     
     # Think we remove a column since this is the effect of one gene across all genes
     w[:, geneNum] .= 0.0
     
-    pIn = unshapeParams(w, alpha, eps)
+    pIn = unshapeParams(w, ɑ, ε)
     
     return pIn
 end
