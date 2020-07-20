@@ -6,7 +6,7 @@ formMatrix should return dataframe with all replicate columns averaged together,
 import unittest
 import pandas as pd
 import numpy as np
-from ..importData import importRNAseqKO, formMatrix
+from ..importData import importRNAseqKO, formMatrix, prepData
 
 class TestModel(unittest.TestCase):
     """Test class for importing RNAseq knockout data file and forming matrix of knockouts"""
