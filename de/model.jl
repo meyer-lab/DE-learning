@@ -3,19 +3,19 @@ using LinearAlgebra
 using DiffEqSensitivity
 using Optim
 using Zygote
-using DelimitedFiles
+using ProgressMeter
+import DelimitedFiles: readdlm
 
 " Load the experimental data matrix. "
 function get_data(path_RNAseq)
     # Import RNAseq data as 83 x 84 matrix preprocessed using python
-    exp = DelimitedFiles.readdlm(path_RNAseq, ',', Float64)
-    return Matrix(exp)
+    return Matrix(readdlm(path_RNAseq, ',', Float64))
 end
 
 " Initialize the parameters based on the data. "
 function initialize_params(exp)
     alpha = fill(0.1, 83)
-    epss = exp[:, 84] .* alpha
+    epss = exp[:, 84] .* alpha .+ 0.0001
     w = zeros(83, 83)
 
     return unshapeParams(w, alpha, epss)
@@ -24,54 +24,57 @@ end
 " Reshape a vector of parameters into the variables we know. "
 @views function reshapeParams(p)
     w = reshape(p[1:6889], (83, 83))
-    alpha = p[6890:6972]
-    epss = p[6973:7055]
+    ɑ = p[6890:6972]
+    ε = p[6973:7055]
 
-    @assert length(epss) == 83
-    @assert length(alpha) == 83
+    @assert length(ε) == 83
+    @assert length(ɑ) == 83
 
-    return w, alpha, epss
+    return w, ɑ, ε
 end
 
 " Melt the variables back into a parameter vector. "
-function unshapeParams(w, alpha, eps)
-    return vcat(vec(w), alpha, eps)
+function unshapeParams(w::AbstractMatrix, ɑ::AbstractVector, ε::AbstractVector)::Vector
+    return vcat(vec(w), ɑ, ε)
 end
 
 
 " The ODE equations we're using. "
 function ODEeq(du, u, p, t)
-    w, alpha, epss = reshapeParams(p)
-    du .= epss .* (1 .+ tanh.(w * u)) .- alpha .* u
+    w, ɑ, ε = reshapeParams(p)
+
+    temp = w * u
+    temp = map(tanh, temp)
+    @. du = ε * (1 + temp) - ɑ * u
     nothing
 end
 
 
 " The Jacobian of the ODE equations. "
 function ODEjac(J, u, p, t)
-    w, alpha, epss = reshapeParams(p)
+    w, ɑ, ε = reshapeParams(p)
 
-    J .= Diagonal(epss .* (sech.(w * u) .^ 2)) * w
-    J[diagind(J)] .-= alpha
+    J .= Diagonal(ε .* (sech.(w * u) .^ 2)) * w
+    J[diagind(J)] .-= ɑ
     nothing
 end
 
 
 " The Jacobian w.r.t. parameters. "
 function paramjac(J, u, p, t)
-    w, alpha, epss = reshapeParams(p)
+    w, ɑ, ε = reshapeParams(p)
 
-    # w.r.t. alpha
+    # w.r.t. ɑ
     Ja = @view J[:, 6890:6972]
     Ja[diagind(Ja)] .= -u
 
-    # w.r.t. epss
+    # w.r.t. ε
     Je = @view J[:, 6973:7055]
     Je[diagind(Je)] = 1 .+ tanh.(w * u)
 
     # w.r.t. w
     Jw = @view J[:, 1:6889]
-    Jw = u' .* Diagonal(epss .* (sech.(w * u) .^ 2))
+    Jw = u' .* Diagonal(ε .* (sech.(w * u) .^ 2))
 
     nothing
 end
@@ -83,9 +86,9 @@ const senseALG = QuadratureAdjoint(; autojacvec=ReverseDiffVJP(true))
 
 
 " Solve the ODE system. "
-function solveODE(ps, tps=nothing)
-    w, alpha, eps = reshapeParams(ps)
-    u0 = eps ./ alpha #initial value
+function solveODE(ps::AbstractVector{<:Number}, tps=nothing)
+    w, ɑ, ε = reshapeParams(ps)
+    u0 = ε ./ ɑ # initial value
 
     if isnothing(tps)
         tspan = (0.0, 10000.0)
@@ -106,18 +109,18 @@ end
 " Remove the effect of one gene across all others to simulate the KO experiments. Returns parameters to be used in solveODE(). "
 function simKO(pIn, geneNum)
     pIn = copy(pIn) # Need to copy as we're using views
-    w, alpha, eps = reshapeParams(pIn)
+    w, ɑ, ε = reshapeParams(pIn)
     
     # Think we remove a column since this is the effect of one gene across all genes
     w[:, geneNum] .= 0.0
     
-    pIn = unshapeParams(w, alpha, eps)
+    pIn = unshapeParams(w, ɑ, ε)
     
     return pIn
 end
 
 " Solves ODE system with given parameters to create comparable 83 x 84 matrix to experimental data. "
-function sol_matrix(pIn)
+function sol_matrix(pIn::AbstractVector{<:Number})
     sol = ones(83, 84)
     for i = 1:83
         sol[:, i] = solveODE(simKO(pIn, i))
@@ -126,31 +129,25 @@ function sol_matrix(pIn)
     return sol
 end
 
-" Single simulation cost function. "
-function sim_cost(pIn, exp_data)
-    return norm(solveODE(pIn) .- exp_data)
-end
-
 " Returns SSE between model and experimental RNAseq data. "
 function cost(pIn, exp_data)
     w = reshapeParams(pIn)[1]
-
-    return norm(sol_matrix(pIn) - exp_data) + 0.01 * sum(abs.(w))
+    costt = norm(sol_matrix(pIn) - exp_data) + 0.01 * norm(w, 1)
+    println(costt)
+    return costt
 end
 
 " Cost function gradient. Returns SSE between model and experimental RNAseq data. "
 function costG!(G, pIn, exp_data)
     # negative control
-    G .= Zygote.gradient(x -> sim_cost(x, exp_data[:, 84]), pIn)[1]
+    G .= Zygote.gradient(x -> norm(solveODE(x) - exp_data[:, 84]), pIn)[1]
 
-    for i = 1:83 # knockout simulations
-        println(i)
+    @showprogress 1 "Computing gradient..." for i = 1:83 # knockout simulations
         p_temp = simKO(pIn, i)
-        g_temp = Zygote.gradient(x -> sim_cost(x, exp_data[:, i]), p_temp)[1]
+        g_temp = Zygote.gradient(x -> norm(solveODE(x) - exp_data[:, i]), p_temp)[1]
 
         # Zero out corresponding parameters in gradient
-        g_temp = simKO(g_temp, i)
-        G .+= g_temp
+        G .+= simKO(g_temp, i)
     end
 
     # Regularization
@@ -159,5 +156,16 @@ function costG!(G, pIn, exp_data)
     nothing
 end
 
+" Run the optimization. "
+function runOptim(exp_data)
+    x₀ = initialize_params(exp_data)
+    func = ps -> cost(ps, exp_data)
+    Gfunc = (a, b) -> costG!(a, b, exp_data)
+    options = Optim.Options(iterations = 10, show_trace = true)
+    x₋ = zeros(length(x₀))
+    x₋[1:6889] .= -10.0
+    x₊ = fill(1000.0, length(x₀))
 
-#optimize(ps -> cost(ps, e), (a, b) -> costG!(a, b, e), fill(0.0, 7055), fill(10.0, 7055), ps, Fminbox(LBFGS()), Optim.Options(iterations = 10, show_trace = true))
+    optt = optimize(func, Gfunc, x₋, x₊, x₀, Fminbox(LBFGS(), mu0=0.1), options)
+    return optt
+end
