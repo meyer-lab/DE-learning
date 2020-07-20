@@ -5,7 +5,7 @@ from os.path import join, dirname
 from julia.api import Julia
 jl = Julia(compiled_modules=False)
 
-from julia import Main
+from julia import Main, Base
 
 
 path_here = dirname(dirname(__file__))
@@ -17,7 +17,7 @@ def julia_solver(ps):
        then return the simulation of ODE over time.
        p = [eps, w, alpha] as 1D array
     '''
-    return Main.solveODE(ps)
+    return Base.invokelatest(Main.solveODE(ps))
 
 def julia_sol_matrix(ps):
     '''
@@ -25,4 +25,4 @@ def julia_sol_matrix(ps):
         mimicking the experimental data.
         p = [eps, w, alpha] as 1D array
     '''
-    return Main.sol_matrix(ps)
+    return Base.invokelatest(Main.sol_matrix(ps))
