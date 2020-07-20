@@ -15,7 +15,7 @@ end
 " Initialize the parameters based on the data. "
 function initialize_params(exp)
     alpha = fill(0.1, 83)
-    epss = exp[:, 84] .* alpha
+    epss = exp[:, 84] .* alpha .+ 0.0001
     w = zeros(83, 83)
 
     return unshapeParams(w, alpha, epss)
@@ -34,7 +34,7 @@ end
 end
 
 " Melt the variables back into a parameter vector. "
-function unshapeParams(w, ɑ, ε)
+function unshapeParams(w::AbstractMatrix, ɑ::AbstractVector, ε::AbstractVector)::Vector
     return vcat(vec(w), ɑ, ε)
 end
 
@@ -132,13 +132,8 @@ end
 " Returns SSE between model and experimental RNAseq data. "
 function cost(pIn, exp_data)
     w = reshapeParams(pIn)[1]
-
-    costt = norm(sol_matrix(pIn) - exp_data)
-    @assert costt >= 0.0
-    costt += 0.01 * norm(w, 1)
-    @assert costt >= 0.0
+    costt = norm(sol_matrix(pIn) - exp_data) + 0.01 * norm(w, 1)
     println(costt)
-
     return costt
 end
 
@@ -171,6 +166,6 @@ function runOptim(exp_data)
     x₋[1:6889] .= -10.0
     x₊ = fill(1000.0, length(x₀))
 
-    optt = optimize(func, Gfunc, x₋, x₊, x₀, Fminbox(LBFGS()), options)
+    optt = optimize(func, Gfunc, x₋, x₊, x₀, Fminbox(LBFGS(), mu0=0.1), options)
     return optt
 end
