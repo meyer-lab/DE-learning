@@ -3,7 +3,7 @@ This creates Figure 1: PCA plots
 """
 import numpy as np
 from .figureCommon import subplotLabel, getSetup
-from ..PCA_helpers import performPCA, KOdataframe, plottingPC
+from ..PCA_helpers import performPCA, KOdataframe
 from ..importData import importRNAseqKO
 
 def prepData():
@@ -19,7 +19,7 @@ def prepData():
 def makeFigure():
     """ Get a list of the axis objects and create a figure. """
     # Get list of axis objects
-    ax, f = getSetup((15, 8), (1, 3))
+    ax, f = getSetup((15, 4), (1, 3))
     
     # Perform PCA
     data = prepData()
@@ -58,5 +58,20 @@ def figureMaker(ax, pca_object, df, KO_genes_unique):
     for j, gene in enumerate(KO_genes_unique):
         indx = df["KO Gene"] == gene
         ax[i].scatter(df.iloc[:, 0][indx], df.iloc[:, 1][indx], s=8)
+    for j, txt in enumerate(KO_genes):
+        ax[i].annotate(txt, (df.iloc[j, 0], df.iloc[j, 1]), fontsize=6)
     ax[i].set_xlabel("PC1 (" + str(round(pca_object.explained_variance_ratio_[0]*100, 2)) + "%)")
     ax[i].set_ylabel("PC2 (" + str(round(pca_object.explained_variance_ratio_[1]*100, 2)) + "%)")
+    ax[i].set_title("PC2 vs PC1")
+    
+    # Plot PC3 vs PC1
+    i += 1
+    KO_genes = df.loc[:, "KO Gene"]
+    for j, gene in enumerate(KO_genes_unique):
+        indx = df["KO Gene"] == gene
+        ax[i].scatter(df.iloc[:, 0][indx], df.iloc[:, 2][indx], s=8)
+    for j, txt in enumerate(KO_genes):
+        ax[i].annotate(txt, (df.iloc[j, 0], df.iloc[j, 2]), fontsize=6)
+    ax[i].set_xlabel("PC1 (" + str(round(pca_object.explained_variance_ratio_[0]*100, 2)) + "%)")
+    ax[i].set_ylabel("PC3 (" + str(round(pca_object.explained_variance_ratio_[2]*100, 2)) + "%)")
+    ax[i].set_title("PC3 vs PC1")
