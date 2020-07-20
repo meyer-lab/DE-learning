@@ -30,45 +30,6 @@ function unshapeParams(w, alpha, eps)
 end
 
 
-" The ODE equations we're using. "
-function ODEeq(du, u, p, t)
-    w, alpha, epss = reshapeParams(p)
-    du .= epss .* (1 .+ tanh.(w * u)) .- alpha .* u
-    nothing
-end
-
-
-" The Jacobian of the ODE equations. "
-function ODEjac(J, u, p, t)
-    w, alpha, epss = reshapeParams(p)
-
-    J .= Diagonal(epss .* (sech.(w * u) .^ 2)) * w
-    J[diagind(J)] .-= alpha
-    nothing
-end
-
-
-" The Jacobian w.r.t. parameters. "
-function paramjac(J, u, p, t)
-    w, alpha, epss = reshapeParams(p)
-
-    # w.r.t. alpha
-    Ja = @view J[:, 6890:6972]
-    Ja[diagind(Ja)] .= -u
-
-    # w.r.t. epss
-    Je = @view J[:, 6973:7055]
-    Je[diagind(Je)] = 1 .+ tanh.(w * u)
-
-    # w.r.t. w
-    Jw = @view J[:, 1:6889]
-    Jw = u' .* Diagonal(epss .* (sech.(w * u) .^ 2))
-
-    nothing
-end
-
-
-const ODEfun = ODEFunction(ODEeq; jac=ODEjac, paramjac=paramjac)
 const ODEalg = AutoDP5(TRBDF2(); stifftol=2.0, nonstifftol=2.0)
 const senseALG = QuadratureAdjoint(; autojacvec=ReverseDiffVJP(true))
 
@@ -84,6 +45,42 @@ function solveODE(ps::AbstractVector{<:Number}, tps=nothing)
         tspan = (0.0, maximum(tps))
     end
 
+    # The ODE equations we're using.
+    function ODEeq(du, u, p, t)
+        w, alpha, epss = reshapeParams(p)
+        du .= epss .* (1 .+ tanh.(w * u)) .- alpha .* u
+        nothing
+    end
+
+    # The Jacobian of the ODE equations.
+    function ODEjac(J, u, p, t)
+        w, alpha, epss = reshapeParams(p)
+
+        J .= Diagonal(epss .* (sech.(w * u) .^ 2)) * w
+        J[diagind(J)] .-= alpha
+        nothing
+    end
+
+    # The Jacobian w.r.t. parameters.
+    function paramjac(J, u, p, t)
+        w, alpha, epss = reshapeParams(p)
+
+        # w.r.t. alpha
+        Ja = @view J[:, 6890:6972]
+        Ja[diagind(Ja)] .= -u
+
+        # w.r.t. epss
+        Je = @view J[:, 6973:7055]
+        Je[diagind(Je)] = 1 .+ tanh.(w * u)
+
+        # w.r.t. w
+        Jw = @view J[:, 1:6889]
+        Jw = u' .* Diagonal(epss .* (sech.(w * u) .^ 2))
+
+        nothing
+    end
+
+    ODEfun = ODEFunction(ODEeq; jac=ODEjac, paramjac=paramjac)
     prob = ODEProblem(ODEfun, u0, tspan, ps)
     sol = solve(prob, ODEalg; sensealg=senseALG)
 
