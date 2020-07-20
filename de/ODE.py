@@ -1,14 +1,12 @@
 '''
 This file contains ODE equation solvers from Julia
 '''
+# pylint: disable=no-name-in-module, wrong-import-position
 from os.path import join, dirname
 from julia.api import Julia
 jl = Julia(compiled_modules=False)
 
 from julia import Main
-
-
-# pylint: disable=no-name-in-module
 
 
 Main.include(join(dirname(dirname(__file__)), "de/model.jl"))
