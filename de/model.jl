@@ -151,7 +151,6 @@ function costG!(G, pIn, exp_data)
     end
 
     # Regularization
-    w = reshapeParams(pIn)[1]
     @. G[1:6889] += 0.01 * sign(pIn[1:6889])
     T₀ = w * w' - I
     temp = vec(2 / norm(T₀) * w * T₀)
