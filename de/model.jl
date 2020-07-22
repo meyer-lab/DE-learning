@@ -43,9 +43,9 @@ end
 function ODEeq(du, u, p, t)
     w, ɑ, ε = reshapeParams(p)
 
-    temp = w * u
-    temp = map(tanh, temp)
-    @. du = ε * (1 + temp) - ɑ * u
+    mul!(du, w, u)
+    du = map(tanh, du)
+    @. du = ε * (1 + du) - ɑ * u
     nothing
 end
 
@@ -72,11 +72,11 @@ function solveODE(ps::AbstractVector{<:Number}, tps=nothing)
     end
 
     ODEfun = ODEFunction(ODEeq; jac=ODEjac)
-    ODEalg = AutoDP5(TRBDF2(); stifftol=2.0, nonstifftol=2.0)
+    ODEalg = AutoTsit5(TRBDF2(); stifftol=2.0, nonstifftol=2.0)
     senseALG = QuadratureAdjoint(; compile=true, autojacvec=ReverseDiffVJP(true))
 
     prob = ODEProblem(ODEfun, u0, tspan, ps)
-    sol = solve(prob, ODEalg; sensealg=senseALG)
+    sol = solve(prob, ODEalg; sensealg=senseALG, reltol=1e-5)
 
     if isnothing(tps)
         return last(sol)
@@ -111,7 +111,7 @@ end
 " Returns SSE between model and experimental RNAseq data. "
 function cost(pIn, exp_data)
     w = reshapeParams(pIn)[1]
-    costt = norm(sol_matrix(pIn) - exp_data) + 0.01 * norm(w, 1) + norm(w' * w - I)
+    costt = norm(sol_matrix(pIn) - exp_data) + norm(w, 1) + 100.0 * norm(w' * w - I)
     println(costt)
     return costt
 end
@@ -130,11 +130,11 @@ function costG!(G, pIn, exp_data)
     end
 
     # Regularization
-    @. G[1:6889] += 0.01 * sign(pIn[1:6889])
+    @. G[1:6889] += sign(pIn[1:6889])
     w = reshapeParams(pIn)[1]
     T₀ = w * w' - I
     temp = vec(2 / norm(T₀) * w * T₀)
-    @. G[1:6889] += temp
+    @. G[1:6889] += 100.0 .* temp
 
     nothing
 end
