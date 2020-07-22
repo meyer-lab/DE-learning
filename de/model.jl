@@ -111,7 +111,7 @@ end
 " Returns SSE between model and experimental RNAseq data. "
 function cost(pIn, exp_data)
     w = reshapeParams(pIn)[1]
-    costt = norm(sol_matrix(pIn) - exp_data) + 0.1 * norm(w, 1) + 10 * norm(w' * w - I) # 10-fold stronger regularization
+    costt = norm(sol_matrix(pIn) - exp_data) + 10 * (0.01 * norm(w, 1) + norm(w' * w - I)) # 10-fold stronger regularization
     println(costt)
     return costt
 end
@@ -130,10 +130,10 @@ function costG!(G, pIn, exp_data)
     end
 
     # Regularization
-    @. G[1:6889] += 0.1 * sign(pIn[1:6889])
+    @. G[1:6889] += 10 * (0.01 * sign(pIn[1:6889]))
     w = reshapeParams(pIn)[1]
     T₀ = w' * w - I
-    temp = vec(20 / norm(T₀) * w * T₀)
+    temp = 10 * vec(2 / norm(T₀) * w * T₀)
     @. G[1:6889] += temp
 
     nothing
