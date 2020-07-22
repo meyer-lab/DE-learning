@@ -57,6 +57,12 @@ function ODEjac(J, u, p, t)
     nothing
 end
 
+function costODEjac(J)
+    eigenvals = eigvals(J)
+    @. imag_components = imag(eigenvals)
+    sort!(imag_components, rev=true)
+    return norm(sum(imag_components[2:83]))
+end
 
 " Solve the ODE system. "
 function solveODE(ps::AbstractVector{<:Number}, tps=nothing)
@@ -108,7 +114,10 @@ end
 " Returns SSE between model and experimental RNAseq data. "
 function cost(pIn, exp_data)
     w = reshapeParams(pIn)[1]
-    costt = norm(sol_matrix(pIn) - exp_data) + 10 * (0.01 * norm(w, 1) + norm(w' * w - I)) # 10-fold stronger regularization
+    sol = sol_matrix(pIn)
+    jacobian = zeros(83, 83)
+    odeJac(jacobian, sol[:,84], pIn, 10000)
+    costt = norm(sol - exp_data) + 1000 * (0.01 * norm(w, 1)) + 1e6 * norm(w' * w - I) + costODEjac(jacobian)
     println(costt)
     return costt
 end
@@ -127,11 +136,14 @@ function costG!(G, pIn, exp_data)
     end
 
     # Regularization
-    @. G[1:6889] += 10 * (0.01 * sign(pIn[1:6889]))
+    @. G[1:6889] += 1000 * (0.01 * sign(pIn[1:6889]))
     w = reshapeParams(pIn)[1]
     T₀ = w' * w - I
-    temp = 10 * vec(2 / norm(T₀) * w * T₀)
+    temp = 1e6 * vec(2 / norm(T₀) * w * T₀)
     @. G[1:6889] += temp
+    jacobian = zeros(83, 83)
+    ODEjac(jacobian, solveODE(pIn), pIn, 10000)
+    G .= G .+ Zygote.gradient(costODEjac, jacobian)[1]
 
     nothing
 end
