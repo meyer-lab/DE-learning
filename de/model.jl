@@ -60,31 +60,6 @@ function ODEjac(J, u, p, t)
 end
 
 
-" The Jacobian w.r.t. parameters. "
-function paramjac(J, u, p, t)
-    w, ɑ, ε = reshapeParams(p)
-
-    # w.r.t. ɑ
-    Ja = @view J[:, 6890:6972]
-    Ja[diagind(Ja)] .= -u
-
-    # w.r.t. ε
-    Je = @view J[:, 6973:7055]
-    Je[diagind(Je)] = 1 .+ tanh.(w * u)
-
-    # w.r.t. w
-    Jw = @view J[:, 1:6889]
-    Jw = u' .* Diagonal(ε .* (sech.(w * u) .^ 2))
-
-    nothing
-end
-
-
-const ODEfun = ODEFunction(ODEeq; jac=ODEjac, paramjac=paramjac)
-const ODEalg = AutoDP5(TRBDF2(); stifftol=2.0, nonstifftol=2.0)
-const senseALG = QuadratureAdjoint(; autojacvec=ReverseDiffVJP(true))
-
-
 " Solve the ODE system. "
 function solveODE(ps::AbstractVector{<:Number}, tps=nothing)
     w, ɑ, ε = reshapeParams(ps)
@@ -95,6 +70,10 @@ function solveODE(ps::AbstractVector{<:Number}, tps=nothing)
     else
         tspan = (0.0, maximum(tps))
     end
+
+    ODEfun = ODEFunction(ODEeq; jac=ODEjac)
+    ODEalg = AutoDP5(TRBDF2(); stifftol=2.0, nonstifftol=2.0)
+    senseALG = QuadratureAdjoint(; compile=true, autojacvec=ReverseDiffVJP(true))
 
     prob = ODEProblem(ODEfun, u0, tspan, ps)
     sol = solve(prob, ODEalg; sensealg=senseALG)
