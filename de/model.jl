@@ -72,11 +72,10 @@ function solveODE(ps::AbstractVector{<:Number}, tps=nothing)
     end
 
     ODEfun = ODEFunction(ODEeq; jac=ODEjac)
-    ODEalg = AutoTsit5(TRBDF2(); stifftol=2.0, nonstifftol=2.0)
     senseALG = QuadratureAdjoint(; compile=true, autojacvec=ReverseDiffVJP(true))
 
     prob = ODEProblem(ODEfun, u0, tspan, ps)
-    sol = solve(prob, ODEalg; sensealg=senseALG, reltol=1e-5)
+    sol = solve(prob, AutoTsit5(TRBDF2()); sensealg=senseALG, reltol=1e-6)
 
     if isnothing(tps)
         return last(sol)
@@ -147,9 +146,9 @@ function runOptim(exp_data)
     options = Optim.Options(iterations = 10, show_trace = true)
     x₋ = zeros(length(x₀))
     x₋[1:6889] .= -10.0
-    x₊ = fill(1000.0, length(x₀))
+    x₊ = fill(100.0, length(x₀))
 
-    optt = optimize(func, Gfunc, x₋, x₊, x₀, Fminbox(LBFGS(), mu0=0.1), options)
+    optt = optimize(func, Gfunc, x₋, x₊, x₀, Fminbox(LBFGS()), options)
     return optt
 end
 
