@@ -43,9 +43,9 @@ end
 function ODEeq(du, u, p, t)
     w, ɑ, ε = reshapeParams(p)
 
-    mul!(du, w, u)
-    du = map(tanh, du)
-    @. du = ε * (1 + du) - ɑ * u
+    temp = w * u
+    temp = map(tanh, temp)
+    @. du = ε * (1 + temp) - ɑ * u
     nothing
 end
 
