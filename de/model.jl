@@ -57,11 +57,12 @@ function ODEjac(J, u, p, t)
     nothing
 end
 
-function costODEjac(J)
-    eigenvals = eigvals(J)
-    @. imag_components = imag(eigenvals)
-    sort!(imag_components, rev=true)
-    return norm(sum(imag_components[2:83]))
+" Regularization: Calculate cost as sum of all but largest complex components of eigenvalues. "
+function costEigvals(pIn, J)
+    u = solveODE(pIn)
+    ODEjac(J, u, pIn, 10000)
+    im_comps = imag(eigvals(J))
+    return norm(sum(im_comps) - maximum(im_comps))
 end
 
 " Solve the ODE system. "
@@ -116,8 +117,8 @@ function cost(pIn, exp_data)
     w = reshapeParams(pIn)[1]
     sol = sol_matrix(pIn)
     jacobian = zeros(83, 83)
-    odeJac(jacobian, sol[:,84], pIn, 10000)
-    costt = norm(sol - exp_data) + 1000 * (0.01 * norm(w, 1)) + 1e6 * norm(w' * w - I) + costODEjac(jacobian)
+    ODEjac(jacobian, sol[:,84], pIn, 10000)
+    costt = norm(sol - exp_data) + 1000 * (0.01 * norm(w, 1)) + 10000 * norm(w' * w - I) + costEigvals(pIn, jacobian)
     println(costt)
     return costt
 end
@@ -139,11 +140,11 @@ function costG!(G, pIn, exp_data)
     @. G[1:6889] += 1000 * (0.01 * sign(pIn[1:6889]))
     w = reshapeParams(pIn)[1]
     T₀ = w' * w - I
-    temp = 1e6 * vec(2 / norm(T₀) * w * T₀)
+    temp = 10000 * vec(2 / norm(T₀) * w * T₀)
     @. G[1:6889] += temp
     jacobian = zeros(83, 83)
     ODEjac(jacobian, solveODE(pIn), pIn, 10000)
-    G .= G .+ Zygote.gradient(costODEjac, jacobian)[1]
+    G .+= Zygote.gradient(x -> costEigvals(x, jacobian), pIn)[1]
 
     nothing
 end
