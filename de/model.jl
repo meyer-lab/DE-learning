@@ -14,11 +14,11 @@ end
 
 " Initialize the parameters based on the data. "
 function initialize_params(exp)
-    alpha = fill(0.1, 83)
-    epss = exp[:, 84] .* alpha .+ 0.0001
+    ɑ = fill(0.1, 83)
+    ε = exp[:, 84] .* ɑ .+ 0.0001
     w = zeros(83, 83)
 
-    return unshapeParams(w, alpha, epss)
+    return unshapeParams(w, ɑ, ε)
 end
 
 " Reshape a vector of parameters into the variables we know. "
@@ -132,7 +132,7 @@ end
 " Returns SSE between model and experimental RNAseq data. "
 function cost(pIn, exp_data)
     w = reshapeParams(pIn)[1]
-    costt = norm(sol_matrix(pIn) - exp_data) + 0.01 * norm(w, 1)
+    costt = norm(sol_matrix(pIn) - exp_data) + 0.01 * norm(w, 1) + norm(w' * w - I)
     println(costt)
     return costt
 end
@@ -151,7 +151,11 @@ function costG!(G, pIn, exp_data)
     end
 
     # Regularization
+    w = reshapeParams(pIn)[1]
     @. G[1:6889] += 0.01 * sign(pIn[1:6889])
+    T₀ = w * w' - I
+    temp = vec(2 / norm(T₀) * w * T₀)
+    @. G[1:6889] += temp
 
     nothing
 end
