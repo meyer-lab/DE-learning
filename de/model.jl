@@ -4,7 +4,7 @@ using DiffEqSensitivity
 using Optim
 using Zygote
 using ProgressMeter
-import DelimitedFiles: readdlm
+import DelimitedFiles: readdlm, writedlm
 
 " Load the experimental data matrix. "
 function get_data(path_RNAseq)
@@ -111,7 +111,7 @@ end
 " Returns SSE between model and experimental RNAseq data. "
 function cost(pIn, exp_data)
     w = reshapeParams(pIn)[1]
-    costt = norm(sol_matrix(pIn) - exp_data) + norm(w, 1) + 100.0 * norm(w' * w - I)
+    costt = norm(sol_matrix(pIn) - exp_data) + 10 * (0.01 * norm(w, 1) + norm(w' * w - I)) # 10-fold stronger regularization
     println(costt)
     return costt
 end
@@ -130,11 +130,11 @@ function costG!(G, pIn, exp_data)
     end
 
     # Regularization
-    @. G[1:6889] += sign(pIn[1:6889])
+    @. G[1:6889] += 10 * (0.01 * sign(pIn[1:6889]))
     w = reshapeParams(pIn)[1]
-    T₀ = w * w' - I
-    temp = vec(2 / norm(T₀) * w * T₀)
-    @. G[1:6889] += 100.0 .* temp
+    T₀ = w' * w - I
+    temp = 10 * vec(2 / norm(T₀) * w * T₀)
+    @. G[1:6889] += temp
 
     nothing
 end
@@ -151,4 +151,14 @@ function runOptim(exp_data)
 
     optt = optimize(func, Gfunc, x₋, x₊, x₀, Fminbox(LBFGS(), mu0=0.1), options)
     return optt
+end
+
+" Save the optimized parameters "
+function save_params(optt)
+    println(Optim.minimum(optt))
+    x = Optim.minimizer(optt)
+    w, ɑ, ε = reshapeParams(x)
+    writedlm( "./data/w.csv",  w, ',')
+    writedlm( "./data/alpha.csv",  ɑ, ',')
+    writedlm( "./data/epss.csv",  ε, ',')
 end
