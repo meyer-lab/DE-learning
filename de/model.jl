@@ -139,7 +139,6 @@ end
 " Returns SSE between model and experimental RNAseq data. "
 function cost(pIn, exp_data)
     w = reshapeParams(pIn)[1]
-    sol = sol_matrix(pIn)
     costt = norm(sol_matrix(pIn) - exp_data) + 1000 * (0.01 * norm(w, 1)) + 1e6 * norm(w' * w - I) + costEigvals(pIn)
     println(costt)
     return costt
