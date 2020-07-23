@@ -4,8 +4,7 @@ using DiffEqSensitivity
 using Optim
 using Zygote
 using ProgressMeter
-import LoopVectorization: vmap
-using VectorizationBase
+import StatsFuns: softplus, logistic
 import DelimitedFiles: readdlm, writedlm
 
 " Load the experimental data matrix. "
@@ -44,8 +43,7 @@ end
 " The ODE equations we're using. "
 function ODEeq(du, u, p, t)
     w, ɑ, ε = reshapeParams(p)
-
-    du .= ε .* (1 .+ vmap(tanh, w * u)) .- ɑ .* u
+    du .= ε .* (1 .+ softplus.(w * u)) .- ɑ .* u
     nothing
 end
 
@@ -53,8 +51,7 @@ end
 " The Jacobian of the ODE equations. "
 function ODEjac(J, u, p, t)
     w, ɑ, ε = reshapeParams(p)
-
-    J .= Diagonal(ε .* (sech.(w * u) .^ 2)) * w
+    mul!(J, Diagonal(ε .* logistic.(w * u)), w)
     J[diagind(J)] .-= ɑ
     nothing
 end
@@ -83,9 +80,6 @@ function solveODE(ps::AbstractVector{<:Number}, tps=nothing)
 
     return sol(tps)
 end
-
-
-solveODE(ones(7055))
 
 
 " Remove the effect of one gene across all others to simulate the KO experiments. Returns parameters to be used in solveODE(). "

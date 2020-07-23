@@ -15,7 +15,7 @@ venv/bin/activate: requirements.txt
 	touch venv/bin/activate
 
 juliaInstall:
-	julia -e 'using Pkg; Pkg.add("OrdinaryDiffEq"); Pkg.add("VectorizationBase"); Pkg.add("LoopVectorization"); Pkg.add("DiffEqSensitivity"); Pkg.add("ProgressMeter"); Pkg.add("Optim"); Pkg.add("Zygote"); Pkg.add("PyCall")'
+	julia -e 'using Pkg; Pkg.add("OrdinaryDiffEq"); Pkg.add("StatsFuns"); Pkg.add("DiffEqSensitivity"); Pkg.add("ProgressMeter"); Pkg.add("Optim"); Pkg.add("Zygote"); Pkg.add("PyCall")'
 	julia -e 'using Pkg; Pkg.update(); Pkg.build(); Pkg.precompile(); Pkg.gc()'
 
 output/figure%.svg: genFigures.py de/figures/figure%.py venv
