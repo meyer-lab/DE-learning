@@ -4,6 +4,7 @@ using DiffEqSensitivity
 using Optim
 using Zygote
 using ProgressMeter
+import LoopVectorization: vmap
 import DelimitedFiles: readdlm, writedlm
 
 " Load the experimental data matrix. "
@@ -43,7 +44,7 @@ end
 function ODEeq(du, u, p, t)
     w, ɑ, ε = reshapeParams(p)
 
-    du .= ε .* (1 .+ tanh.(w * u)) .- ɑ .* u
+    du .= ε .* (1 .+ vmap(tanh, w * u)) .- ɑ .* u
     nothing
 end
 
