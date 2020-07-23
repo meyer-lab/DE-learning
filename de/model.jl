@@ -4,6 +4,7 @@ using DiffEqSensitivity
 using Optim
 using Zygote
 using ProgressMeter
+using Zygote: @adjoint
 import DelimitedFiles: readdlm, writedlm
 
 " Load the experimental data matrix. "
@@ -49,7 +50,7 @@ end
 
 
 " The Jacobian of the ODE equations. "
-function ODEjac(J, u, p, t)
+function ODEjac!(J, u, p, t)
     w, ɑ, ε = reshapeParams(p)
 
     J .= Diagonal(ε .* (sech.(w * u) .^ 2)) * w
@@ -57,7 +58,7 @@ function ODEjac(J, u, p, t)
     nothing
 end
 
-function ODEjac_nomutate(u, p, t)
+function ODEjac(u, p, t)
     w, ɑ, ε = reshapeParams(p)
 
     return Diagonal(ε .* (sech.(w * u) .^ 2)) * w .- Diagonal(ɑ)
@@ -65,14 +66,36 @@ end
 
 " Regularization: Calculate cost as sum of all but largest complex components of eigenvalues. "
 function costEigvals(pIn)
+    @assert typeof(pIn) == Array{Float64,1}
     u = solveODE(pIn)
-    jacobian = ODEjac_nomutate(u, pIn, 10000)
-    im_comps = imag(eigen(jacobian, sortby=nothing).values)
-    return real(norm(sum(im_comps) - maximum(im_comps)))
+    @assert typeof(u) == Array{Float64,1}
+    jacobian = ODEjac(u, pIn, 10000)
+    im_comps = abs.(imag(eigen(jacobian).values))
+    @assert typeof(im_comps) == Array{Float64,1}
+    return norm(sum(im_comps) - maximum(im_comps))
+end
+
+@adjoint function LinearAlgebra.eigen(A::AbstractMatrix)
+eV = eigen(A)
+e,V = eV
+n = size(A,1)
+    eV, function (Δ)
+        Δe, ΔV = Δ
+        if ΔV === nothing
+            (inv(V)'*Diagonal(Δe)*V', )
+        elseif Δe === nothing
+            F = [i==j ? 0 : inv(e[j] - e[i]) for i=1:n, j=1:n]
+            (inv(V)'*(F .* (V'ΔV))*V', )
+        else
+            F = [i==j ? 0 : inv(e[j] - e[i]) for i=1:n, j=1:n]
+            (inv(V)'*(Diagonal(Δe) + F .* (V'ΔV))*V', )
+        end
+    end
 end
 
 " Solve the ODE system. "
 function solveODE(ps::AbstractVector{<:Number}, tps=nothing)
+    @assert typeof(ps) == Array{Float64,1}
     w, ɑ, ε = reshapeParams(ps)
     u0 = ε ./ ɑ # initial value
 
@@ -82,12 +105,12 @@ function solveODE(ps::AbstractVector{<:Number}, tps=nothing)
         tspan = (0.0, maximum(tps))
     end
 
-    ODEfun = ODEFunction(ODEeq; jac=ODEjac)
+    ODEfun = ODEFunction(ODEeq; jac=ODEjac!)
     senseALG = QuadratureAdjoint(; compile=true, autojacvec=ReverseDiffVJP(true))
 
     prob = ODEProblem(ODEfun, u0, tspan, ps)
     sol = solve(prob, AutoTsit5(TRBDF2()); sensealg=senseALG, reltol=1e-6)
-
+    @assert typeof(last(sol)) == Array{Float64,1}
     if isnothing(tps)
         return last(sol)
     end
@@ -146,8 +169,7 @@ function costG!(G, pIn, exp_data)
     T₀ = w' * w - I
     temp = 10000 * vec(2 / norm(T₀) * w * T₀)
     @. G[1:6889] += temp
-    G += real(Zygote.gradient(costEigvals, pIn)[1])
-    println("Finished CostG!")
+    G += Zygote.gradient(costEigvals, pIn)[1]
     nothing
 end
 
