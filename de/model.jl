@@ -4,8 +4,9 @@ using DiffEqSensitivity
 using Optim
 using Zygote
 using ProgressMeter
-import StatsFuns: softplus, logistic
+import StatsFuns: softplus
 import DelimitedFiles: readdlm, writedlm
+using ReverseDiff: JacobianTape, jacobian!, compile
 
 " Load the experimental data matrix. "
 function get_data(path_RNAseq)
@@ -41,20 +42,13 @@ end
 
 
 " The ODE equations we're using. "
-function ODEeq(du, u, p, t)
+function ODEeq!(du, u, p, t)
     w, ɑ, ε = reshapeParams(p)
     du .= ε .* (1 .+ softplus.(w * u)) .- ɑ .* u
     nothing
 end
 
-
-" The Jacobian of the ODE equations. "
-function ODEjac(J, u, p, t)
-    w, ɑ, ε = reshapeParams(p)
-    mul!(J, Diagonal(ε .* logistic.(w * u)), w)
-    J[diagind(J)] .-= ɑ
-    nothing
-end
+const ODEeq_tape = compile(JacobianTape(ODEeq!, ones(83), (ones(83), ones(7055), 1.0)))
 
 
 " Solve the ODE system. "
@@ -68,7 +62,7 @@ function solveODE(ps::AbstractVector{<:Number}, tps=nothing)
         tspan = (0.0, maximum(tps))
     end
 
-    ODEfun = ODEFunction(ODEeq; jac=ODEjac)
+    ODEfun = ODEFunction(ODEeq!; jac=(J, u, p, t) -> jacobian!(J, ODEeq_tape, (u, p, t)))
     senseALG = QuadratureAdjoint(; compile=true, autojacvec=ReverseDiffVJP(true))
 
     prob = ODEProblem(ODEfun, u0, tspan, ps)
