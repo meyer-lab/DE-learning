@@ -18,10 +18,10 @@ end
 function initialize_params(exp)
     ɑ = fill(0.1, 83)
     ε = exp[:, 84] .* ɑ .+ 0.0001
-    w = zeros(83, 83)
 
-    return unshapeParams(w, ɑ, ε)
+    return vcat(zeros(83*83), ɑ, ε)
 end
+
 
 " Reshape a vector of parameters into the variables we know. "
 @views function reshapeParams(p)
@@ -33,11 +33,6 @@ end
     @assert length(ɑ) == 83
 
     return w, ɑ, ε
-end
-
-" Melt the variables back into a parameter vector. "
-function unshapeParams(w::AbstractMatrix, ɑ::AbstractVector, ε::AbstractVector)::Vector
-    return vcat(vec(w), ɑ, ε)
 end
 
 
@@ -77,15 +72,11 @@ end
 
 
 " Remove the effect of one gene across all others to simulate the KO experiments. Returns parameters to be used in solveODE(). "
-function simKO(pIn, geneNum)
-    pIn = copy(pIn) # Need to copy as we're using views
+function simKO!(pIn, geneNum)
     w, ɑ, ε = reshapeParams(pIn)
-    
-    # Think we remove a column since this is the effect of one gene across all genes
+
+    # Remove a column, effect of one gene across all genes
     w[:, geneNum] .= 0.0
-    
-    pIn = unshapeParams(w, ɑ, ε)
-    
     return pIn
 end
 
@@ -93,7 +84,7 @@ end
 function sol_matrix(pIn::AbstractVector{<:Number})
     sol = ones(83, 84)
     for i = 1:83
-        sol[:, i] = solveODE(simKO(pIn, i))
+        sol[:, i] = solveODE(simKO!(copy(pIn), i))
     end
     sol[:, 84] = solveODE(pIn)
     return sol
@@ -113,7 +104,7 @@ function costG!(G, pIn, exp_data)
     G .= Zygote.gradient(x -> norm(solveODE(x) - exp_data[:, 84]), pIn)[1]
 
     @showprogress 1 "Computing gradient..." for i = 1:83 # knockout simulations
-        p_temp = simKO(pIn, i)
+        p_temp = simKO!(copy(pIn), i)
         g_temp = Zygote.gradient(x -> norm(solveODE(x) - exp_data[:, i]), p_temp)[1]
 
         # Zero out corresponding parameters in gradient
