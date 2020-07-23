@@ -5,6 +5,7 @@ using Optim
 using Zygote
 using ProgressMeter
 import LoopVectorization: vmap
+using VectorizationBase
 import DelimitedFiles: readdlm, writedlm
 
 " Load the experimental data matrix. "
