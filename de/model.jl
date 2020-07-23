@@ -60,8 +60,7 @@ end
 function ODEjac_nomutate(u, p, t)
     w, ɑ, ε = reshapeParams(p)
     
-    J = Diagonal(ε .* (sech.(w * u) .^ 2)) * w
-    J[diagind(J)] .-= ɑ #TODO: Find a way to implement this without mutating array
+    J .= Diagonal(ε .* (sech.(w * u) .^ 2)) * w .- Diagonal(ɑ)
     return J
 end
 
@@ -148,7 +147,7 @@ function costG!(G, pIn, exp_data)
     T₀ = w' * w - I
     temp = 10000 * vec(2 / norm(T₀) * w * T₀)
     @. G[1:6889] += temp
-    G .+= Zygote.gradient(costEigvals, pIn)[1]
+    @. G .+= Zygote.gradient(costEigvals, pIn)[1]
 
     nothing
 end
