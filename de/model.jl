@@ -59,9 +59,8 @@ end
 
 function ODEjac_nomutate(u, p, t)
     w, ɑ, ε = reshapeParams(p)
-    
-    J .= Diagonal(ε .* (sech.(w * u) .^ 2)) * w .- Diagonal(ɑ)
-    return J
+
+    return Diagonal(ε .* (sech.(w * u) .^ 2)) * w .- Diagonal(ɑ)
 end
 
 " Regularization: Calculate cost as sum of all but largest complex components of eigenvalues. "
@@ -69,7 +68,7 @@ function costEigvals(pIn)
     u = solveODE(pIn)
     jacobian = ODEjac_nomutate(u, pIn, 10000)
     im_comps = imag(eigen(jacobian, sortby=nothing).values)
-    return norm(sum(im_comps) - maximum(im_comps))
+    return real(norm(sum(im_comps) - maximum(im_comps)))
 end
 
 " Solve the ODE system. "
@@ -147,8 +146,8 @@ function costG!(G, pIn, exp_data)
     T₀ = w' * w - I
     temp = 10000 * vec(2 / norm(T₀) * w * T₀)
     @. G[1:6889] += temp
-    @. G .+= Zygote.gradient(costEigvals, pIn)[1]
-
+    G += real(Zygote.gradient(costEigvals, pIn)[1])
+    println("Finished CostG!")
     nothing
 end
 
