@@ -43,7 +43,7 @@ function ODEeq!(du, u, p, t)
     nothing
 end
 
-const ODEeq_tape = compile(JacobianTape(ODEeq!, ones(83), (ones(83), ones(7055), 1.0)))
+const ODEeq_tape = compile(JacobianTape(ODEeq!, ones(83), (ones(83), ones(7055), ones(1))))
 
 
 " Solve the ODE system. "
@@ -57,7 +57,7 @@ function solveODE(ps::AbstractVector{<:Number}, tps=nothing)
         tspan = (0.0, maximum(tps))
     end
 
-    ODEfun = ODEFunction(ODEeq!; jac=(J, u, p, t) -> jacobian!(J, ODEeq_tape, (u, p, t)))
+    ODEfun = ODEFunction(ODEeq!; jac=(J, u, p, t) -> jacobian!(J, ODEeq_tape, (u, p, [t])))
     senseALG = QuadratureAdjoint(; compile=true, autojacvec=ReverseDiffVJP(true))
 
     prob = ODEProblem(ODEfun, u0, tspan, ps)
