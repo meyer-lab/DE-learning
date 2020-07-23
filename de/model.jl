@@ -84,6 +84,10 @@ function solveODE(ps::AbstractVector{<:Number}, tps=nothing)
     return sol(tps)
 end
 
+
+solveODE(ones(7055))
+
+
 " Remove the effect of one gene across all others to simulate the KO experiments. Returns parameters to be used in solveODE(). "
 function simKO(pIn, geneNum)
     pIn = copy(pIn) # Need to copy as we're using views
