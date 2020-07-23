@@ -69,7 +69,7 @@ function costEigvals(pIn)
     u = solveODE(pIn)
     jacobian = ODEjac(u, pIn, 10000)
     im_comps = abs.(imag(eigen(jacobian).values))
-    return norm(sum(im_comps) - maximum(im_comps))
+    return sum(im_comps) - maximum(im_comps)
 end
 
 @adjoint function LinearAlgebra.eigen(A::AbstractMatrix)
