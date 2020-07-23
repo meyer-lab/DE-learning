@@ -57,7 +57,6 @@ function ODEjac(J, u, p, t)
     nothing
 end
 
-
 " Solve the ODE system. "
 function solveODE(ps::AbstractVector{<:Number}, tps=nothing)
     w, ɑ, ε = reshapeParams(ps)
@@ -108,7 +107,7 @@ end
 " Returns SSE between model and experimental RNAseq data. "
 function cost(pIn, exp_data)
     w = reshapeParams(pIn)[1]
-    costt = norm(sol_matrix(pIn) - exp_data) + 10 * (0.01 * norm(w, 1) + norm(w' * w - I)) # 10-fold stronger regularization
+    costt = norm(sol_matrix(pIn) - exp_data) + 1000 * (0.01 * norm(w, 1)) + 1e6 * norm(w' * w - I) # 10-fold stronger regularization
     println(costt)
     return costt
 end
@@ -127,10 +126,10 @@ function costG!(G, pIn, exp_data)
     end
 
     # Regularization
-    @. G[1:6889] += 10 * (0.01 * sign(pIn[1:6889]))
+    @. G[1:6889] += 1000 * (0.01 * sign(pIn[1:6889]))
     w = reshapeParams(pIn)[1]
     T₀ = w' * w - I
-    temp = 10 * vec(2 / norm(T₀) * w * T₀)
+    temp = 1e6 * vec(2 / norm(T₀) * w * T₀)
     @. G[1:6889] += temp
 
     nothing
