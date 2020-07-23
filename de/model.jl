@@ -4,7 +4,6 @@ using DiffEqSensitivity
 using Optim
 using Zygote
 using ProgressMeter
-import StatsFuns: softplus, logistic
 import DelimitedFiles: readdlm, writedlm
 
 " Load the experimental data matrix. "
@@ -16,11 +15,11 @@ end
 " Initialize the parameters based on the data. "
 function initialize_params(exp)
     ɑ = fill(0.1, 83)
-    ε = exp[:, 84] ./ softplus(0.0) .* ɑ .+ 0.000001
+    ε = exp[:, 84] .* ɑ .+ 0.0001
+    w = zeros(83, 83)
 
-    return vcat(zeros(83*83), ɑ, ε)
+    return unshapeParams(w, ɑ, ε)
 end
-
 
 " Reshape a vector of parameters into the variables we know. "
 @views function reshapeParams(p)
@@ -34,18 +33,26 @@ end
     return w, ɑ, ε
 end
 
+" Melt the variables back into a parameter vector. "
+function unshapeParams(w::AbstractMatrix, ɑ::AbstractVector, ε::AbstractVector)::Vector
+    return vcat(vec(w), ɑ, ε)
+end
 
-function ODEeq!(du, u, p, t)
+
+" The ODE equations we're using. "
+function ODEeq(du, u, p, t)
     w, ɑ, ε = reshapeParams(p)
-    du .= ε .* softplus.(w * u) .- ɑ .* u
+
+    du .= ε .* (1 .+ tanh.(w * u)) .- ɑ .* u
     nothing
 end
 
 
 " The Jacobian of the ODE equations. "
-function ODEjac!(J, u, p, t)
+function ODEjac(J, u, p, t)
     w, ɑ, ε = reshapeParams(p)
-    mul!(J, Diagonal(ε .* logistic.(w * u)), w)
+
+    J .= Diagonal(ε .* (sech.(w * u) .^ 2)) * w
     J[diagind(J)] .-= ɑ
     nothing
 end
@@ -62,7 +69,7 @@ function solveODE(ps::AbstractVector{<:Number}, tps=nothing)
         tspan = (0.0, maximum(tps))
     end
 
-    ODEfun = ODEFunction(ODEeq!; jac=ODEjac!)
+    ODEfun = ODEFunction(ODEeq; jac=ODEjac)
     senseALG = QuadratureAdjoint(; compile=true, autojacvec=ReverseDiffVJP(true))
 
     prob = ODEProblem(ODEfun, u0, tspan, ps)
@@ -75,13 +82,16 @@ function solveODE(ps::AbstractVector{<:Number}, tps=nothing)
     return sol(tps)
 end
 
-
 " Remove the effect of one gene across all others to simulate the KO experiments. Returns parameters to be used in solveODE(). "
-function simKO!(pIn, geneNum)
+function simKO(pIn, geneNum)
+    pIn = copy(pIn) # Need to copy as we're using views
     w, ɑ, ε = reshapeParams(pIn)
-
-    # Remove a column, effect of one gene across all genes
+    
+    # Think we remove a column since this is the effect of one gene across all genes
     w[:, geneNum] .= 0.0
+    
+    pIn = unshapeParams(w, ɑ, ε)
+    
     return pIn
 end
 
@@ -89,7 +99,7 @@ end
 function sol_matrix(pIn::AbstractVector{<:Number})
     sol = ones(83, 84)
     for i = 1:83
-        sol[:, i] = solveODE(simKO!(copy(pIn), i))
+        sol[:, i] = solveODE(simKO(pIn, i))
     end
     sol[:, 84] = solveODE(pIn)
     return sol
@@ -98,36 +108,33 @@ end
 " Returns SSE between model and experimental RNAseq data. "
 function cost(pIn, exp_data)
     w = reshapeParams(pIn)[1]
-    costt = norm(sol_matrix(pIn) - exp_data) + regularize(pIn)
+    costt = norm(sol_matrix(pIn) - exp_data) + 10 * (0.01 * norm(w, 1) + norm(w' * w - I)) # 10-fold stronger regularization
     println(costt)
     return costt
 end
 
-
-" Calculate the regularization. "
-function regularize(pIn)
-    return 10 * (0.01 * norm(w, 1) + norm(w' * w - I))
-end
-
-
 " Cost function gradient. Returns SSE between model and experimental RNAseq data. "
 function costG!(G, pIn, exp_data)
-    # Control
+    # negative control
     G .= Zygote.gradient(x -> norm(solveODE(x) - exp_data[:, 84]), pIn)[1]
 
     @showprogress 1 "Computing gradient..." for i = 1:83 # knockout simulations
-        p_temp = simKO!(copy(pIn), i)
+        p_temp = simKO(pIn, i)
         g_temp = Zygote.gradient(x -> norm(solveODE(x) - exp_data[:, i]), p_temp)[1]
 
         # Zero out corresponding parameters in gradient
-        G .+= simKO!(g_temp, i)
+        G .+= simKO(g_temp, i)
     end
 
     # Regularization
-    G .+= Zygote.gradient(x -> regularize(x), pIn)[1]
+    @. G[1:6889] += 10 * (0.01 * sign(pIn[1:6889]))
+    w = reshapeParams(pIn)[1]
+    T₀ = w' * w - I
+    temp = 10 * vec(2 / norm(T₀) * w * T₀)
+    @. G[1:6889] += temp
+
     nothing
 end
-
 
 " Run the optimization. "
 function runOptim(exp_data)
@@ -137,7 +144,7 @@ function runOptim(exp_data)
     options = Optim.Options(iterations = 10, show_trace = true)
     x₋ = zeros(length(x₀))
     x₋[1:6889] .= -10.0
-    x₊ = fill(200.0, length(x₀))
+    x₊ = fill(100.0, length(x₀))
 
     optt = optimize(func, Gfunc, x₋, x₊, x₀, Fminbox(LBFGS()), options)
     return optt
