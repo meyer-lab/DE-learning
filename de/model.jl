@@ -62,7 +62,7 @@ function solveODE(ps::AbstractVector{<:Number}, tps=nothing)
         tspan = (0.0, maximum(tps))
     end
 
-    ODEfun = ODEFunction(ODEeq!; jac=(J, u, p, t) -> jacobian!(J, ODEeq_tape, (u, p, [t])))
+    ODEfun = ODEFunction(ODEeq!; jac=ODEjac!)
     senseALG = QuadratureAdjoint(; compile=true, autojacvec=ReverseDiffVJP(true))
 
     prob = ODEProblem(ODEfun, u0, tspan, ps)
