@@ -4,9 +4,8 @@ using DiffEqSensitivity
 using Optim
 using Zygote
 using ProgressMeter
-import StatsFuns: softplus
+import StatsFuns: softplus, logistic
 import DelimitedFiles: readdlm, writedlm
-using ReverseDiff: JacobianTape, jacobian!, compile
 
 " Load the experimental data matrix. "
 function get_data(path_RNAseq)
@@ -17,7 +16,7 @@ end
 " Initialize the parameters based on the data. "
 function initialize_params(exp)
     ɑ = fill(0.1, 83)
-    ε = exp[:, 84] .* ɑ .+ 0.0001
+    ε = exp[:, 84] ./ softplus(0.0) .* ɑ .+ 0.000001
 
     return vcat(zeros(83*83), ɑ, ε)
 end
@@ -36,14 +35,20 @@ end
 end
 
 
-" The ODE equations we're using. "
 function ODEeq!(du, u, p, t)
     w, ɑ, ε = reshapeParams(p)
-    du .= ε .* (1 .+ softplus.(w * u)) .- ɑ .* u
+    du .= ε .* softplus.(w * u) .- ɑ .* u
     nothing
 end
 
-const ODEeq_tape = compile(JacobianTape(ODEeq!, ones(83), (ones(83), ones(7055), ones(1))))
+
+" The Jacobian of the ODE equations. "
+function ODEjac!(J, u, p, t)
+    w, ɑ, ε = reshapeParams(p)
+    mul!(J, Diagonal(ε .* logistic.(w * u)), w)
+    J[diagind(J)] .-= ɑ
+    nothing
+end
 
 
 " Solve the ODE system. "
@@ -93,14 +98,21 @@ end
 " Returns SSE between model and experimental RNAseq data. "
 function cost(pIn, exp_data)
     w = reshapeParams(pIn)[1]
-    costt = norm(sol_matrix(pIn) - exp_data) + 10 * (0.01 * norm(w, 1) + norm(w' * w - I)) # 10-fold stronger regularization
+    costt = norm(sol_matrix(pIn) - exp_data) + regularize(pIn)
     println(costt)
     return costt
 end
 
+
+" Calculate the regularization. "
+function regularize(pIn)
+    return 10 * (0.01 * norm(w, 1) + norm(w' * w - I))
+end
+
+
 " Cost function gradient. Returns SSE between model and experimental RNAseq data. "
 function costG!(G, pIn, exp_data)
-    # negative control
+    # Control
     G .= Zygote.gradient(x -> norm(solveODE(x) - exp_data[:, 84]), pIn)[1]
 
     @showprogress 1 "Computing gradient..." for i = 1:83 # knockout simulations
@@ -108,18 +120,14 @@ function costG!(G, pIn, exp_data)
         g_temp = Zygote.gradient(x -> norm(solveODE(x) - exp_data[:, i]), p_temp)[1]
 
         # Zero out corresponding parameters in gradient
-        G .+= simKO(g_temp, i)
+        G .+= simKO!(g_temp, i)
     end
 
     # Regularization
-    @. G[1:6889] += 10 * (0.01 * sign(pIn[1:6889]))
-    w = reshapeParams(pIn)[1]
-    T₀ = w' * w - I
-    temp = 10 * vec(2 / norm(T₀) * w * T₀)
-    @. G[1:6889] += temp
-
+    G .+= Zygote.gradient(x -> regularize(x), pIn)[1]
     nothing
 end
+
 
 " Run the optimization. "
 function runOptim(exp_data)
@@ -129,7 +137,7 @@ function runOptim(exp_data)
     options = Optim.Options(iterations = 10, show_trace = true)
     x₋ = zeros(length(x₀))
     x₋[1:6889] .= -10.0
-    x₊ = fill(100.0, length(x₀))
+    x₊ = fill(200.0, length(x₀))
 
     optt = optimize(func, Gfunc, x₋, x₊, x₀, Fminbox(LBFGS()), options)
     return optt
