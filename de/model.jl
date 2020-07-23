@@ -124,9 +124,7 @@ end
 function cost(pIn, exp_data)
     w = reshapeParams(pIn)[1]
     sol = sol_matrix(pIn)
-    jacobian = zeros(83, 83)
-    ODEjac(jacobian, sol[:,84], pIn, 10000)
-    costt = norm(sol - exp_data) + 1000 * (0.01 * norm(w, 1)) + 10000 * norm(w' * w - I) + costEigvals(pIn, jacobian)
+    costt = norm(sol - exp_data) + 1000 * (0.01 * norm(w, 1)) + 10000 * norm(w' * w - I) + costEigvals(pIn)
     println(costt)
     return costt
 end
@@ -150,9 +148,7 @@ function costG!(G, pIn, exp_data)
     T₀ = w' * w - I
     temp = 10000 * vec(2 / norm(T₀) * w * T₀)
     @. G[1:6889] += temp
-    jacobian = zeros(83, 83)
-    ODEjac(jacobian, solveODE(pIn), pIn, 10000)
-    G .+= Zygote.gradient(x -> costEigvals(x, jacobian), pIn)[1]
+    G .+= Zygote.gradient(costEigvals, pIn)[1]
 
     nothing
 end
