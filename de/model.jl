@@ -50,7 +50,6 @@ function ODEjac!(J, u, p, t)
     nothing
 end
 
-
 " Solve the ODE system. "
 function solveODE(ps::AbstractVector{<:Number}, tps=nothing)
     w, ɑ, ε = reshapeParams(ps)
