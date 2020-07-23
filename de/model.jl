@@ -57,11 +57,19 @@ function ODEjac(J, u, p, t)
     nothing
 end
 
+function ODEjac_nomutate(u, p, t)
+    w, ɑ, ε = reshapeParams(p)
+    
+    J = Diagonal(ε .* (sech.(w * u) .^ 2)) * w
+    J[diagind(J)] .-= ɑ #TODO: Find a way to implement this without mutating array
+    return J
+end
+
 " Regularization: Calculate cost as sum of all but largest complex components of eigenvalues. "
-function costEigvals(pIn, J)
+function costEigvals(pIn)
     u = solveODE(pIn)
-    ODEjac(J, u, pIn, 10000)
-    im_comps = imag(eigvals(J))
+    jacobian = ODEjac_nomutate(u, pIn, 10000)
+    im_comps = imag(eigen(jacobian, sortby=nothing).values)
     return norm(sum(im_comps) - maximum(im_comps))
 end
 
