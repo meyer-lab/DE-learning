@@ -4,6 +4,7 @@ using DiffEqSensitivity
 using Optim
 using Zygote
 using ProgressMeter
+using Zygote: @adjoint
 import DelimitedFiles: readdlm, writedlm
 
 " Load the experimental data matrix. "
@@ -49,12 +50,44 @@ end
 
 
 " The Jacobian of the ODE equations. "
-function ODEjac(J, u, p, t)
+function ODEjac!(J, u, p, t)
     w, ɑ, ε = reshapeParams(p)
 
     J .= Diagonal(ε .* (sech.(w * u) .^ 2)) * w
     J[diagind(J)] .-= ɑ
     nothing
+end
+
+function ODEjac(u, p, t)
+    w, ɑ, ε = reshapeParams(p)
+
+    return Diagonal(ε .* (sech.(w * u) .^ 2)) * w .- Diagonal(ɑ)
+end
+
+" Regularization: Calculate cost as sum of all but largest complex components of eigenvalues. "
+function costEigvals(pIn)
+    u = solveODE(pIn)
+    jacobian = ODEjac(u, pIn, 10000)
+    im_comps = abs.(imag(eigen(jacobian).values))
+    return sum(im_comps) - maximum(im_comps)
+end
+
+@adjoint function LinearAlgebra.eigen(A::AbstractMatrix)
+eV = eigen(A)
+e,V = eV
+n = size(A,1)
+    eV, function (Δ)
+        Δe, ΔV = Δ
+        if ΔV === nothing
+            (real.(inv(V)'*Diagonal(Δe)*V'), )
+        elseif Δe === nothing
+            F = [i==j ? 0 : inv(e[j] - e[i]) for i=1:n, j=1:n]
+            (real.(inv(V)'*(F .* (V'ΔV))*V'), )
+        else
+            F = [i==j ? 0 : inv(e[j] - e[i]) for i=1:n, j=1:n]
+            (real.(inv(V)'*(Diagonal(Δe) + F .* (V'ΔV))*V'), )
+        end
+    end
 end
 
 " Solve the ODE system. "
@@ -68,12 +101,11 @@ function solveODE(ps::AbstractVector{<:Number}, tps=nothing)
         tspan = (0.0, maximum(tps))
     end
 
-    ODEfun = ODEFunction(ODEeq; jac=ODEjac)
+    ODEfun = ODEFunction(ODEeq; jac=ODEjac!)
     senseALG = QuadratureAdjoint(; compile=true, autojacvec=ReverseDiffVJP(true))
 
     prob = ODEProblem(ODEfun, u0, tspan, ps)
     sol = solve(prob, AutoTsit5(TRBDF2()); sensealg=senseALG, reltol=1e-6)
-
     if isnothing(tps)
         return last(sol)
     end
@@ -107,7 +139,7 @@ end
 " Returns SSE between model and experimental RNAseq data. "
 function cost(pIn, exp_data)
     w = reshapeParams(pIn)[1]
-    costt = norm(sol_matrix(pIn) - exp_data) + 1000 * (0.01 * norm(w, 1)) + 1e6 * norm(w' * w - I) # 10-fold stronger regularization
+    costt = norm(sol_matrix(pIn) - exp_data) + 1000 * (0.01 * norm(w, 1)) + 10000 * norm(w' * w - I) + costEigvals(pIn)
     println(costt)
     return costt
 end
@@ -129,9 +161,9 @@ function costG!(G, pIn, exp_data)
     @. G[1:6889] += 1000 * (0.01 * sign(pIn[1:6889]))
     w = reshapeParams(pIn)[1]
     T₀ = w' * w - I
-    temp = 1e6 * vec(2 / norm(T₀) * w * T₀)
+    temp = 10000 * vec(2 / norm(T₀) * w * T₀)
     @. G[1:6889] += temp
-
+    G += Zygote.gradient(costEigvals, pIn)[1]
     nothing
 end
 
