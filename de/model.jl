@@ -139,7 +139,7 @@ end
 " Returns SSE between model and experimental RNAseq data. "
 function cost(pIn, exp_data)
     w = reshapeParams(pIn)[1]
-    costt = norm(sol_matrix(pIn) - exp_data) + 1000 * (0.01 * norm(w, 1)) + 1e6 * norm(w' * w - I) + costEigvals(pIn)
+    costt = norm(sol_matrix(pIn) - exp_data) + 1000 * (0.01 * norm(w, 1)) + 10000 * norm(w' * w - I) + costEigvals(pIn)
     println(costt)
     return costt
 end
@@ -161,7 +161,7 @@ function costG!(G, pIn, exp_data)
     @. G[1:6889] += 1000 * (0.01 * sign(pIn[1:6889]))
     w = reshapeParams(pIn)[1]
     T₀ = w' * w - I
-    temp = 1e6 * vec(2 / norm(T₀) * w * T₀)
+    temp = 10000 * vec(2 / norm(T₀) * w * T₀)
     @. G[1:6889] += temp
     G += Zygote.gradient(costEigvals, pIn)[1]
     nothing
