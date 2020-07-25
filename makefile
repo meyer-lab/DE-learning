@@ -15,7 +15,7 @@ venv/bin/activate: requirements.txt
 	touch venv/bin/activate
 
 juliaInstall:
-	julia -e 'using Pkg; Pkg.add("https://github.com/meyer-lab/DE.jl.git"); Pkg.add("PyCall")'
+	julia -e 'using Pkg; Pkg.add(PackageSpec(url="https://github.com/meyer-lab/DE.jl.git")); Pkg.add("PyCall")'
 	julia -e 'using Pkg; Pkg.update(); Pkg.build(); Pkg.precompile(); Pkg.gc()'
 
 output/figure%.svg: genFigures.py de/figures/figure%.py venv
