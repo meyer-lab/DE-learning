@@ -2,15 +2,15 @@
 This file contains ODE equation solvers from Julia
 """
 # pylint: disable=no-name-in-module, wrong-import-position
-from os.path import join, dirname
 from julia.api import Julia
 
 jl = Julia(compiled_modules=False)
 
 from julia import Main
 
+Main.eval("using DE")
 
-Main.include(join(dirname(dirname(__file__)), "de/model.jl"))
+from julia import DE
 
 
 def julia_solver(ps):
@@ -19,7 +19,7 @@ def julia_solver(ps):
        then return the simulation of ODE over time.
        p = [eps, w, alpha] as 1D array
     """
-    return Main.solveODE(ps)
+    return DE.solveODE(ps)
 
 
 def julia_sol_matrix(ps):
@@ -28,4 +28,4 @@ def julia_sol_matrix(ps):
         mimicking the experimental data.
         p = [eps, w, alpha] as 1D array
     """
-    return Main.sol_matrix(ps)
+    return DE.sol_matrix(ps)
