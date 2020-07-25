@@ -22,7 +22,7 @@ class TestModel(unittest.TestCase):
         self.assertTrue(isinstance(matrix, np.ndarray))
         self.assertEqual(matrix.shape[0], 83) # there were 83 knockout models and thus associated genes
         self.assertEqual(matrix.shape[1], 84) # there is an extra column due to the negative control
-    
+
     def test_prep(self):
         """Tests that a DataFrame is formed with a row for every gene and 85 columns to represent models"""
         data = prepData()

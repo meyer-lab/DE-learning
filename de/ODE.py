@@ -22,7 +22,7 @@ def solver(ps, ts):
     return sol
 
 
-def ODE(y, t, eps, w, alpha):
+def ODE(y, _, eps, w, alpha):
     '''The ODE system:
     Parameters = eps: Value that bound the saturation effect
                  w: Interaction between components

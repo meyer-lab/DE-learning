@@ -13,4 +13,3 @@ def test_ODErun():
 
     assert output.shape == (2, 83)
     assert np.all(np.isfinite(output))
-
