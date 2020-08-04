@@ -29,20 +29,12 @@ def add_edges(dir_graph, w):
     Given a directed graph and w matrix, calculates a threshold for large w values. Then adds a directed edge from gene j to gene i representing the interaction with the w value as the edge's weight.
     """
     w = w.to_numpy()
-    threshold = np.mean(w) + 2 * np.std(w)
+    threshold = np.mean(w) + 1.25 * np.std(w)
     for i in range(83):
         for j in range(83):
             if w[i, j] > threshold:
                 dir_graph.add_edge(j, i, weight=w[i, j])
     # Remove nodes with no edges
-    dir_graph.remove_nodes_from(nx.isolates(dir_graph))
+    isolates = list(nx.isolates(dir_graph))
+    dir_graph.remove_nodes_from(isolates)
     return dir_graph
-
-def make_graph(dir_graph):
-    """
-    Forms figure from directed graph with nodes labelled as genes.
-    """
-    fig = plt.figure(figsize=(10, 10))
-    plt.subplot(1, 1, 1)
-    labels = nx.get_node_attributes(dir_graph, 'gene')
-    nx.draw_networkx(dir_graph,labels=labels, node_size=200, font_size=8)
