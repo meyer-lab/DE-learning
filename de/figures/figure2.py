@@ -16,8 +16,8 @@ def makeFigure():
     add_nodes(G, w)
     add_edges(G, w)
     ax[0].set_title("w Network Graph")
-    labels = nx.get_node_attributes(G, 'gene')
-    nx.draw_networkx(G,labels=labels, node_size=200, font_size=8)
+    labels = nx.get_node_attributes(G, "gene")
+    nx.draw_networkx(G, labels=labels, node_size=200, font_size=8)
 
     # Add subplot labels
     subplotLabel(ax)
