@@ -13,3 +13,4 @@ svgutils==0.3.1
 scikit-learn==0.23.1
 pybiomart
 julia==0.5.3
+NetworkX==2.4
