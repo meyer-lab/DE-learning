@@ -16,7 +16,7 @@ def makeFigure():
     add_nodes(G, w)
     G, threshold, w_max = add_edges(G, w)
     labels = nx.get_node_attributes(G, "gene")
-    pos = nx.spring_layout(G)
+    pos = nx.spring_layout(G, k=10.0/G.number_of_nodes())
     ax[0].set_title("w Network Graph")
     
     #adjust the size of node based on pagerank
@@ -24,7 +24,7 @@ def makeFigure():
     #adjust the thickness and color of edges based on weights and interaction type separately
     adjustment(G, threshold, w_max, pos)
     #draw the label for each node
-    nx.draw_networkx_labels(G, pos, labels = labels, font_size=10)
+    nx.draw_networkx_labels(G, pos, labels = labels, font_size=8)
     plt.show()
     
     # Add subplot labels
