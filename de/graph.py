@@ -28,6 +28,7 @@ def add_edges(dir_graph, w):
     Given a directed graph and w matrix, calculates a threshold for large w values. Then adds a directed edge from gene j to gene i representing the interaction with the w value as the edge's weight.
     """
     w = w.to_numpy()
+#     w = np.transpose(w)
     w_new = abs(w)
     w_max = np.max(w_new)
     threshold = np.mean(w_new) + 1.5 * np.std(w_new)
@@ -50,14 +51,19 @@ def pagerank(dir_graph, pos, alpha = 0.85):
     pagerank = nx.pagerank(dir_graph, alpha, weight = (dir_graph[u][v]['weight'] for u,v in dir_graph.edges()))
     nx.set_node_attributes(dir_graph, name = 'pagerank', values=pagerank)
     nodesize = [v['pagerank']*20000 for u,v in dir_graph.nodes(data=True)]
+    
+    #draw the nodes
     nx.draw_networkx_nodes(dir_graph, pos, node_size=nodesize)
     return dir_graph
 
-def adjustment(dir_graph, threshold, w_max):
+def adjustment(dir_graph, threshold, w_max, pos):
     """
-    Given a directed graph, threshold for w and w_max, then return edges color and thickness.
+    Given a directed graph, threshold for w and w_max, calculate edges color and thickness. Then return a directed edge.
     """
     edges = dir_graph.edges()
     colors = [dir_graph[u][v]["color"] for u,v in edges]
     thickness = [np.exp((dir_graph[u][v]['weight'] - threshold) / (w_max - threshold)) for u,v in edges]
-    return edges, colors, thickness
+    
+    #draw the edges
+    nx.draw_networkx_edges(dir_graph, pos, edgelist=edges, width=thickness, edge_color=colors)
+    return dir_graph

@@ -2,10 +2,9 @@
 This creates Figure 2: w Network Graph
 """
 import networkx as nx
-import numpy as np
 from .figureCommon import subplotLabel, getSetup
 from ..graph import load_w, add_nodes, add_edges, pagerank, adjustment
-
+import matplotlib.pyplot as plt
 
 def makeFigure():
     """ Get a list of the axis objects and create a figure. """
@@ -23,10 +22,11 @@ def makeFigure():
     #adjust the size of node based on pagerank
     pagerank(G, pos)
     #adjust the thickness and color of edges based on weights and interaction type separately
-    edges, colors, thickness = adjustment(G, threshold, w_max)
-    #draw the network graph
-    nx.draw_networkx(G, pos, labels=labels, edges=edges, edge_color=colors, width=thickness, font_size=8)
-
+    adjustment(G, threshold, w_max, pos)
+    #draw the label for each node
+    nx.draw_networkx_labels(G, pos, labels = labels, font_size=10)
+    plt.show()
+    
     # Add subplot labels
     subplotLabel(ax)
                                
