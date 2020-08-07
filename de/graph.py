@@ -35,9 +35,9 @@ def add_edges(dir_graph, w):
         for j in range(83):
             if w_new[i, j] > threshold:
                 if w[i, j] > 0:
-                    dir_graph.add_edge(j, i, color="red", weight=w[i, j])
+                    dir_graph.add_edge(j, i, color="red", weight=w_new[i, j])
                 else:
-                    dir_graph.add_edge(j, i, color="blue", weight=w[i, j])
+                    dir_graph.add_edge(j, i, color="blue", weight=w_new[i, j])
     # Remove nodes with no edges
     isolates = list(nx.isolates(dir_graph))
     dir_graph.remove_nodes_from(isolates)
@@ -47,7 +47,7 @@ def pagerank(dir_graph, pos, alpha = 0.85):
     """
     Given a directed graph and position type, calculate the pagerank for each node. Then return a directed edge with adjusted nodesize based on pagerank.
     """
-    pagerank = nx.pagerank(dir_graph, alpha)
+    pagerank = nx.pagerank(dir_graph, alpha, weight = (dir_graph[u][v]['weight'] for u,v in dir_graph.edges()))
     nx.set_node_attributes(dir_graph, name = 'pagerank', values=pagerank)
     nodesize = [v['pagerank']*20000 for u,v in dir_graph.nodes(data=True)]
     nx.draw_networkx_nodes(dir_graph, pos, node_size=nodesize)
@@ -59,5 +59,5 @@ def adjustment(dir_graph, threshold, w_max):
     """
     edges = dir_graph.edges()
     colors = [dir_graph[u][v]["color"] for u,v in edges]
-    thickness = [np.exp((abs(dir_graph[u][v]['weight']) - threshold) / (w_max - threshold)) for u,v in edges]
+    thickness = [np.exp((dir_graph[u][v]['weight'] - threshold) / (w_max - threshold)) for u,v in edges]
     return edges, colors, thickness
