@@ -45,7 +45,7 @@ def add_edges(dir_graph, w):
 
 def pagerank(dir_graph, pos, alpha = 0.85):
     """
-    use pagerank to do quantification
+    Given a directed graph and position type, calculate the pagerank for each node. Then return a directed edge with adjusted nodesize based on pagerank.
     """
     pagerank = nx.pagerank(dir_graph, alpha)
     nx.set_node_attributes(dir_graph, name = 'pagerank', values=pagerank)
@@ -55,9 +55,9 @@ def pagerank(dir_graph, pos, alpha = 0.85):
 
 def adjustment(dir_graph, threshold, w_max):
     """
-    adjust edges color and thickness
+    Given a directed graph, threshold for w and w_max, then return edges color and thickness.
     """
     edges = dir_graph.edges()
     colors = [dir_graph[u][v]["color"] for u,v in edges]
-    weights = [np.exp((abs(dir_graph[u][v]['weight']) - threshold) / (w_max - threshold)) for u,v in edges]
-    return edges, colors, weights
+    thickness = [np.exp((abs(dir_graph[u][v]['weight']) - threshold) / (w_max - threshold)) for u,v in edges]
+    return edges, colors, thickness

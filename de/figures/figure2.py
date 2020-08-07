@@ -17,13 +17,15 @@ def makeFigure():
     add_nodes(G, w)
     G, threshold, w_max = add_edges(G, w)
     labels = nx.get_node_attributes(G, "gene")
-    pos = nx.circular_layout(G)
+    pos = nx.spring_layout(G)
     ax[0].set_title("w Network Graph")
     
+    #adjust the size of node based on pagerank
     pagerank(G, pos)
-    edges, colors, weights = adjustment(G, threshold, w_max)
-    
-    nx.draw_networkx(G, pos, labels=labels, edges=edges, edge_color=colors, width=weights, font_size=8)
+    #adjust the thickness and color of edges based on weights and interaction type separately
+    edges, colors, thickness = adjustment(G, threshold, w_max)
+    #draw the network graph
+    nx.draw_networkx(G, pos, labels=labels, edges=edges, edge_color=colors, width=thickness, font_size=8)
 
     # Add subplot labels
     subplotLabel(ax)
