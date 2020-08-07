@@ -42,3 +42,22 @@ def add_edges(dir_graph, w):
     isolates = list(nx.isolates(dir_graph))
     dir_graph.remove_nodes_from(isolates)
     return dir_graph, threshold, w_max
+
+def pagerank(dir_graph, pos, alpha = 0.85):
+    """
+    use pagerank to do quantification
+    """
+    pagerank = nx.pagerank(dir_graph, alpha)
+    nx.set_node_attributes(dir_graph, name = 'pagerank', values=pagerank)
+    nodesize = [v['pagerank']*20000 for u,v in dir_graph.nodes(data=True)]
+    nx.draw_networkx_nodes(dir_graph, pos, node_size=nodesize)
+    return dir_graph
+
+def adjustment(dir_graph, threshold, w_max):
+    """
+    adjust edges color and thickness
+    """
+    edges = dir_graph.edges()
+    colors = [dir_graph[u][v]["color"] for u,v in edges]
+    weights = [np.exp((abs(dir_graph[u][v]['weight']) - threshold) / (w_max - threshold)) for u,v in edges]
+    return edges, colors, weights
