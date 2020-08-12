@@ -20,6 +20,7 @@ def pagerank(w, num_iterations: int = 100, d: float = 0.85):
     Given an adjecency matrix, calculate the pagerank value.
     Notice: All the elements in w should be no less than zeros; Also, the elements of each column should sum up to 1.
     """
+    w = np.absolute(w) # PageRank only works with unsigned networks, so we'll take the absolute value.
     N = w.shape[1]
     for i in range(N):
         w[:,i] /= sum(w[:,i])
