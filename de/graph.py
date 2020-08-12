@@ -31,28 +31,28 @@ def pagerank(w, num_iterations: int = 100, d: float = 0.85):
         v = w_hat @ v
     return v
 
-def add_nodes(dir_graph, w, w_new):
+def add_nodes(dir_graph, w, w_abs):
     """
     Given a directed graph and w matrix, adds a node to the directed graph for each gene.
     """
-    v = pagerank(w_new)
+    v = pagerank(w_abs)
     for i in range(83):
         dir_graph.add_node(i, gene=w.columns[i], pagerank=v[i])
     return dir_graph
 
-def add_edges(dir_graph, w, w_new):
+def add_edges(dir_graph, w, w_abs):
     """
     Given a directed graph and w matrix, calculates a threshold for large w values. Then adds a directed edge from gene j to gene i representing the interaction with the w value as the edge's weight.
     """
     w = w.to_numpy()
-    threshold = np.mean(w_new) + 1.5 * np.std(w_new)
+    threshold = np.mean(w_abs) + 1.5 * np.std(w_abs)
     for i in range(83):
         for j in range(83):
-            if w_new[i, j] > threshold:
+            if w_abs[i, j] > threshold:
                 if w[i, j] > 0:
-                    dir_graph.add_edge(j, i, color="red", weight=w_new[i, j])
+                    dir_graph.add_edge(j, i, color="red", weight=w_abs[i, j])
                 else:
-                    dir_graph.add_edge(j, i, color="blue", weight=w_new[i, j])
+                    dir_graph.add_edge(j, i, color="blue", weight=w_abs[i, j])
     return dir_graph
 
 def threshold(dir_graph):
@@ -75,11 +75,11 @@ def set_nodes(dir_graph, pos):
     nx.draw_networkx_nodes(dir_graph, pos, node_size = nodesize)
     return dir_graph
 
-def set_edges(dir_graph, w_new, w_max, pos):
+def set_edges(dir_graph, w_abs, w_max, pos):
     """
     Given a directed graph, w_new and w_max, calculate edges color and thickness. Then draw the corresponding edge.
     """
-    threshold = np.mean(w_new) + 1.5 * np.std(w_new)
+    threshold = np.mean(w_abs) + 1.5 * np.std(w_abs)
     edges = dir_graph.edges()
     colors = [dir_graph[u][v]["color"] for u,v in edges]
     thickness = [np.exp((dir_graph[u][v]["weight"] - threshold) / (w_max - threshold)) for u,v in edges]

@@ -15,18 +15,18 @@ def makeFigure():
     #create NetworkX graph
     G = nx.DiGraph()
     w = load_w()
-    w_new = abs(w.to_numpy())
-    w_max = np.max(w_new)
+    w_abs = np.absolute(w.to_numpy())
+    w_max = np.max(w_abs)
     
     #add nodes and edges
-    add_nodes(G, w, w_new)
-    add_edges(G, w, w_new)
+    add_nodes(G, w, w_abs)
+    add_edges(G, w, w_abs)
     threshold(G)
     
-    #draw the nodes and edges
+    #draw the nodes, edges and labels
     pos = nx.spring_layout(G)
     set_nodes(G, pos)
-    set_edges(G, w_new, w_max, pos)
+    set_edges(G, w_abs, w_max, pos)
     set_labels(G, pos)
 
     ax[0].set_title("w Network Graph")
