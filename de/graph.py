@@ -23,7 +23,7 @@ def pagerank(w, num_iterations: int = 100, d: float = 0.85):
     w = np.absolute(w) # PageRank only works with unsigned networks, so we'll take the absolute value.
     N = w.shape[1]
     for i in range(N):
-        w[:,i] /= sum(w[:,i])
+        w[:, i] /= sum(w[:, i])
     v = np.random.rand(N, 1)
     v = v / np.linalg.norm(v, 1)
     w_hat = (d * w + (1 - d) / N)
@@ -55,13 +55,13 @@ def add_edges(dir_graph, w, w_abs):
                     dir_graph.add_edge(j, i, color="blue", weight=w_abs[i, j])
     return dir_graph
 
-def threshold(dir_graph):
+def remove_isolates(dir_graph):
     """
     Given a directed graph, then remove nodes with no edges.
     """
     isolates = list(nx.isolates(dir_graph))
     dir_graph.remove_nodes_from(isolates)
-    
+
     return dir_graph
 
 def set_nodes(dir_graph, pos):
@@ -70,9 +70,9 @@ def set_nodes(dir_graph, pos):
     """
     nodes = dir_graph.nodes()
     nodesize = [dir_graph.nodes[u]["pagerank"]*20000 for u in nodes]
-    
+
     #draw the nodes
-    nx.draw_networkx_nodes(dir_graph, pos, node_size = nodesize)
+    nx.draw_networkx_nodes(dir_graph, pos, node_size=nodesize)
     return dir_graph
 
 def set_edges(dir_graph, w_abs, w_max, pos):
@@ -81,19 +81,19 @@ def set_edges(dir_graph, w_abs, w_max, pos):
     """
     threshold = np.mean(w_abs) + 1.5 * np.std(w_abs)
     edges = dir_graph.edges()
-    colors = [dir_graph[u][v]["color"] for u,v in edges]
-    thickness = [np.exp((dir_graph[u][v]["weight"] - threshold) / (w_max - threshold)) for u,v in edges]
-    
+    colors = [dir_graph[u][v]["color"] for u, v in edges]
+    thickness = [np.exp((dir_graph[u][v]["weight"] - threshold) / (w_max - threshold)) for u, v in edges]
+
     #draw the edges
     nx.draw_networkx_edges(dir_graph, pos, edgelist=edges, width=thickness, edge_color=colors)
     return dir_graph
-                 
+        
 def set_labels(dir_graph, pos):
     """
     Given a directed graph and pos, then draw the corresponding label based on index.
     """
     labels = nx.get_node_attributes(dir_graph, "gene")
-                 
+         
     #draw the labels
-    nx.draw_networkx_labels(dir_graph, pos, labels = labels, font_size=8)
+    nx.draw_networkx_labels(dir_graph, pos, labels=labels, font_size=8)
     return dir_graph
