@@ -12,15 +12,18 @@ def makeFigure():
     # Get list of axis objects
     ax, f = getSetup((8, 8), (1, 1))
     
+    #create NetworkX graph
     G = nx.DiGraph()
     w = load_w()
     w_new = abs(w.to_numpy())
     w_max = np.max(w_new)
-
+    
+    #add nodes and edges
     add_nodes(G, w, w_new)
     add_edges(G, w, w_new)
     threshold(G)
     
+    #draw the nodes and edges
     pos = nx.spring_layout(G)
     set_nodes(G, pos)
     set_edges(G, w_new, w_max, pos)
