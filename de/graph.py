@@ -15,6 +15,14 @@ def load_w():
     w.index = genes
     return w
 
+def remove_POLR2A(w):
+    """
+    Removes POLR2A from w matrix.
+    """
+    w = w.drop(["POLR2A"], axis=0)
+    w = w.drop(["POLR2A"], axis=1)
+    return w
+
 def pagerank(w, num_iterations: int = 100, d: float = 0.85):
     """
     Given an adjecency matrix, calculate the pagerank value.
@@ -36,7 +44,7 @@ def add_nodes(dir_graph, w, w_abs):
     Given a directed graph and w matrix, adds a node to the directed graph for each gene.
     """
     v = pagerank(w_abs)
-    for i in range(83):
+    for i in range(len(v)):
         dir_graph.add_node(i, gene=w.columns[i], pagerank=v[i])
     return dir_graph
 
@@ -46,8 +54,8 @@ def add_edges(dir_graph, w, w_abs):
     """
     w = w.to_numpy()
     threshold = np.mean(w_abs) + 1.5 * np.std(w_abs)
-    for i in range(83):
-        for j in range(83):
+    for i in range(w.shape[1]):
+        for j in range(w.shape[1]):
             if w_abs[i, j] > threshold:
                 if w[i, j] > 0:
                     dir_graph.add_edge(j, i, color="red", weight=w_abs[i, j])
