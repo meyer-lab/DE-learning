@@ -31,7 +31,7 @@ def add_edges(dir_graph, w):
 #     w = np.transpose(w)
     w_new = abs(w)
     w_max = np.max(w_new)
-    threshold = np.mean(w_new) + np.std(w_new)
+    threshold = np.mean(w_new) + 1.5 * np.std(w_new)
     for i in range(83):
         for j in range(83):
             if w_new[i, j] > threshold:
