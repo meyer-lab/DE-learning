@@ -3,29 +3,33 @@ This creates Figure 2: w Network Graph
 """
 import networkx as nx
 from .figureCommon import subplotLabel, getSetup
-from ..graph import load_w, add_nodes, add_edges, pagerank, adjustment
+from ..graph import load_w, add_nodes, add_edges, threshold, set_nodes, set_edges, set_labels
 import matplotlib.pyplot as plt
+import numpy as np
 
 def makeFigure():
     """ Get a list of the axis objects and create a figure. """
     # Get list of axis objects
     ax, f = getSetup((8, 8), (1, 1))
     
+    #create NetworkX graph
     G = nx.DiGraph()
     w = load_w()
-    add_nodes(G, w)
-    G, threshold, w_max = add_edges(G, w)
-    labels = nx.get_node_attributes(G, "gene")
-    pos = nx.spring_layout(G, k=10.0/G.number_of_nodes())
-    ax[0].set_title("w Network Graph")
+    w_abs = np.absolute(w.to_numpy())
+    w_max = np.max(w_abs)
     
-    #adjust the size of node based on pagerank
-    pagerank(G, pos)
-    #adjust the thickness and color of edges based on weights and interaction type separately
-    adjustment(G, threshold, w_max, pos)
-    #draw the label for each node
-    nx.draw_networkx_labels(G, pos, labels = labels, font_size=8)
-    plt.show()
+    #add nodes and edges
+    add_nodes(G, w, w_abs)
+    add_edges(G, w, w_abs)
+    threshold(G)
+    
+    #draw the nodes, edges and labels
+    pos = nx.spring_layout(G, k=10.0/G.number_of_nodes())
+    set_nodes(G, pos)
+    set_edges(G, w_abs, w_max, pos)
+    set_labels(G, pos)
+
+    ax[0].set_title("w Network Graph")
     
     # Add subplot labels
     subplotLabel(ax)
