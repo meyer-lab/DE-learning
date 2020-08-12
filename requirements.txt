@@ -1,6 +1,6 @@
 numpy==1.19.1
-scipy==1.5.1
-pytest==5.4.3
+scipy==1.5.2
+pytest==6.0.1
 pytest-cov==2.10.0
 pylint==2.5.3
 manubot==0.4.0
@@ -10,7 +10,7 @@ pandoc-tablenos
 matplotlib==3.3.0
 seaborn==0.10.1
 svgutils==0.3.1
-scikit-learn==0.23.1
+scikit-learn==0.23.2
 pybiomart
-julia==0.5.3
+julia==0.5.4
 NetworkX==2.4
