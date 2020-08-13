@@ -25,11 +25,11 @@ def makeFigure(pagerank_threshold = None):
     
     #Plot upstream graph
     w_trans = np.transpose(w)
-    w_abs = np.absolute(w_trans.to_numpy())
-    w_max = np.max(w_abs)
+    w_abs_trans = np.absolute(w_trans.to_numpy())
+    w_max = np.max(w_abs_trans)
     
     #create NetworkX graph
-    G_upstream = Networkx(w, w_abs, w_max, ax[1])
+    G_upstream = Networkx(w_trans, w_abs_trans, w_max, ax[1])
     #set title for the graph
     ax[1].set_title("w Network Graph (upstream)")
     
