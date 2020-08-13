@@ -6,7 +6,7 @@ from .figureCommon import subplotLabel, getSetup
 from ..graph import Networkx, load_w, remove_POLR2A
 
 
-def makeFigure(pagerank_threshold = None):
+def makeFigure():
     """ Get a list of the axis objects and create a figure. """
     # Get list of axis objects
     ax, f = getSetup((12, 12), (1, 2))
