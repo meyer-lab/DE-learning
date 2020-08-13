@@ -107,7 +107,7 @@ def set_labels(dir_graph, pos):
     nx.draw_networkx_labels(dir_graph, pos, labels=labels, font_size=8)
     return dir_graph
 
-def G(pagerank_threshold, w, w_abs, w_max):
+def G(w, w_abs, w_max):
     """ Networkx graph without considering pagerank threshold"""
     
     G = nx.DiGraph()
@@ -117,25 +117,8 @@ def G(pagerank_threshold, w, w_abs, w_max):
     remove_isolates(G)
     #draw the nodes, edges and labels
     pos = nx.spring_layout(G, k=8.0/G.number_of_nodes())
-    if pagerank_threshold == None:
-        set_nodes(G, pos)
-        set_edges(G, w_abs, w_max, pos)
-        set_labels(G, pos)
+    set_nodes(G, pos)
+    set_edges(G, w_abs, w_max, pos)
+    set_labels(G, pos)
     
     return G
-
-def G_new(dir_graph, w_abs, w_max):
-    """ Networkx graph with pagerank threshold"""
-    
-    pagerank_threshold = 0.005
-    G_new = dir_graph.copy()
-    for n, p_rank in dir_graph.nodes(data=True):
-        if p_rank['pagerank'] < pagerank_threshold: 
-            G_new.remove_node(n)
-    pos_new = nx.spring_layout(G_new, k=8.0/G_new.number_of_nodes())
-    #draw the nodes, edges and labels
-    set_nodes(G_new, pos_new)
-    set_edges(G_new, w_abs, w_max, pos_new)
-    set_labels(G_new, pos_new)
-    
-    return G_new
