@@ -73,7 +73,7 @@ def remove_isolates(dir_graph):
 
     return dir_graph
 
-def set_nodes(dir_graph, pos):
+def set_nodes(dir_graph, pos, ax):
     """
     Given a directed graph and pos, then draw the corresponding node based on pagerank value.
     """
@@ -81,10 +81,10 @@ def set_nodes(dir_graph, pos):
     nodesize = [dir_graph.nodes[u]["pagerank"]*20000 for u in nodes]
 
     #draw the nodes
-    nx.draw_networkx_nodes(dir_graph, pos, node_size=nodesize)
+    nx.draw_networkx_nodes(dir_graph, pos, node_size=nodesize, ax=ax)
     return dir_graph
 
-def set_edges(dir_graph, w_abs, w_max, pos):
+def set_edges(dir_graph, w_abs, w_max, pos, ax):
     """
     Given a directed graph, w_new and w_max, calculate edges color and thickness. Then draw the corresponding edge.
     """
@@ -94,20 +94,20 @@ def set_edges(dir_graph, w_abs, w_max, pos):
     thickness = [np.exp((dir_graph[u][v]["weight"] - threshold) / (w_max - threshold)) for u, v in edges]
 
     #draw the edges
-    nx.draw_networkx_edges(dir_graph, pos, edgelist=edges, width=thickness, edge_color=colors)
+    nx.draw_networkx_edges(dir_graph, pos, edgelist=edges, width=thickness, edge_color=colors, ax=ax)
     return dir_graph
         
-def set_labels(dir_graph, pos):
+def set_labels(dir_graph, pos, ax):
     """
     Given a directed graph and pos, then draw the corresponding label based on index.
     """
     labels = nx.get_node_attributes(dir_graph, "gene")
          
     #draw the labels
-    nx.draw_networkx_labels(dir_graph, pos, labels=labels, font_size=8)
+    nx.draw_networkx_labels(dir_graph, pos, labels=labels, font_size=8, ax = ax)
     return dir_graph
 
-def G(w, w_abs, w_max):
+def Networkx(w, w_abs, w_max, ax):
     """ Networkx graph without considering pagerank threshold"""
     
     G = nx.DiGraph()
@@ -117,8 +117,8 @@ def G(w, w_abs, w_max):
     remove_isolates(G)
     #draw the nodes, edges and labels
     pos = nx.spring_layout(G, k=8.0/G.number_of_nodes())
-    set_nodes(G, pos)
-    set_edges(G, w_abs, w_max, pos)
-    set_labels(G, pos)
+    set_nodes(G, pos, ax)
+    set_edges(G, w_abs, w_max, pos, ax)
+    set_labels(G, pos, ax)
     
     return G
