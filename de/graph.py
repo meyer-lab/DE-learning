@@ -107,7 +107,7 @@ def set_labels(dir_graph, pos, ax):
     nx.draw_networkx_labels(dir_graph, pos, labels=labels, font_size=8, ax = ax)
     return dir_graph
 
-def Networkx(w, w_abs, w_max, ax):
+def Network(w, w_abs, w_max, ax):
     """ Networkx graph without considering pagerank threshold"""
     
     G = nx.DiGraph()

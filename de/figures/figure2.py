@@ -3,7 +3,7 @@ This creates Figure 2: w Network Graph
 """
 import numpy as np
 from .figureCommon import subplotLabel, getSetup
-from ..graph import Networkx, load_w, remove_POLR2A
+from ..graph import Network, load_w, remove_POLR2A
 
 
 def makeFigure():
@@ -19,7 +19,7 @@ def makeFigure():
     w_abs = np.absolute(w.to_numpy())
     w_max = np.max(w_abs)
     
-    G_downstream = Networkx(w, w_abs, w_max, ax[0])
+    G_downstream = Network(w, w_abs, w_max, ax[0])
     #set title for the graph
     ax[0].set_title("w Network Graph (downstream)")
     
@@ -29,7 +29,7 @@ def makeFigure():
     w_max = np.max(w_abs_trans)
     
     #create NetworkX graph
-    G_upstream = Networkx(w_trans, w_abs_trans, w_max, ax[1])
+    G_upstream = Network(w_trans, w_abs_trans, w_max, ax[1])
     #set title for the graph
     ax[1].set_title("w Network Graph (upstream)")
     
