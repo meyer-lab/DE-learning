@@ -43,6 +43,7 @@ def add_nodes(dir_graph, w, w_abs):
     """
     Given a directed graph and w matrix, adds a node to the directed graph for each gene.
     """
+    w_abs = np.copy(w_abs)
     v = pagerank(w_abs)
     for i in range(len(v)):
         dir_graph.add_node(i, gene=w.columns[i], pagerank=v[i])
@@ -105,3 +106,36 @@ def set_labels(dir_graph, pos):
     #draw the labels
     nx.draw_networkx_labels(dir_graph, pos, labels=labels, font_size=8)
     return dir_graph
+
+def G(pagerank_threshold, w, w_abs, w_max):
+    """ Networkx graph without considering pagerank threshold"""
+    
+    G = nx.DiGraph()
+    #add nodes and edges
+    add_nodes(G, w, w_abs)
+    add_edges(G, w, w_abs)
+    remove_isolates(G)
+    #draw the nodes, edges and labels
+    pos = nx.spring_layout(G, k=8.0/G.number_of_nodes())
+    if pagerank_threshold == None:
+        set_nodes(G, pos)
+        set_edges(G, w_abs, w_max, pos)
+        set_labels(G, pos)
+    
+    return G
+
+def G_new(dir_graph, w_abs, w_max):
+    """ Networkx graph with pagerank threshold"""
+    
+    pagerank_threshold = 0.005
+    G_new = dir_graph.copy()
+    for n, p_rank in dir_graph.nodes(data=True):
+        if p_rank['pagerank'] < pagerank_threshold: 
+            G_new.remove_node(n)
+    pos_new = nx.spring_layout(G_new, k=8.0/G_new.number_of_nodes())
+    #draw the nodes, edges and labels
+    set_nodes(G_new, pos_new)
+    set_edges(G_new, w_abs, w_max, pos_new)
+    set_labels(G_new, pos_new)
+    
+    return G_new
