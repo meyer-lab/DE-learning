@@ -136,5 +136,5 @@ def bar_graph(w, color, ax, label):
     v_new = pd.DataFrame(v) 
     v_new.index = w.columns
     v_new.columns = [label]
-    v_new.sort_values(by = label, inplace = True, ascending = False)
-    v_new[0:20].plot.bar(color = color, ax = ax)
+    v_new.sort_values(by=label, inplace=True, ascending=False)
+    v_new[0:20].plot.bar(color=color, ax=ax)
