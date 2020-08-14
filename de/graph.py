@@ -122,3 +122,12 @@ def Network(w, w_abs, w_max, ax):
     set_labels(G, pos, ax)
     
     return G
+
+def bar_graph(w, color, ax, label):
+    w_new = w.to_numpy()
+    v = pagerank(w_new)
+    v_new = pd.DataFrame(v) 
+    v_new.index = w.columns
+    v_new.columns = [label]
+    v_new.sort_values(by = label, inplace = True, ascending = False)
+    v_new[0:20].plot.bar(color = color, ax = ax)
