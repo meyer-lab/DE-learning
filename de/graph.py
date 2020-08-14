@@ -108,7 +108,10 @@ def set_labels(dir_graph, pos, ax):
     return dir_graph
 
 def Network(w, w_abs, w_max, ax):
-    """ Networkx graph without considering pagerank threshold"""
+    """
+    Given w, w_abs, w_max and ax, then draw the corresponding Networkx graph.
+    """
+    
     
     G = nx.DiGraph()
     #add nodes and edges
@@ -124,6 +127,10 @@ def Network(w, w_abs, w_max, ax):
     return G
 
 def bar_graph(w, color, ax, label):
+    """ 
+    Given w, color, ax and label, then draw the corresponding bar graph based on pagerank value.
+    """
+    
     w_new = w.to_numpy()
     v = pagerank(w_new)
     v_new = pd.DataFrame(v) 
