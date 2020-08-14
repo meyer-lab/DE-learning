@@ -19,7 +19,7 @@ def makeFigure():
     w_abs = np.absolute(w.to_numpy())
     w_max = np.max(w_abs)
     
-    G_downstream = Network(w, w_abs, w_max, ax[0])
+    Network(w, w_abs, w_max, ax[0])
     #set title for the graph
     ax[0].set_title("w Network Graph (downstream)")
     
@@ -34,7 +34,7 @@ def makeFigure():
     w_max = np.max(w_abs)
     
     #create NetworkX graph
-    G_upstream = Network(w, w_abs, w_max, ax[2])
+    Network(w, w_abs, w_max, ax[2])
     #set title for the graph
     ax[2].set_title("w Network Graph (upstream)")
     
