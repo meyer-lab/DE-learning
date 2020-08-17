@@ -52,3 +52,18 @@ def prepData():
         data_prepped = data_prepped.drop(["neg0" + str(i)], axis=1)
     data_prepped = data_prepped.drop(["neg10"], axis=1)
     return data_prepped
+
+def importBMDCdata():
+    """ Imports BMDC data, replaces cell name with cluster. """
+    path_here = dirname(dirname(__file__))
+
+    data = pd.read_csv(join(path_here, "de/data/dc_both_filt_fix_tp10k.tsv.xz"), index_col="GENE", delim_whitespace=True)
+    clusters = pd.read_csv(join(path_here, "de/data/cluster_assignment_bmdc.txt.xz"), index_col="NAME", delim_whitespace=True)
+    clusters = clusters.drop(["TYPE"], axis=0)
+    assert len(data.columns) == clusters.shape[0]
+
+    # Replace column name (cell) with subcluster name
+    for i, cell_name in enumerate(clusters.index):
+        assert cell_name == data.columns[i]
+    data.columns = clusters.loc[:, "SUB-CLUSTER"]
+    return data
