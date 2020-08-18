@@ -63,7 +63,6 @@ def importBMDCdata():
     assert len(data.columns) == clusters.shape[0]
 
     # Replace column name (cell) with subcluster name
-    for i, cell_name in enumerate(clusters.index):
-        assert cell_name == data.columns[i]
+    assert clusters.index == data.columns
     data.columns = clusters.loc[:, "SUB-CLUSTER"]
     return data
