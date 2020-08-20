@@ -43,3 +43,20 @@ def scatterplot(exp_data, model_data, save_path=""):
     if save_path:
         plt.savefig(save_path)
     plt.show()
+
+def num_line(ss_vals, save_path=""):
+    """
+    Function received steady state values and creates a number line of differences between steady state values for each gene
+    """
+    fig = plt.figure(figsize=(100, 300.0))
+    for i in range(83):
+        axes = fig.add_subplot(17, 5, i + 1)
+        ss_vals[:, i] = ss_vals[:, i] - ss_vals[1, i]
+        
+        axes.set_title(cond)
+    plt.xlabel("t")
+    plt.ylabel("Expression Level")  # x(t)/x(0)
+    fig.tight_layout()
+    if save_path:
+        plt.savefig(save_path)
+    plt.show()

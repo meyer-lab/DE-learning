@@ -10,10 +10,9 @@ def solver(ps, ts):
        then return the simulation of ODE.
     '''
     w = np.reshape(ps[:6889], (83, 83))
-    alpha = ps[6889:6972]
-    eps = ps[6972:]
+    eps = ps[6889:6972]
+    alpha = 0.1
 
-    assert alpha.size == w.shape[0]
     assert eps.size == w.shape[0]
     assert w.shape[1] == w.shape[0]
 
@@ -28,4 +27,4 @@ def ODE(y, _, eps, w, alpha):
                  w: Interaction between components
                  alpha: Degradation rate
     '''
-    return eps * np.tanh(np.dot(w, y)) - alpha * y
+    return eps * ( 1.0 + np.tanh(np.dot(w, y))) - alpha * y
