@@ -1,5 +1,6 @@
 import numpy as np
 from sklearn.decomposition import PCA
+from de.figures.figureCommon import getSetup
 
 ss_vals = np.loadtxt("de/data/steady_state_values.csv", delimiter=',')
 
