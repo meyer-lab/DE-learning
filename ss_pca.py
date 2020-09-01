@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.decomposition import PCA
 
-ss_vals = np.loadtxt("steady_state_values.csv", delimiter=',')
+ss_vals = np.loadtxt("de/data/steady_state_values.csv", delimiter=',')
 
 pca_object = PCA(n_components=2)
 X_r = pca_object.fit_transform(ss_vals)
