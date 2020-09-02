@@ -139,3 +139,4 @@ cython_debug/
 
 # MacOS Finder cache
 **.DS_Store
+.vscode/settings.json
