@@ -27,10 +27,7 @@ def makeFigure():
     w_trans = np.transpose(w)
     w_abs = np.absolute(w_trans.to_numpy())
     w_max = np.max(w_abs)
-    #create NetworkX graph
-    Network(w, w_abs, w_max, ax[2])
-    #set title for the graph
-    ax[2].set_title("w Network Graph (upstream)")
+
     #create upstream bar graph 
     bar_graph(w_trans, "orange", ax[3], "upstream")
     #set title for the graph
