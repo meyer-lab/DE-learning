@@ -54,14 +54,14 @@ def add_edges(dir_graph, w, w_abs):
     Given a directed graph and w matrix, calculates a threshold for large w values. Then adds a directed edge from gene j to gene i representing the interaction with the w value as the edge's weight.
     """
     w = w.to_numpy()
-    threshold = np.mean(w_abs) + 1.5 * np.std(w_abs)
+    threshold = np.mean(w_abs) + 0.7 * np.std(w_abs) #lower threshold in order to find more possible loops
     for i in range(w.shape[1]):
         for j in range(w.shape[1]):
             if w_abs[i, j] > threshold:
                 if w[i, j] > 0:
-                    dir_graph.add_edge(j, i, color="red", weight=w_abs[i, j])
+                    dir_graph.add_edge(j, i, color="red", weight=w[i, j])
                 else:
-                    dir_graph.add_edge(j, i, color="blue", weight=w_abs[i, j])
+                    dir_graph.add_edge(j, i, color="blue", weight=w[i, j])
     return dir_graph
 
 def remove_isolates(dir_graph):
@@ -91,7 +91,7 @@ def set_edges(dir_graph, w_abs, w_max, pos, ax):
     threshold = np.mean(w_abs) + 1.5 * np.std(w_abs)
     edges = dir_graph.edges()
     colors = [dir_graph[u][v]["color"] for u, v in edges]
-    thickness = [np.exp((dir_graph[u][v]["weight"] - threshold) / (w_max - threshold)) for u, v in edges]
+    thickness = [np.exp((np.abs(dir_graph[u][v]["weight"]) - threshold) / (w_max - threshold)) for u, v in edges]
 
     #draw the edges
     nx.draw_networkx_edges(dir_graph, pos, edgelist=edges, width=thickness, edge_color=colors, ax=ax)
@@ -138,3 +138,36 @@ def bar_graph(w, color, ax, label):
     v_new.columns = [label]
     v_new.sort_values(by=label, inplace=True, ascending=False)
     v_new[0:20].plot.bar(color=color, ax=ax)
+
+def loop():
+    w = load_w()
+    w = remove_POLR2A(w)
+    w_trans = np.transpose(w)
+    w_abs = np.absolute(w_trans.to_numpy())
+    w_max = np.max(w_abs)
+    G = Network(w_trans, w_abs, w_max, ax=None)
+    G_1 = G.copy()
+    m = list(nx.simple_cycles(G_1))
+    
+    # remove self-interacting loop
+    for i in m:
+        if len(i) == 1:
+            G_1.remove_edges_from([(i[0],i[0])])
+    m_new = list(nx.simple_cycles(G_1))
+    G_2 = G_1.copy()
+    
+    #find positive feedback loop
+    positive = []
+    product = 1
+    for i in range(len(m_new)):
+        try:
+            n = list(nx.find_cycle(G_2, orientation=None))
+            for j in range(len(n)):
+                product *= G_2[n[j][0]][n[j][1]]["weight"]
+            G_2.remove_edges_from([(n[len(n)-1][0],n[len(n)-1][1])]) #Issue: some loops may share the same edge, so this will remove other loops as well
+            if product > 0:
+                positive.append(n)
+            product = 1
+        except:
+            pass
+    return positive
