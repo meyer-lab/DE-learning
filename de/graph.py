@@ -154,9 +154,9 @@ def loop():
     product = 1
 
     # remove self-interacting loop
-    for i in m:
-        if len(i) == 1:
-            G_1.remove_edges_from([(i[0],i[0])])
+    for l in m:
+        if len(l) == 1:
+            G_1.remove_edges_from([(l[0],l[0])])
     m_new = list(nx.simple_cycles(G_1))
 
     for i in m_new:
