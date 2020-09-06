@@ -142,32 +142,30 @@ def bar_graph(w, color, ax, label):
 def loop():
     w = load_w()
     w = remove_POLR2A(w)
+    
+    #upstream
     w_trans = np.transpose(w)
     w_abs = np.absolute(w_trans.to_numpy())
     w_max = np.max(w_abs)
     G = Network(w_trans, w_abs, w_max, ax=None)
     G_1 = G.copy()
     m = list(nx.simple_cycles(G_1))
-    
+    positive = []
+    product = 1
+
     # remove self-interacting loop
     for i in m:
         if len(i) == 1:
             G_1.remove_edges_from([(i[0],i[0])])
     m_new = list(nx.simple_cycles(G_1))
-    G_2 = G_1.copy()
-    
-    #find positive feedback loop
-    positive = []
-    product = 1
-    for i in range(len(m_new)):
-        try:
-            n = list(nx.find_cycle(G_2, orientation=None))
-            for j in range(len(n)):
-                product *= G_2[n[j][0]][n[j][1]]["weight"]
-            G_2.remove_edges_from([(n[len(n)-1][0],n[len(n)-1][1])]) #Issue: some loops may share the same edge, so this will remove other loops as well
-            if product > 0:
-                positive.append(n)
-            product = 1
-        except:
-            pass
+
+    for i in m_new:
+        for j in range(len(i)):
+            if (j+1)<len(i):
+                product *= G_1[i[j]][i[j+1]]["weight"]
+            else:
+                product *= G_1[i[j]][i[0]]["weight"]
+        if product > 0:
+            positive.append(i)
+        product = 1
     return positive
