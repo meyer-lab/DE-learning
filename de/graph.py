@@ -15,12 +15,18 @@ def load_w():
     w.index = genes
     return w
 
-def remove_POLR2A(w):
+def remove(w):
     """
-    Removes POLR2A from w matrix.
+    Removes POLR2A and genes whose expression level equals zero under control condition from w matrix.
     """
     w = w.drop(["POLR2A"], axis=0)
     w = w.drop(["POLR2A"], axis=1)
+    m = w.columns
+    w_2 = w.to_numpy()
+    for i in range(len(m)):
+        if w_2[0, i] == 0:
+            w = w.drop([m[i]], axis=0)
+            w = w.drop([m[i]], axis=1)
     return w
 
 def pagerank(w, num_iterations: int = 100, d: float = 0.85):
@@ -54,7 +60,7 @@ def add_edges(dir_graph, w, w_abs):
     Given a directed graph and w matrix, calculates a threshold for large w values. Then adds a directed edge from gene j to gene i representing the interaction with the w value as the edge's weight.
     """
     w = w.to_numpy()
-    threshold = np.mean(w_abs) + 0.7 * np.std(w_abs) #lower threshold in order to find more possible loops
+    threshold = np.mean(w_abs) + 0.2 * np.std(w_abs) #lower threshold in order to find more possible loops
     for i in range(w.shape[1]):
         for j in range(w.shape[1]):
             if w_abs[i, j] > threshold:
@@ -88,7 +94,7 @@ def set_edges(dir_graph, w_abs, w_max, pos, ax):
     """
     Given a directed graph, w_new and w_max, calculate edges color and thickness. Then draw the corresponding edge.
     """
-    threshold = np.mean(w_abs) + 1.5 * np.std(w_abs)
+    threshold = np.mean(w_abs) + 0.2 * np.std(w_abs)
     edges = dir_graph.edges()
     colors = [dir_graph[u][v]["color"] for u, v in edges]
     thickness = [np.exp((np.abs(dir_graph[u][v]["weight"]) - threshold) / (w_max - threshold)) for u, v in edges]
@@ -140,13 +146,15 @@ def bar_graph(w, color, ax, label):
     v_new[0:20].plot.bar(color=color, ax=ax)
 
 def loop():
+    """
+    Return positive-feedback loops involved in network
+    """
     w = load_w()
-    w = remove_POLR2A(w)
-    
-    #upstream
+    w = remove(w)
     w_trans = np.transpose(w)
     w_abs = np.absolute(w_trans.to_numpy())
     w_max = np.max(w_abs)
+    
     G = Network(w_trans, w_abs, w_max, ax=None)
     G_1 = G.copy()
     m = list(nx.simple_cycles(G_1))
@@ -168,4 +176,35 @@ def loop():
         if product > 0:
             positive.append(i)
         product = 1
-    return positive
+    return positive, G_1
+
+def loop_figure(loop, G_1):
+    """
+    Given certain loop number(eg.[37, 74, 26, 60]) and network graph
+    Return loop graph
+    """
+    w = load_w()
+    w = remove(w)
+    w_trans = np.transpose(w)
+    w_abs = np.absolute(w_trans.to_numpy())
+    w_max = np.max(w_abs)
+    
+    edge=[]
+    node=[]
+    
+    for i in range(len(loop)):
+        node.append((loop[i], G_1.nodes[loop[i]]))
+        
+    for j in range(len(loop)):
+        if (j+1)<len(loop):
+            edge.append((loop[j],loop[j+1],G_1[loop[j]][loop[j+1]]))
+        else:
+            edge.append((loop[j],loop[0],G_1[loop[j]][loop[0]]))
+            
+    G_test = nx.DiGraph()
+    G_test.add_nodes_from(node)
+    G_test.add_edges_from(edge)
+    pos = nx.circular_layout(G_test)
+    set_nodes(G_test, pos, ax = None)
+    set_edges(G_test, w_abs, w_max, pos, ax = None)
+    set_labels(G_test, pos, ax = None)
