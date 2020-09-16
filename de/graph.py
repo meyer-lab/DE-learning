@@ -9,7 +9,7 @@ def load_w():
     Loads w from csv file and returns dataframe with gene symbols attached to w values.
     """
     path_here = dirname(dirname(__file__))
-    w = pd.read_csv(join(path_here, "de/data/w.csv"), header=None)
+    w = pd.read_csv(join(path_here, "de/data/w_new.csv"), header=None)
     genes = np.loadtxt(join(path_here, "de/data/node_Index.csv"), dtype=str)
     w.columns = genes
     w.index = genes
@@ -208,3 +208,4 @@ def loop_figure(loop, G_1):
     set_nodes(G_test, pos, ax = None)
     set_edges(G_test, w_abs, w_max, pos, ax = None)
     set_labels(G_test, pos, ax = None)
+    
