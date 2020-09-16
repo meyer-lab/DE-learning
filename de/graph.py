@@ -208,4 +208,3 @@ def loop_figure(loop, G_1):
     set_nodes(G_test, pos, ax = None)
     set_edges(G_test, w_abs, w_max, pos, ax = None)
     set_labels(G_test, pos, ax = None)
-    
