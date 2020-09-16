@@ -151,11 +151,10 @@ def loop():
     """
     w = load_w()
     w = remove(w)
-    w_trans = np.transpose(w)
-    w_abs = np.absolute(w_trans.to_numpy())
+    w_abs = np.absolute(w.to_numpy())
     w_max = np.max(w_abs)
     
-    G = Network(w_trans, w_abs, w_max, ax=None)
+    G = Network(w, w_abs, w_max, ax=None)
     G_1 = G.copy()
     m = list(nx.simple_cycles(G_1))
     positive = []
@@ -185,8 +184,7 @@ def loop_figure(loop, G_1):
     """
     w = load_w()
     w = remove(w)
-    w_trans = np.transpose(w)
-    w_abs = np.absolute(w_trans.to_numpy())
+    w_abs = np.absolute(w.to_numpy())
     w_max = np.max(w_abs)
     
     edge=[]
