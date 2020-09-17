@@ -18,7 +18,6 @@ pipeline {
         }
         archiveArtifacts artifacts: 'output/*.svg, output/manuscript.docx', onlyIfSuccessful: true
         cobertura coberturaReportFile: 'coverage.xml', failUnhealthy: false, failUnstable: false, maxNumberOfBuilds: 0, onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false
-        recordIssues qualityGates: [[threshold: 20, type: 'TOTAL', unstable: true]], tools: [pyLint(pattern: 'pylint.log')]
         publishHTML([allowMissing:false, alwaysLinkToLastBuild:false, keepAll:true, reportDir:'output', reportFiles:'manuscript.html', reportName:'Manuscript'])
       }
     }
