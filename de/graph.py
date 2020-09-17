@@ -158,7 +158,6 @@ def loop():
     G_1 = G.copy()
     m = list(nx.simple_cycles(G_1))
     positive = []
-    product = 1
 
     # remove self-interacting loop
     for l in m:
@@ -167,6 +166,7 @@ def loop():
     m_new = list(nx.simple_cycles(G_1))
 
     for i in m_new:
+        product = 1
         for j in range(len(i)):
             if (j+1)<len(i):
                 product *= G_1[i[j]][i[j+1]]["weight"]
@@ -174,7 +174,6 @@ def loop():
                 product *= G_1[i[j]][i[0]]["weight"]
         if product > 0:
             positive.append(i)
-        product = 1
     return positive, G_1
 
 def loop_figure(loop, G_1):
