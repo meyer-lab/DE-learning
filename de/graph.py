@@ -9,7 +9,7 @@ def load_w():
     Loads w from csv file and returns dataframe with gene symbols attached to w values.
     """
     path_here = dirname(dirname(__file__))
-    w = pd.read_csv(join(path_here, "de/data/w_new.csv"), header=None)
+    w = pd.read_csv(join(path_here, "de/data/w.csv"), header=None)
     genes = np.loadtxt(join(path_here, "de/data/node_Index.csv"), dtype=str)
     w.columns = genes
     w.index = genes
@@ -20,7 +20,7 @@ def normalize(w):
     Given w matrix, then return normalized w matrix according to gene expression under control conditions
     """
     path_here = dirname(dirname(__file__))
-    control = (np.loadtxt(join(path_here,'data/exp_data.csv',delimiter=',')))[:,-1]
+    control = (np.loadtxt(join(path_here,'de/data/exp_data.csv',delimiter=',')))[:,-1]
     for i in range(len(control)):
             w.iloc[:,i] = w.iloc[:,i] * control[i]
     return w
