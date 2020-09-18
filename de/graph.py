@@ -15,6 +15,16 @@ def load_w():
     w.index = genes
     return w
 
+def normalize(w):
+    """
+    Given w matrix, then return normalized w matrix according to gene expression under control conditions
+    """
+    path_here = dirname(dirname(__file__))
+    control = (np.loadtxt(join(path_here,'data/exp_data.csv',delimiter=',')))[:,-1]
+    for i in range(len(control)):
+            w.iloc[:,i] = w.iloc[:,i] * control[i]
+    return w
+
 def remove(w):
     """
     Removes POLR2A and genes whose expression level equals zero under control condition from w matrix.
