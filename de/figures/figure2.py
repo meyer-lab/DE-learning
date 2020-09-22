@@ -3,7 +3,7 @@ This creates Figure 2: w Network Graph
 """
 import numpy as np
 from .figureCommon import subplotLabel, getSetup
-from ..graph import Network, load_w, remove_POLR2A, bar_graph
+from ..graph import Network, load_w, normalize, remove, bar_graph
 
 
 def makeFigure():
@@ -12,7 +12,8 @@ def makeFigure():
     ax, f = getSetup((12, 12), (2, 2))
     #load w
     w = load_w()
-    w = remove_POLR2A(w)
+    w = normalize(w)
+    w = remove(w)
     #Plot downstream graph
     w_abs = np.absolute(w.to_numpy())
     w_max = np.max(w_abs)
