@@ -3,6 +3,7 @@ from os.path import join, dirname
 import numpy as np
 import pandas as pd
 import networkx as nx
+from .importData import formMatrix
 
 def load_w():
     """
@@ -19,8 +20,7 @@ def normalize(w):
     """
     Given w matrix, then return normalized w matrix according to gene expression under control conditions
     """
-    path_here = dirname(dirname(__file__))
-    control = (np.loadtxt(join(path_here,'de/data/exp_data.csv',delimiter=',')))[:,-1]
+    control = formMatrix()[:, -1]
     for i in range(len(control)):
             w.iloc[:,i] = w.iloc[:,i] * control[i]
     return w
