@@ -1,5 +1,6 @@
 # DE-learning
 
-[![Build Status](https://transduc.seas.ucla.edu/buildStatus/icon?job=meyer-lab%2FDE-learning%2Fmaster)](https://transduc.seas.ucla.edu/job/meyer-lab/job/DE-learning/job/master/)
+![Test](https://github.com/meyer-lab/DE-learning/workflows/Test/badge.svg)
+![Build](https://github.com/meyer-lab/DE-learning/workflows/Build/badge.svg)
 
 Learning a network while restricting dynamics.
