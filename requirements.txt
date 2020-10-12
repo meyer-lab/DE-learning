@@ -13,3 +13,5 @@ svgutils==0.3.1
 scikit-learn==0.23.2
 pybiomart
 NetworkX==2.5
+pydot==1.4.1
+graphviz==0.14.2
