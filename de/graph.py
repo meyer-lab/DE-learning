@@ -120,26 +120,26 @@ def set_labels(dir_graph, pos, ax):
     labels = nx.get_node_attributes(dir_graph, "gene")
          
     #draw the labels
-    nx.draw_networkx_labels(dir_graph, pos, labels=labels, font_size=8, ax=ax)
+    nx.draw_networkx_labels(dir_graph, pos, labels=labels, font_size=6, ax=ax)
     return dir_graph
 
 def Network(w, w_abs, w_max, ax):
     """
     Given w, w_abs, w_max and ax, then draw the corresponding Networkx graph.
     """
-    
-    
     G = nx.DiGraph()
     #add nodes and edges
     add_nodes(G, w, w_abs)
     add_edges(G, w, w_abs)
     remove_isolates(G)
+
+    pos = nx.nx_pydot.pydot_layout(G, prog="fdp")
+    
     #draw the nodes, edges and labels
-    pos = nx.spring_layout(G, k=8.0/G.number_of_nodes())
     set_nodes(G, pos, ax)
     set_edges(G, w_abs, w_max, pos, ax)
     set_labels(G, pos, ax)
-    
+
     return G
 
 def bar_graph(w, color, ax, label):
