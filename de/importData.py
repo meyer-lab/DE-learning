@@ -52,3 +52,45 @@ def prepData():
         data_prepped = data_prepped.drop(["neg0" + str(i)], axis=1)
     data_prepped = data_prepped.drop(["neg10"], axis=1)
     return data_prepped
+
+def importGenomeData():
+    """ Loads genome-wide RNAseq data, perturbation information, and landmark gene information. """
+    path_here = dirname(dirname(__file__))
+    data = pd.read_csv(join(path_here, "de/data/GSE92742_Broad_LINCS_Level2.csv.xz"), compression="xz")
+    inst_info = pd.read_csv(join(path_here, "de/data/GSE106127_inst_info.txt"), sep="\t").set_index("inst_id")
+    gene_info = pd.read_csv(join(path_here, "de/data/GSE92742_Broad_LINCS_gene_info.txt"), sep='\t', index_col="pr_gene_id")
+    gene_info = gene_info.drop(["pr_gene_title", "pr_is_lm", "pr_is_bing"], axis=1)
+    return data, inst_info, gene_info
+
+def determineCellTypes(inst_info):
+    """ Returns list of cell types and the amount of perturbations performed on each. """
+    cell_types_counts = inst_info.groupby(by="cell_id").count()
+    cell_types_counts = cell_types_counts.drop(["pert_iname", "pert_type", "pert_time", "pert_time_unit", "seed_seq_6mer", "seed_seq_7mer", "pert_itime"], axis=1)
+    return cell_types_counts
+
+def cell_type_perturbations(data, inst_info, gene_info, cell_id):
+    """ Returns matrix with rows corresponding to landmark genes measured and columns corresponding to average value of each perturbation performed. """
+    inst_info_celltype = inst_info.loc[inst_info["cell_id"] == cell_id]
+    drop_cols = []
+    rename_cols = []
+    new_names = []
+    # Find perturbations by RNAi or CRISPR
+    for col in data.columns:
+        if col not in inst_info_celltype.index:
+            drop_cols.append(col)
+        else:
+            rename_cols.append(col)
+            new_names.append(inst_info_celltype.loc[col, "pert_iname"])
+    # Drop perturbations not by RNAi or CRISPR
+    out_celltype = data.drop(drop_cols, axis=1)
+    # Relabel perturbations with gene knocked out
+    out_celltype = out_celltype.rename(columns=dict(zip(rename_cols, new_names)))
+    # Average replicates
+    out_celltype = out_celltype.groupby(by=out_celltype.columns, axis=1).mean()
+    # Convert landmark gene numbers to ints
+    out_celltype.index = list(map(int, out_celltype.index))
+    # Change landmark gene numbers to gene symbols
+    out_celltype = out_celltype.join(gene_info)
+    out_celltype = out_celltype.set_index("pr_gene_symbol")
+    out_celltype = out_celltype.sort_index()
+    return out_celltype
