@@ -76,18 +76,18 @@ def determineCellTypes(inst_info):
 
 def cell_type_perturbations(data, inst_info, gene_info, cell_id):
     """ Returns matrix with rows corresponding to landmark genes measured and columns corresponding to average value of each perturbation performed. """
-    inst_info_celltype = inst_info_i.loc[((inst_info_i["cell_id"] == cell_id) | (inst_info_i["cell_id"] == (cell_id + ".311"))) & ((inst_info_i["pert_type"] == "ctl_vector") | (inst_info_i["pert_type"] == "trt_sh"))]
+    inst_info_celltype = inst_info.loc[((inst_info["cell_id"] == cell_id) | (inst_info["cell_id"] == (cell_id + ".311"))) & ((inst_info["pert_type"] == "ctl_vector") | (inst_info["pert_type"] == "trt_sh"))]
     drop_cols = []
     rename_cols = []
     new_names = []
     # Find perturbations by RNAi and controls
-    for col in data_i.columns:
+    for col in data.columns:
         if col not in inst_info_celltype.index:
             drop_cols.append(col)
         else:
             rename_cols.append(col)
             new_names.append(inst_info_celltype.loc[col, "pert_iname"])
-    out_celltype = data_i.drop(drop_cols, axis=1)
+    out_celltype = data.drop(drop_cols, axis=1)
     # Rename columns with perturbation name
     out_celltype.rename(columns=dict(zip(rename_cols, new_names)), inplace=True)
     # Average replicates
