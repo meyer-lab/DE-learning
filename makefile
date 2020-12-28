@@ -46,3 +46,8 @@ pylint.log: venv
 
 clean:
 	rm -rf coverage.xml junit.xml output venv
+
+download: data/GSE106127_inst_info.txt.xz data/GSE92742_Broad_LINCS_Level2.csv.xz
+
+data/%.xz:
+	wget -N -P ./data https://syno.seas.ucla.edu:9001/de-learning/$*.xz

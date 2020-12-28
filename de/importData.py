@@ -56,8 +56,14 @@ def prepData():
 def importGenomeData():
     """ Loads genome-wide RNAseq data, perturbation information, and landmark gene information. """
     path_here = dirname(dirname(__file__))
-    data = pd.read_csv(join(path_here, "de/data/GSE92742_Broad_LINCS_Level2.csv.xz"), compression="xz")
+    # Import perturbation data and join 2 datasets
+    data1 = pd.read_csv(join(path_here, "de/data/GSE92742_Broad_LINCS_Level2.csv.xz"), compression="xz")
+    data2 = pd.read_csv(join(path_here, "de/data/GSE70138_Broad_LINCS_Level2.csv.xz"), compression="xz")
+    data = data1.join(data2)
+    # Import perturbation IDs and names
     inst_info = pd.read_csv(join(path_here, "de/data/GSE106127_inst_info.txt"), sep="\t").set_index("inst_id")
+    inst_info = inst_info.drop(["pert_time", "pert_time_unit", "seed_seq_6mer", "seed_seq_7mer", "pert_itime"], axis=1)
+    # Import gene IDs and names
     gene_info = pd.read_csv(join(path_here, "de/data/GSE92742_Broad_LINCS_gene_info.txt"), sep='\t', index_col="pr_gene_id")
     gene_info = gene_info.drop(["pr_gene_title", "pr_is_lm", "pr_is_bing"], axis=1)
     return data, inst_info, gene_info
@@ -70,27 +76,39 @@ def determineCellTypes(inst_info):
 
 def cell_type_perturbations(data, inst_info, gene_info, cell_id):
     """ Returns matrix with rows corresponding to landmark genes measured and columns corresponding to average value of each perturbation performed. """
-    inst_info_celltype = inst_info.loc[inst_info["cell_id"] == cell_id]
+    inst_info_celltype = inst_info_i.loc[((inst_info_i["cell_id"] == cell_id) | (inst_info_i["cell_id"] == (cell_id + ".311"))) & ((inst_info_i["pert_type"] == "ctl_vector") | (inst_info_i["pert_type"] == "trt_sh"))]
     drop_cols = []
     rename_cols = []
     new_names = []
-    # Find perturbations by RNAi or CRISPR
-    for col in data.columns:
+    # Find perturbations by RNAi and controls
+    for col in data_i.columns:
         if col not in inst_info_celltype.index:
             drop_cols.append(col)
         else:
             rename_cols.append(col)
             new_names.append(inst_info_celltype.loc[col, "pert_iname"])
-    # Drop perturbations not by RNAi or CRISPR
-    out_celltype = data.drop(drop_cols, axis=1)
-    # Relabel perturbations with gene knocked out
-    out_celltype = out_celltype.rename(columns=dict(zip(rename_cols, new_names)))
+    out_celltype = data_i.drop(drop_cols, axis=1)
+    # Rename columns with perturbation name
+    out_celltype.rename(columns=dict(zip(rename_cols, new_names)), inplace=True)
     # Average replicates
     out_celltype = out_celltype.groupby(by=out_celltype.columns, axis=1).mean()
-    # Convert landmark gene numbers to ints
+    # Replace row numbers with name of gene measured
     out_celltype.index = list(map(int, out_celltype.index))
-    # Change landmark gene numbers to gene symbols
     out_celltype = out_celltype.join(gene_info)
     out_celltype = out_celltype.set_index("pr_gene_symbol")
-    out_celltype = out_celltype.sort_index()
+    out_celltype.sort_index(inplace=True)
+    # Remove columns of perturbations not corresponding to a measured gene or control
+    drop_cols = []
+    for x in out_celltype.columns:
+        if x not in out_celltype.index and x != "LUCIFERASE":
+            drop_cols.append(x)
+    out_celltype.drop(drop_cols, axis=1, inplace=True)
+    # Remove genes that were measured but not perturbed
+    drop_rows = []
+    for x in out_celltype.index:
+        if x not in out_celltype.columns:
+            drop_rows.append(x)
+    out_celltype.drop(drop_rows, inplace=True)
+    # Move control to end of dataframe
+    out_celltype = out_celltype[[x for x in out_celltype if x not in ["LUCIFERASE"]] + ["LUCIFERASE"]]
     return out_celltype
