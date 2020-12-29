@@ -4,7 +4,7 @@ pytest==6.2.1
 pytest-cov==2.10.1
 pylint==2.6.0
 manubot==0.5.0
-panflute==2.0.5
+panflute==1.12
 pandoc-fignos==2.4.0
 pandoc-eqnos==2.5.0
 pandoc-tablenos==2.3.0
