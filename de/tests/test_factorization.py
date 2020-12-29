@@ -34,9 +34,9 @@ def test_factorizeBlank(level):
     np.testing.assert_allclose(eta, level * alpha)
 
 
-@pytest.mark.parametrize("sizze", [(8, 8), (12, 12)])
+@pytest.mark.parametrize("sizze", [(8, 8), (12, 13), (15, 14)])
 def test_fit(sizze):
     """ Test that this runs successfully with reasonable input. """
-    data = np.random.normal(size=sizze)
+    data = np.random.lognormal(size=sizze)
     outt = runOptim(data, niter=2, disp=False)
     assert np.all(np.isfinite(outt))
