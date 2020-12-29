@@ -4,6 +4,7 @@ Test the factorization model.
 import pytest
 import numpy as np
 from ..factorization import factorizeEstimate, alpha
+from ..fitting import runOptim
 
 
 @pytest.mark.parametrize("sizze", [8, 12, 13])
@@ -24,3 +25,11 @@ def test_factorizeBlank(level):
 
     np.testing.assert_allclose(w, 0.0, atol=1e-9)
     np.testing.assert_allclose(eta, level * alpha)
+
+
+@pytest.mark.parametrize("sizze", [(8, 8), (12, 12)])
+def test_fit(sizze):
+    """ Test that this runs successfully with reasonable input. """
+    data = np.random.normal(size=sizze)
+    outt = runOptim(data, niter=2, disp=False)
+    assert np.all(np.isfinite(outt))

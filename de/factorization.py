@@ -29,10 +29,10 @@ def calcEta(data, w, alpha):
 def factorizeEstimate(data):
     """ Initialize the parameters based on the data. """
     # TODO: Add tolerance for termination.
-    w = np.zeros((data.shape[0], data.shape[0]))
+    w = np.zeros(data.shape)
 
     # Use the data to try and initialize the parameters
-    for ii in range(20):
+    for _ in range(20):
         eta = calcEta(data, w, alpha)
         w = calcW(data, eta, alpha)
 
