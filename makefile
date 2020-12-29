@@ -36,7 +36,7 @@ output/manuscript.docx: venv output/manuscript.md $(flistFull)
 		-o $@ output/manuscript.md
 
 test: venv
-	. venv/bin/activate && pytest -s
+	. venv/bin/activate && pytest -s -x
 
 clean:
 	rm -rf coverage.xml junit.xml output venv de/data/GSE*
