@@ -10,21 +10,17 @@ def calcW(data, eta, alpha):
     """Directly calculate w."""
     U = np.copy(data)
     np.fill_diagonal(U, 0.0)
-    Uinv = pinv(U.T)
 
-    B = (data * alpha) / eta[:, np.newaxis] - 1
-    B = np.arctanh(np.clip(B, -0.9, 0.9))
-
-    return (Uinv @ B.T).T
+    B = (data * alpha) / eta[:, np.newaxis] - 1.0
+    B = np.arctanh(np.clip(B, -0.95, 0.95))
+    return np.linalg.lstsq(U.T, B.T, rcond=None)[0].T
 
 
 def calcEta(data, w, alpha):
     """Directly calculate eta."""
     A = np.clip(alpha * data, 0.01, np.inf)
     B = np.clip(1 + np.tanh(w @ data), 0.01, np.inf)
-    Am = gmean(A, axis=1)
-    Bm = gmean(B, axis=1)
-    return Am / Bm
+    return gmean(A, axis=1) / gmean(B, axis=1)
 
 
 def factorizeEstimate(data, niter=20):
