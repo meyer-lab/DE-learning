@@ -3,12 +3,9 @@ import jax.numpy as jnp
 from jax.nn import softplus
 
 
-alpha = 0.1
-
-
 def reshapeParams(p):
     """Reshape a vector of parameters into the variables we know."""
-    w = reshape(p[1:6889], (83, 83))
+    w = jnp.reshape(p[1:6889], (83, 83))
     eta = p[6890:6972]
 
     assert eta.size == w.shape[0]
@@ -43,8 +40,8 @@ def regularize(pIn, strength = 1.0):
 
 def costG(x, data):
     """ Cost function gradient. """
-    U = copy(data)
-    np.fill_diagonal(U, 0.0)
+    U = jnp.copy(data)
+    jnp.fill_diagonal(U, 0.0)
     G = cost_grad(x, data, U)
     return G
 
