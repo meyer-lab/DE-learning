@@ -10,29 +10,29 @@ def makeFigure():
     """ Get a list of the axis objects and create a figure. """
     # Get list of axis objects
     ax, f = getSetup((12, 12), (2, 2))
-    #load w
+    # load w
     w = load_w()
     w = normalize(w)
     w = remove(w)
-    #Plot downstream graph
+    # Plot downstream graph
     w_abs = np.absolute(w.to_numpy())
     w_max = np.max(w_abs)
     Network(w, w_abs, w_max, ax[0])
-    #set title for the graph
+    # set title for the graph
     ax[0].set_title("w Network Graph (downstream)")
-    #create downstream bar graph 
+    # create downstream bar graph
     bar_graph(w, "green", ax[1], "downstream")
-    #set title for the graph
+    # set title for the graph
     ax[1].set_title("Bar Graph (downstream)")
-    #Plot upstream graph
+    # Plot upstream graph
     w_trans = np.transpose(w)
     w_abs = np.absolute(w_trans.to_numpy())
     w_max = np.max(w_abs)
 
-    #create upstream bar graph 
+    # create upstream bar graph
     bar_graph(w_trans, "orange", ax[3], "upstream")
-    #set title for the graph
-    ax[3].set_title("Bar Graph (upstream)") 
+    # set title for the graph
+    ax[3].set_title("Bar Graph (upstream)")
     # Add subplot labels
     subplotLabel(ax)
     return f
