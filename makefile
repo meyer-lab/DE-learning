@@ -1,11 +1,11 @@
 SHELL := /bin/bash
 
-.PHONY: clean test juliaInstall
+.PHONY: clean test
 
 flist = 1 2 3
 flistFull = $(patsubst %, output/figure%.svg, $(flist))
 
-all: pylint.log $(flistFull) output/manuscript.md coverage.xml
+all: $(flistFull) output/manuscript.md
 
 venv: venv/bin/activate
 
@@ -14,7 +14,7 @@ venv/bin/activate: requirements.txt
 	. venv/bin/activate && pip install -Uqr requirements.txt
 	touch venv/bin/activate
 
-output/figure%.svg: genFigures.py de/figures/figure%.py venv
+output/figure%.svg: genFigures.py de/figures/figure%.py venv de/data/GSE106127_inst_info.txt.xz de/data/GSE92742_Broad_LINCS_Level2.csv.xz de/data/GSE70138_Broad_LINCS_Level2.csv.xz
 	@ mkdir -p ./output
 	. venv/bin/activate && ./genFigures.py $*
 
@@ -38,11 +38,10 @@ output/manuscript.docx: venv output/manuscript.md $(flistFull)
 test: venv
 	. venv/bin/activate && pytest -s -x
 
-coverage.xml: venv
-	. venv/bin/activate && pytest --junitxml=junit.xml --cov=de --cov-report xml:coverage.xml
-
-pylint.log: venv
-	. venv/bin/activate && (pylint --rcfile=./common/pylintrc de > pylint.log || echo "pylint exited with $?")
-
 clean:
-	rm -rf coverage.xml junit.xml output venv
+	rm -rf coverage.xml junit.xml output venv de/data/GSE*
+
+download: de/data/GSE106127_inst_info.txt.xz de/data/GSE92742_Broad_LINCS_Level2.csv.xz de/data/GSE70138_Broad_LINCS_Level2.csv.xz
+
+de/data/%.xz:
+	wget -N -P ./de/data https://syno.seas.ucla.edu:9001/de-learning/$*.xz
