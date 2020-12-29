@@ -10,8 +10,7 @@ config.update("jax_enable_x64", True)
 
 def reshapeParams(p, nGenes):
     """Reshape a vector of parameters into the variables we know."""
-    nKO = int(p.size / nGenes - 1)
-    w = jnp.reshape(p[:(nKO * nGenes)], (nGenes, nKO))
+    w = jnp.reshape(p[:(nGenes * nGenes)], (nGenes, nGenes))
     eta = p[-nGenes:]
 
     assert eta.size == w.shape[0]
@@ -26,7 +25,7 @@ def cost(pIn, data, U = None):
         np.fill_diagonal(U, 0.0)
 
     w, eta = reshapeParams(pIn, data.shape[0])
-    costt = jnp.linalg.norm(eta * (1 + jnp.tanh(w @ U)) - alpha * data)
+    costt = jnp.linalg.norm(eta[:, jnp.newaxis] * (1 + jnp.tanh(w @ U)) - alpha * data)
     costt += regularize(pIn, data.shape[0])
 
     return costt
