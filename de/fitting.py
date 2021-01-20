@@ -18,7 +18,7 @@ def reshapeParams(p, nGenes):
     return w, eta
 
 
-def cost(pIn, data, U = None):
+def cost(pIn, data, U=None):
     """ Returns SSE between model and experimental RNAseq data. """
     if U is None:
         U = np.copy(data)
@@ -31,7 +31,7 @@ def cost(pIn, data, U = None):
     return costt
 
 
-def regularize(pIn, nGenes, strength = 0.1):
+def regularize(pIn, nGenes, strength=0.1):
     """Calculate the regularization."""
     w = reshapeParams(pIn, nGenes)[0]
 
@@ -40,7 +40,7 @@ def regularize(pIn, nGenes, strength = 0.1):
     return strength * ll
 
 
-def runOptim(data, niter = 2000, disp = 0):
+def runOptim(data, niter=2000, disp=0):
     """ Run the optimization. """
     # TODO: Add bounds to fitting.
     w, eps = factorizeEstimate(data, niter=50)
@@ -54,6 +54,6 @@ def runOptim(data, niter = 2000, disp = 0):
         return grad(lambda x: jnp.vdot(cost_grad(x, data, U), v))(x)
 
     res = minimize(cost, x0, args=(data, U), method="trust-constr", jac=cost_grad, hessp=hvp, options={"maxiter": niter, "verbose": disp})
-    assert (res.success == True) or (res.nit == niter)
+    assert (res.success) or (res.nit == niter)
 
     return res.x
