@@ -31,7 +31,7 @@ def cost(pIn, data, U = None):
     return costt
 
 
-def regularize(pIn, nGenes, strength = 1.0):
+def regularize(pIn, nGenes, strength = 0.1):
     """Calculate the regularization."""
     w = reshapeParams(pIn, nGenes)[0]
 
@@ -40,10 +40,10 @@ def regularize(pIn, nGenes, strength = 1.0):
     return strength * ll
 
 
-def runOptim(data, niter = 2000, disp = False):
+def runOptim(data, niter = 2000, disp = 0):
     """ Run the optimization. """
     # TODO: Add bounds to fitting.
-    w, eps = factorizeEstimate(data)
+    w, eps = factorizeEstimate(data, niter=50)
     x0 = np.concatenate((w.flatten(), eps))
 
     U = np.copy(data)
@@ -53,7 +53,7 @@ def runOptim(data, niter = 2000, disp = False):
     def hvp(x, v, data, U):
         return grad(lambda x: jnp.vdot(cost_grad(x, data, U), v))(x)
 
-    res = minimize(cost, x0, args=(data, U), method="trust-krylov", jac=cost_grad, hessp=hvp, options={"maxiter": niter, "disp": disp})
+    res = minimize(cost, x0, args=(data, U), method="trust-constr", jac=cost_grad, hessp=hvp, options={"maxiter": niter, "verbose": disp})
     assert (res.success == True) or (res.nit == niter)
 
     return res.x

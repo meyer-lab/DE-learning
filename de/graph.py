@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import networkx as nx
 from .importData import formMatrix
+from .fitting import runOptim, reshapeParams
 
 
 def load_w():
@@ -11,11 +12,13 @@ def load_w():
     Loads w from csv file and returns dataframe with gene symbols attached to w values.
     """
     path_here = dirname(dirname(__file__))
-    w = pd.read_csv(join(path_here, "de/data/w.csv"), header=None)
+
+    data = formMatrix()
+    ps = runOptim(data, niter=100, disp=2)
+    w = reshapeParams(ps, data.shape[0])[0]
     genes = np.loadtxt(join(path_here, "de/data/node_Index.csv"), dtype=str)
-    w.columns = genes
-    w.index = genes
-    return w
+
+    return pd.DataFrame(w, columns=genes, index=genes)
 
 
 def normalize(w):
