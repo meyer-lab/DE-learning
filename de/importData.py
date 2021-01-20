@@ -53,6 +53,7 @@ def prepData():
     data_prepped = data_prepped.drop(["neg10"], axis=1)
     return data_prepped
 
+
 def importGenomeData():
     """ Loads genome-wide RNAseq data, perturbation information, and landmark gene information. """
     path_here = dirname(dirname(__file__))
@@ -68,11 +69,13 @@ def importGenomeData():
     gene_info = gene_info.drop(["pr_gene_title", "pr_is_lm", "pr_is_bing"], axis=1)
     return data, inst_info, gene_info
 
+
 def determineCellTypes(inst_info):
     """ Returns list of cell types and the amount of perturbations performed on each. """
     cell_types_counts = inst_info.groupby(by="cell_id").count()
     cell_types_counts = cell_types_counts.drop(["pert_iname", "pert_type", "pert_time", "pert_time_unit", "seed_seq_6mer", "seed_seq_7mer", "pert_itime"], axis=1)
     return cell_types_counts
+
 
 def cell_type_perturbations(data, inst_info, gene_info, cell_id):
     """ Returns matrix with rows corresponding to landmark genes measured and columns corresponding to average value of each perturbation performed. """
