@@ -18,22 +18,19 @@ output/figure%.svg: genFigures.py de/figures/figure%.py venv de/data/GSE106127_i
 	@ mkdir -p ./output
 	. venv/bin/activate && ./genFigures.py $*
 
-output/manuscript.md: venv manuscript/*.md venv/bin/activate
+output/manuscript.md: venv manuscript/*.md
 	. venv/bin/activate && manubot process --content-directory=manuscript --output-directory=output --cache-directory=cache --skip-citations --log-level=INFO
 	git remote rm rootstock
 
-output/manuscript.html: venv output/manuscript.md $(patsubst %, output/figure%.svg, $(flist))
-	mkdir output/output
-	cp output/*.svg output/output/
+output/manuscript.html: venv output/manuscript.md $(flistFull)
 	. venv/bin/activate && pandoc --verbose \
 		--defaults=./common/templates/manubot/pandoc/common.yaml \
-		--defaults=./common/templates/manubot/pandoc/html.yaml
+		--defaults=./common/templates/manubot/pandoc/html.yaml output/manuscript.md
 
 output/manuscript.docx: venv output/manuscript.md $(flistFull)
-	. venv/bin/activate && pandoc --verbose -t docx $(pandocCommon) \
-		--reference-doc=common/templates/manubot/default.docx \
-		--resource-path=.:content \
-		-o $@ output/manuscript.md
+	. venv/bin/activate && pandoc --verbose \
+		--defaults=./common/templates/manubot/pandoc/common.yaml \
+		--defaults=./common/templates/manubot/pandoc/docx.yaml output/manuscript.md
 
 test: venv
 	. venv/bin/activate && pytest -s -x
