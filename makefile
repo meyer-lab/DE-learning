@@ -14,6 +14,10 @@ venv/bin/activate: requirements.txt
 	. venv/bin/activate && pip install -Uqr requirements.txt
 	touch venv/bin/activate
 
+output/figure%.svg: de/figures/figure%.svg
+	@ mkdir -p ./output
+	cp $< $@
+
 output/figure%.svg: genFigures.py de/figures/figure%.py venv de/data/GSE106127_inst_info.txt.xz de/data/GSE92742_Broad_LINCS_Level2.csv.xz de/data/GSE70138_Broad_LINCS_Level2.csv.xz
 	@ mkdir -p ./output
 	. venv/bin/activate && ./genFigures.py $*
@@ -36,7 +40,7 @@ test: venv
 	. venv/bin/activate && pytest -s -x
 
 clean:
-	rm -rf coverage.xml junit.xml output venv de/data/GSE*
+	rm -rf output venv de/data/GSE*
 
 download: de/data/GSE106127_inst_info.txt.xz de/data/GSE92742_Broad_LINCS_Level2.csv.xz de/data/GSE70138_Broad_LINCS_Level2.csv.xz
 
