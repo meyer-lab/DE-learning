@@ -9,7 +9,11 @@ def importLINCS(cellLine):
     path_here = dirname(dirname(__file__))
 
     data = np.fromfile(join(path_here, "de/data/", cellLine + "_RNAi_matrix.npy"))
-    annotation = pd.read_csv(join(path_here, "de/data/", cellLine + "_genes.txt"))
+    annotation = pd.read_csv(join(path_here, "de/data/", cellLine + "_genes.txt"), header=None)
+    print(annotation)
+
+    # Reshape into a matrix
+    data = np.reshape(data, (len(annotation), -1))
 
     return data, annotation
 
