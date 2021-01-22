@@ -30,12 +30,6 @@ class TestModel(unittest.TestCase):
         self.assertTrue(isinstance(data, pd.DataFrame))
         self.assertEqual(data.shape, (63677, 85))
 
-    def test_prep(self):
-        """Tests that a DataFrame is formed with a row for every gene and 85 columns to represent models"""
-        data = prepData()
-        self.assertTrue(isinstance(data, pd.DataFrame))
-        self.assertEqual(data.shape, (63677, 85))
-
     def test_load(self):
         """Tests that a DataFrame is formed with a row for every gene and 85 columns to represent models"""
         data, annotation = importLINCS("A375")
