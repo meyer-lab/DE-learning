@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.stats import gmean
 from scipy.linalg import pinv
-from importData import importLINCS
+from .importData import importLINCS
 
 
 alpha = 0.1
