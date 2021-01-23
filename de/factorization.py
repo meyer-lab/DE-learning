@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.stats import gmean
 from scipy.linalg import pinv
+from importData import importLINCS
 
 
 alpha = 0.1
@@ -36,3 +37,12 @@ def factorizeEstimate(data, niter=20):
         assert w.shape == (data.shape[0], data.shape[0])
 
     return w, eta
+
+def cellLineFactorization(cellLine):
+    """runs factorizeEsitmate on a given cell line"""
+    data, annotation  = importLINCS(cellLine)
+    w, eta = factorizeEstimate(data, 20)
+
+    return w, eta
+
+
