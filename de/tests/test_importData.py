@@ -33,4 +33,4 @@ class TestModel(unittest.TestCase):
     def test_load(self):
         """Tests that a DataFrame is formed with a row for every gene and 85 columns to represent models"""
         data, annotation = importLINCS("A375")
-        self.assertEqual(data.ndim == 2)
+        self.assertEqual(data.ndim, 2)

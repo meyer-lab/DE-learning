@@ -10,10 +10,11 @@ def importLINCS(cellLine):
 
     data = np.fromfile(join(path_here, "de/data/", cellLine + "_RNAi_matrix.npy"))
     annotation = pd.read_csv(join(path_here, "de/data/", cellLine + "_genes.txt"), header=None)
-    print(annotation)
 
     # Reshape into a matrix
-    data = np.reshape(data, (len(annotation), -1))
+    # FIXME: Make fake data until we have the actual data form figured out
+    # data = np.reshape(data, (len(annotation), -1))
+    data = np.random.randn(len(annotation), len(annotation) + 1)
 
     return data, annotation
 
