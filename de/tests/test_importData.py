@@ -6,7 +6,7 @@ formMatrix should return dataframe with all replicate columns averaged together,
 import unittest
 import pandas as pd
 import numpy as np
-from ..importData import importRNAseqKO, formMatrix, prepData
+from ..importData import importRNAseqKO, formMatrix, prepData, importLINCS
 
 
 class TestModel(unittest.TestCase):
@@ -29,3 +29,8 @@ class TestModel(unittest.TestCase):
         data = prepData()
         self.assertTrue(isinstance(data, pd.DataFrame))
         self.assertEqual(data.shape, (63677, 85))
+
+    def test_load(self):
+        """Tests that a DataFrame is formed with a row for every gene and 85 columns to represent models"""
+        data, annotation = importLINCS("A375")
+        self.assertEqual(data.ndim, 2)
