@@ -1,6 +1,5 @@
 import numpy as np
 from scipy.stats import gmean
-from scipy.linalg import pinv
 
 
 alpha = 0.1
@@ -25,6 +24,7 @@ def calcEta(data, w, alpha):
 
 def factorizeEstimate(data, niter=20):
     """ Initialize the parameters based on the data. """
+    assert niter > 0
     # TODO: Add tolerance for termination.
     w = np.zeros((data.shape[0], data.shape[0]))
 
