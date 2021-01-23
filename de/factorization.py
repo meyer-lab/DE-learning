@@ -40,7 +40,7 @@ def factorizeEstimate(data, niter=20):
 
 def cellLineFactorization(cellLine):
     """runs factorizeEsitmate on a given cell line"""
-    data, annotation  = importLINCS(cellLine)
+    data,   = importLINCS(cellLine)
     w, eta = factorizeEstimate(data, 20)
 
     return w, eta
