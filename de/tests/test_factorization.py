@@ -4,7 +4,7 @@ Test the factorization model.
 import pytest
 import numpy as np
 from ..factorization import factorizeEstimate, alpha
-from ..fitting import runOptim, cost
+from ..fitting import runOptim
 
 
 @pytest.mark.parametrize("sizze", [(8, 8), (12, 13), (15, 14)])
