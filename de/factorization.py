@@ -17,9 +17,10 @@ def calcW(data, eta, alpha):
 
 def calcEta(data, w, alpha):
     """Directly calculate eta."""
-    A = np.clip(alpha * data, 0.01, np.inf)
-    B = np.clip(1 + np.tanh(w @ data), 0.01, np.inf)
-    return gmean(A, axis=1) / gmean(B, axis=1)
+    eta = (alpha * data) / (1 + np.tanh(w @ data))
+    eta = np.nan_to_num(eta, nan=1.0, posinf=1e9)
+    eta = np.clip(eta, 1e-9, 1e9)
+    return gmean(eta, axis=1)
 
 
 def factorizeEstimate(data, niter=20):
@@ -33,6 +34,7 @@ def factorizeEstimate(data, niter=20):
         eta = calcEta(data, w, alpha)
         assert eta.shape == (data.shape[0], )
         w = calcW(data, eta, alpha)
+
         assert w.shape == (data.shape[0], data.shape[0])
 
     return w, eta

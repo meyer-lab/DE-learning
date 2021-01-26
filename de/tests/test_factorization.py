@@ -7,14 +7,14 @@ from ..factorization import factorizeEstimate, alpha
 from ..fitting import runOptim
 
 
-@pytest.mark.parametrize("sizze", [(8, 8), (12, 13), (15, 14)])
+@pytest.mark.parametrize("sizze", [(80, 8), (120, 13), (150, 14)])
 def test_factorizeEstimate(sizze):
     """ Test that this runs successfully with reasonable input. """
     data = np.random.lognormal(size=sizze)
     U = np.copy(data)
     np.fill_diagonal(U, 0.0)
 
-    w, eta = factorizeEstimate(data, niter=2)
+    w, eta = factorizeEstimate(data, niter=20)
     assert w.shape == (sizze[0], sizze[0])
     assert eta.shape == (sizze[0], )
 
@@ -38,5 +38,5 @@ def test_factorizeBlank(level):
 def test_fit(sizze):
     """ Test that this runs successfully with reasonable input. """
     data = np.random.lognormal(size=sizze)
-    outt = runOptim(data, niter=2, disp=False)
+    outt = runOptim(data, niter=20, disp=False)
     assert np.all(np.isfinite(outt))

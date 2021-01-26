@@ -1,5 +1,5 @@
 import numpy as np
-from jax import grad, jit, jvp
+from jax import grad, jit
 import jax.numpy as jnp
 from jax.config import config
 from scipy.optimize import minimize
@@ -43,7 +43,7 @@ def regularize(pIn, nGenes, strength=0.1):
 def runOptim(data, niter=2000, disp=0):
     """ Run the optimization. """
     # TODO: Add bounds to fitting.
-    w, eps = factorizeEstimate(data, niter=50)
+    w, eps = factorizeEstimate(data)
     x0 = np.concatenate((w.flatten(), eps))
 
     U = np.copy(data)
