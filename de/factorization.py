@@ -42,6 +42,7 @@ def factorizeEstimate(data, tol=1e-9, maxiter=10000):
         assert eta.shape == (data.shape[0], )
         w = calcW(data, eta, alpha)
         assert np.all(np.isfinite(w))
+
         assert w.shape == (data.shape[0], data.shape[0])
 
         cost = np.linalg.norm(eta[:, np.newaxis] * expit(w @ U) - alpha * data)
