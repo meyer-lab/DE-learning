@@ -2,6 +2,7 @@
 This file contains ODE equation solvers
 """
 import numpy as np
+from scipy.special import expit
 from scipy.integrate import odeint
 
 
@@ -28,4 +29,4 @@ def ODE(y, _, eps, w, alpha):
                  w: Interaction between components
                  alpha: Degradation rate
     '''
-    return eps * np.tanh(np.dot(w, y)) - alpha * y
+    return eps * expit(np.dot(w, y)) - alpha * y

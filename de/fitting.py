@@ -1,6 +1,7 @@
 import numpy as np
 from jax import grad, jit
 import jax.numpy as jnp
+from jax.scipy.special import expit
 from jax.config import config
 from scipy.optimize import minimize
 from .factorization import alpha, factorizeEstimate
@@ -25,7 +26,7 @@ def cost(pIn, data, U=None):
         np.fill_diagonal(U, 0.0)
 
     w, eta = reshapeParams(pIn, data.shape[0])
-    costt = jnp.linalg.norm(eta[:, jnp.newaxis] * (1 + jnp.tanh(w @ U)) - alpha * data)
+    costt = jnp.linalg.norm(eta[:, jnp.newaxis] * expit(w @ U) - alpha * data)
     costt += regularize(pIn, data.shape[0])
 
     return costt
