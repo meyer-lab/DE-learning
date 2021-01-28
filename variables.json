@@ -1,0 +1,117 @@
+{
+  "pandoc": {
+    "title": "Integrating data-driven and mechanistic approaches in cell regulatory pathway analysis",
+    "keywords": [
+      "markdown",
+      "publishing",
+      "manubot"
+    ],
+    "lang": "en-US",
+    "date-meta": "2021-01-28",
+    "author-meta": [
+      "Madison Wahlsten",
+      "Zhan Zhang",
+      "Aaron S. Meyer"
+    ],
+    "header-includes": "<!--\nManubot generated metadata rendered from header-includes-template.html.\nSuggest improvements at https://github.com/manubot/manubot/blob/master/manubot/process/header-includes-template.html\n-->\n<meta name=\"dc.format\" content=\"text/html\" />\n<meta name=\"dc.title\" content=\"Integrating data-driven and mechanistic approaches in cell regulatory pathway analysis\" />\n<meta name=\"citation_title\" content=\"Integrating data-driven and mechanistic approaches in cell regulatory pathway analysis\" />\n<meta property=\"og:title\" content=\"Integrating data-driven and mechanistic approaches in cell regulatory pathway analysis\" />\n<meta property=\"twitter:title\" content=\"Integrating data-driven and mechanistic approaches in cell regulatory pathway analysis\" />\n<meta name=\"dc.date\" content=\"2021-01-28\" />\n<meta name=\"citation_publication_date\" content=\"2021-01-28\" />\n<meta name=\"dc.language\" content=\"en-US\" />\n<meta name=\"citation_language\" content=\"en-US\" />\n<meta name=\"dc.relation.ispartof\" content=\"Manubot\" />\n<meta name=\"dc.publisher\" content=\"Manubot\" />\n<meta name=\"citation_journal_title\" content=\"Manubot\" />\n<meta name=\"citation_technical_report_institution\" content=\"Manubot\" />\n<meta name=\"citation_author\" content=\"Madison Wahlsten\" />\n<meta name=\"citation_author_institution\" content=\"Department of Biomedical Engineering, University of Michigan, Ann Arbor\" />\n<meta name=\"citation_author_orcid\" content=\"0000-0002-3435-9260\" />\n<meta name=\"citation_author\" content=\"Zhan Zhang\" />\n<meta name=\"citation_author_institution\" content=\"Department of Biology, Southern University of Science and Technology\" />\n<meta name=\"citation_author_orcid\" content=\"0000-0003-2767-7524\" />\n<meta name=\"citation_author\" content=\"Aaron S. Meyer\" />\n<meta name=\"citation_author_institution\" content=\"Department of Bioengineering, University of California, Los Angeles\" />\n<meta name=\"citation_author_institution\" content=\"Department of Bioinformatics, University of California, Los Angeles\" />\n<meta name=\"citation_author_institution\" content=\"Jonsson Comprehensive Cancer Center, University of California, Los Angeles\" />\n<meta name=\"citation_author_institution\" content=\"Eli and Edythe Broad Center of Regenerative Medicine and Stem Cell Research, University of California, Los Angeles\" />\n<meta name=\"citation_author_orcid\" content=\"0000-0003-4513-1840\" />\n<meta name=\"twitter:creator\" content=\"@aarmey\" />\n<link rel=\"canonical\" href=\"https://meyer-lab.github.io/DE-learning/\" />\n<meta property=\"og:url\" content=\"https://meyer-lab.github.io/DE-learning/\" />\n<meta property=\"twitter:url\" content=\"https://meyer-lab.github.io/DE-learning/\" />\n<meta name=\"citation_fulltext_html_url\" content=\"https://meyer-lab.github.io/DE-learning/\" />\n<meta name=\"citation_pdf_url\" content=\"https://meyer-lab.github.io/DE-learning/manuscript.pdf\" />\n<link rel=\"alternate\" type=\"application/pdf\" href=\"https://meyer-lab.github.io/DE-learning/manuscript.pdf\" />\n<link rel=\"alternate\" type=\"text/html\" href=\"https://meyer-lab.github.io/DE-learning/v/75665ceee9e41514b57e49721c7e7878c4e7a9f8/\" />\n<meta name=\"manubot_html_url_versioned\" content=\"https://meyer-lab.github.io/DE-learning/v/75665ceee9e41514b57e49721c7e7878c4e7a9f8/\" />\n<meta name=\"manubot_pdf_url_versioned\" content=\"https://meyer-lab.github.io/DE-learning/v/75665ceee9e41514b57e49721c7e7878c4e7a9f8/manuscript.pdf\" />\n<meta property=\"og:type\" content=\"article\" />\n<meta property=\"twitter:card\" content=\"summary_large_image\" />\n<link rel=\"icon\" type=\"image/png\" sizes=\"192x192\" href=\"https://manubot.org/favicon-192x192.png\" />\n<link rel=\"mask-icon\" href=\"https://manubot.org/safari-pinned-tab.svg\" color=\"#ad1457\" />\n<meta name=\"theme-color\" content=\"#ad1457\" />\n<!-- end Manubot generated metadata -->",
+    "bibliography": [],
+    "manubot-output-bibliography": "output/references.json",
+    "manubot-output-citekeys": "output/citations.tsv",
+    "manubot-requests-cache-path": "cache/requests-cache",
+    "manubot-clear-requests-cache": false
+  },
+  "manubot": {
+    "date": "January 28, 2021",
+    "authors": [
+      {
+        "github": "mlwahl",
+        "name": "Madison Wahlsten",
+        "initials": "MW",
+        "orcid": "0000-0002-3435-9260",
+        "affiliations": [
+          "Department of Biomedical Engineering, University of Michigan, Ann Arbor"
+        ],
+        "affiliation_numbers": [
+          1
+        ]
+      },
+      {
+        "github": "Zhanzhang-2020",
+        "name": "Zhan Zhang",
+        "initials": "ZZ",
+        "orcid": "0000-0003-2767-7524",
+        "affiliations": [
+          "Department of Biology, Southern University of Science and Technology"
+        ],
+        "affiliation_numbers": [
+          2
+        ]
+      },
+      {
+        "github": "aarmey",
+        "name": "Aaron S. Meyer",
+        "initials": "ASM",
+        "twitter": "aarmey",
+        "orcid": "0000-0003-4513-1840",
+        "email": "a@asmlab.org",
+        "affiliations": [
+          "Department of Bioengineering, University of California, Los Angeles",
+          "Department of Bioinformatics, University of California, Los Angeles",
+          "Jonsson Comprehensive Cancer Center, University of California, Los Angeles",
+          "Eli and Edythe Broad Center of Regenerative Medicine and Stem Cell Research, University of California, Los Angeles"
+        ],
+        "affiliation_numbers": [
+          3,
+          4,
+          5,
+          6
+        ]
+      }
+    ],
+    "affiliations": [
+      {
+        "affiliation": "Department of Biomedical Engineering, University of Michigan, Ann Arbor",
+        "affiliation_number": 1
+      },
+      {
+        "affiliation": "Department of Biology, Southern University of Science and Technology",
+        "affiliation_number": 2
+      },
+      {
+        "affiliation": "Department of Bioengineering, University of California, Los Angeles",
+        "affiliation_number": 3
+      },
+      {
+        "affiliation": "Department of Bioinformatics, University of California, Los Angeles",
+        "affiliation_number": 4
+      },
+      {
+        "affiliation": "Jonsson Comprehensive Cancer Center, University of California, Los Angeles",
+        "affiliation_number": 5
+      },
+      {
+        "affiliation": "Eli and Edythe Broad Center of Regenerative Medicine and Stem Cell Research, University of California, Los Angeles",
+        "affiliation_number": 6
+      }
+    ],
+    "ci_source": {
+      "provider": "github",
+      "repo_slug": "meyer-lab/DE-learning",
+      "repo_owner": "meyer-lab",
+      "repo_name": "DE-learning",
+      "commit": "75665ceee9e41514b57e49721c7e7878c4e7a9f8",
+      "triggering_commit": "75665ceee9e41514b57e49721c7e7878c4e7a9f8",
+      "build_url": "https://github.com/meyer-lab/DE-learning/commit/75665ceee9e41514b57e49721c7e7878c4e7a9f8/checks",
+      "job_url": "https://github.com/meyer-lab/DE-learning/runs/run2"
+    },
+    "html_url": "https://meyer-lab.github.io/DE-learning/",
+    "pdf_url": "https://meyer-lab.github.io/DE-learning/manuscript.pdf",
+    "html_url_versioned": "https://meyer-lab.github.io/DE-learning/v/75665ceee9e41514b57e49721c7e7878c4e7a9f8/",
+    "pdf_url_versioned": "https://meyer-lab.github.io/DE-learning/v/75665ceee9e41514b57e49721c7e7878c4e7a9f8/manuscript.pdf",
+    "manubot_version": "0.5.0",
+    "rootstock_commit": null,
+    "manuscript_stats": {
+      "word_count": 2415
+    }
+  }
+}
