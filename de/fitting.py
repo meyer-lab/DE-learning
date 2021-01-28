@@ -44,7 +44,7 @@ def regularize(pIn, nGenes, strength=0.1):
 def runOptim(data, niter=2000, disp=0):
     """ Run the optimization. """
     # TODO: Add bounds to fitting.
-    w, eps = factorizeEstimate(data)
+    (w, eta), _ = factorizeEstimate(data)
     x0 = np.concatenate((w.flatten(), eps))
 
     U = np.copy(data)

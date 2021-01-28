@@ -6,7 +6,7 @@ from scipy.special import expit, logit
 alpha = 0.1
 
 
-def calcW(data, U, eta, alpha):
+def calcW(data, U, eta):
     """Directly calculate w."""
     B = (data * alpha) / eta[:, np.newaxis]
     assert np.all(np.isfinite(B))
@@ -15,7 +15,7 @@ def calcW(data, U, eta, alpha):
     return np.linalg.lstsq(U.T, B.T, rcond=None)[0].T
 
 
-def calcEta(data, U, w, alpha):
+def calcEta(data, U, w):
     """Directly calculate eta."""
     eta = (alpha * data) / expit(w @ U)
     eta = np.nan_to_num(eta, nan=1.0, posinf=1e9)
@@ -23,31 +23,32 @@ def calcEta(data, U, w, alpha):
     return gmean(eta, axis=1)
 
 
-def factorizeEstimate(data, tol=1e-9, maxiter=10000):
+def factorizeEstimate(data, tol=1e-9, maxiter=20):
     """ Initialize the parameters based on the data. """
     assert maxiter > 0
-    # TODO: Add tolerance for termination.
     w = np.zeros((data.shape[0], data.shape[0]))
     # Make the U matrix
     U = np.copy(data)
     np.fill_diagonal(U, 0.0)
+    print("---")
 
     # Use the data to try and initialize the parameters
     for ii in range(maxiter):
-        eta = calcEta(data, U, w, alpha)
+        eta = calcEta(data, U, w)
         assert np.all(np.isfinite(eta))
         assert eta.shape == (data.shape[0], )
-        w = calcW(data, U, eta, alpha)
+        w = calcW(data, U, eta)
         assert np.all(np.isfinite(w))
 
         assert w.shape == (data.shape[0], data.shape[0])
 
         cost = np.linalg.norm(eta[:, np.newaxis] * expit(w @ U) - alpha * data)
+        print(cost)
 
-        if ii > 10 and (costLast - cost) < tol:
+        if ii > 5 and (costLast - cost) < tol:
             # TODO: I believe the cost should be strictly decreasing, so look into this.
             break
 
         costLast = cost
 
-    return w, eta
+    return (w, eta), cost
