@@ -15,13 +15,12 @@ def test_factorizeEstimate():
     U = np.copy(data)
     np.fill_diagonal(U, 0.0)
 
-    w, eta = factorizeEstimate(data)
+    (w, eta, p), costOne = factorizeEstimate(data)
     assert w.shape == (data.shape[0], data.shape[0])
     assert eta.shape == (data.shape[0], )
+    assert p.size == 3
 
-    wLess, etaLess = factorizeEstimate(data, maxiter=1)
-    costOne = np.linalg.norm(eta[:, np.newaxis] * expit(w @ U) - alpha * data)
-    costTwo = np.linalg.norm(etaLess[:, np.newaxis] * expit(wLess @ U) - alpha * data)
+    _, costTwo = factorizeEstimate(data, maxiter=1)
     assert costOne < costTwo
 
 
@@ -29,7 +28,7 @@ def test_factorizeEstimate():
 def test_factorizeBlank(level):
     """ Test that if gene expression is flat we get a blank w. """
     data = np.ones((12, 12)) * level
-    w, eta = factorizeEstimate(data, maxiter=2)
+    (w, eta, _), _ = factorizeEstimate(data, maxiter=2)
 
     np.testing.assert_allclose(w, 0.0, atol=1e-9)
     np.testing.assert_allclose(eta, 2 * level * alpha)
