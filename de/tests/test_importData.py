@@ -4,9 +4,10 @@ importRNAseqKO should return dataframe with individual replicate columns and row
 formMatrix should return dataframe with all replicate columns averaged together, WT removed, and only rows for genes associated with a knockout.
 """
 import unittest
+import pytest
 import pandas as pd
 import numpy as np
-from ..importData import importRNAseqKO, formMatrix, prepData
+from ..importData import importRNAseqKO, formMatrix, prepData, importLINCS
 
 
 class TestModel(unittest.TestCase):
@@ -29,3 +30,11 @@ class TestModel(unittest.TestCase):
         data = prepData()
         self.assertTrue(isinstance(data, pd.DataFrame))
         self.assertEqual(data.shape, (63677, 85))
+
+
+@pytest.mark.parametrize("cellLine", ["A375", "A549", "HA1E", "MCF7"])
+def test_load(cellLine):
+    """Tests that a DataFrame is formed with a row for every gene and 85 columns to represent models"""
+    data, annotation = importLINCS(cellLine)
+    assert data.ndim == 2
+    assert data.shape[0] == len(annotation)

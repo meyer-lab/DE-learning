@@ -1,6 +1,17 @@
 """Contains function for importing and handling knockout RNAseq data"""
 from os.path import join, dirname
+import numpy as np
 import pandas as pd
+
+
+def importLINCS(cellLine):
+    """ Import processed LINCS data. """
+    path_here = dirname(dirname(__file__))
+
+    data = np.load(join(path_here, "de/data/", cellLine + "_RNAi_matrix.npy"))
+    annotation = pd.read_csv(join(path_here, "de/data/", cellLine + "_genes.txt"), header=None)
+
+    return data, annotation
 
 
 def importRNAseqKO():

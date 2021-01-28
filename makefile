@@ -18,7 +18,7 @@ output/figure%.svg: de/figures/figure%.svg
 	@ mkdir -p ./output
 	cp $< $@
 
-output/figure%.svg: genFigures.py de/figures/figure%.py venv de/data/GSE106127_inst_info.txt.xz de/data/GSE92742_Broad_LINCS_Level2.csv.xz de/data/GSE70138_Broad_LINCS_Level2.csv.xz
+output/figure%.svg: genFigures.py de/figures/figure%.py venv
 	@ mkdir -p ./output
 	. venv/bin/activate && ./genFigures.py $*
 

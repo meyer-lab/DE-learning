@@ -2,8 +2,9 @@
 This creates Figure 1: PCA plots
 """
 import numpy as np
+import pandas as pd
 from .figureCommon import subplotLabel, getSetup
-from ..PCA_helpers import performPCA, KOdataframe
+from ..PCA_helpers import performPCA
 from ..importData import prepData
 
 
@@ -17,7 +18,9 @@ def makeFigure():
     pca_object, X_r = performPCA(data.T, 25)
 
     # Create dataframe for plotting
-    df, KO_genes_unique = KOdataframe(data, X_r)
+    KO_genes_unique = list(set(data.columns))
+    df = pd.DataFrame(X_r)
+    df["KO Gene"] = data.columns
 
     # Make subplots
     figureMaker(ax, pca_object, df, KO_genes_unique)
