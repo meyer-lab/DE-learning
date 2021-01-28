@@ -14,7 +14,7 @@ def load_w():
     path_here = dirname(dirname(__file__))
 
     data = formMatrix()
-    ps = runOptim(data, niter=200, disp=1)
+    ps = runOptim(data, niter=400, disp=True)
     w = reshapeParams(ps, data.shape[0])[0]
     genes = np.loadtxt(join(path_here, "de/data/node_Index.csv"), dtype=str)
 

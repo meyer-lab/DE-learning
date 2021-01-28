@@ -54,7 +54,7 @@ def runOptim(data, niter=2000, disp=0):
     def hvp(x, v, data, U):
         return grad(lambda x: jnp.vdot(cost_grad(x, data, U), v))(x)
 
-    res = minimize(cost, x0, args=(data, U), method="trust-constr", jac=cost_grad, hessp=hvp, options={"maxiter": niter, "verbose": disp})
+    res = minimize(cost, x0, args=(data, U), method="trust-ncg", jac=cost_grad, hessp=hvp, options={"maxiter": niter, "disp": disp})
     assert (res.success) or (res.nit == niter)
 
     return res.x
