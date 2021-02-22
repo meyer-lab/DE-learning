@@ -39,13 +39,9 @@ def factorizeEstimate(data, niter=20):
 
     return w, eta
 
+
 def cellLineFactorization(cellLine):
     data, annotation = importLINCS(cellLine)
-    w, eta = factorizeEstimate(data, )
+    w, eta = factorizeEstimate(data)
 
     return w, eta, annotation
-
-
-
-
-
