@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.stats import gmean
 from scipy.special import expit, logit
+from .importData import importLINCS
 
 
 alpha = 0.1
@@ -54,3 +55,10 @@ def factorizeEstimate(data, tol=1e-9, maxiter=10000):
         costLast = cost
 
     return w, eta
+
+
+def cellLineFactorization(cellLine):
+    data, annotation = importLINCS(cellLine)
+    w, eta = factorizeEstimate(data)
+
+    return w, eta, annotation
