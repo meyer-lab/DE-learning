@@ -1,7 +1,8 @@
 import numpy as np
+import pandas as pd
 from scipy.stats import gmean
 from scipy.special import expit, logit
-from .importData import importLINCS
+from importData import importLINCS
 
 
 alpha = 0.1
@@ -60,5 +61,7 @@ def factorizeEstimate(data, tol=1e-9, maxiter=10000):
 def cellLineFactorization(cellLine):
     data, annotation = importLINCS(cellLine)
     w, eta = factorizeEstimate(data)
+    annotation1 = annotation[0].tolist()
 
-    return w, eta, annotation
+
+    return w, eta, annotation1
