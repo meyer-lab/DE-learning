@@ -26,6 +26,6 @@ def cellLineComparision(cellLine1, cellLine2):
     return index_list1, norm1, norm2
 
 
-index_listHTA3, norm1, norm2 = cellLineComparision('A375', 'HT29')
-index_listA3A5, norm3, norm4 = cellLineComparision('A375', 'A549')
-index_listHTA5, norm5, norm6 = cellLineComparision('A375', 'HT29')
+cellLineComparision('A375', 'HT29')
+cellLineComparision('A375', 'A549')
+cellLineComparision('A375', 'HT29')
