@@ -1,3 +1,5 @@
+""" A more generalized logistic function. """
+
 import numpy as np
 
 

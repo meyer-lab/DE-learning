@@ -1,3 +1,5 @@
+""" Methods implementing the model as a fitting process. """
+
 import numpy as np
 from jax import grad, jit
 import jax.numpy as jnp
@@ -51,10 +53,11 @@ def runOptim(data, niter=2000, disp=0):
     np.fill_diagonal(U, 0.0)
     cost_grad = jit(grad(cost, argnums=0))
 
-    def hvp(x, v, data, U):
-        return grad(lambda x: jnp.vdot(cost_grad(x, data, U), v))(x)
+    def cost_GF(*args):
+        outt = cost_grad(*args)
+        return np.array(outt)
 
-    res = minimize(cost, x0, args=(data, U), method="trust-ncg", jac=cost_grad, hessp=hvp, options={"maxiter": niter, "disp": disp})
+    res = minimize(cost, x0, args=(data, U), method="L-BFGS-B", jac=cost_GF, options={"maxiter": niter, "disp": disp})
     assert (res.success) or (res.nit == niter)
 
     return res.x
