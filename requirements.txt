@@ -9,7 +9,7 @@ pandoc-eqnos==2.5.0
 pandoc-tablenos==2.3.0
 matplotlib==3.4.1
 jaxlib==0.1.65
-jax==0.2.12
+jax==0.2.13
 seaborn==0.11.1
 svgutils==0.3.4
 scikit-learn==0.24.2

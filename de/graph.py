@@ -216,14 +216,14 @@ def loop_figure(loop, G_1):
     edge = []
     node = []
 
-    for i in range(len(loop)):
-        node.append((loop[i], G_1.nodes[loop[i]]))
+    for i, loopi in enumerate(loop):
+        node.append((loopi, G_1.nodes[loopi]))
 
-    for j in range(len(loop)):
+    for j, loopj in enumerate(loop):
         if (j + 1) < len(loop):
-            edge.append((loop[j], loop[j + 1], G_1[loop[j]][loop[j + 1]]))
+            edge.append((loopj, loop[j + 1], G_1[loopj][loop[j + 1]]))
         else:
-            edge.append((loop[j], loop[0], G_1[loop[j]][loop[0]]))
+            edge.append((loopj, loop[0], G_1[loopj][loop[0]]))
 
     G_test = nx.DiGraph()
     G_test.add_nodes_from(node)
