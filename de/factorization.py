@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 from scipy.stats import gmean
 from scipy.special import expit, logit
 from .importData import importLINCS
@@ -59,9 +58,7 @@ def factorizeEstimate(data, tol=1e-9, maxiter=10000):
 
 
 def cellLineFactorization(cellLine):
+    """ Import a cell line, fit the model, and return the result. """
     data, annotation = importLINCS(cellLine)
     w, eta = factorizeEstimate(data)
-    annotation1 = annotation[0].tolist()
-
-
-    return w, eta, annotation1
+    return w, eta, annotation[0].tolist()
