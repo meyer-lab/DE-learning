@@ -52,4 +52,4 @@ def test_cellLines():
     # assuming the function returns the list of shared genes between the two cell lines
     shared_annotation = cellLineComparision(cellLine1, cellLine2)
     # make sure at least 50% of the genes in smaller cell line is shared between the two cell lines
-    assert np.abs(len(shared_annotation)) >= 0.5 * len(np.min(len(annotation1), len(annotation2)))
+    assert np.abs(len(shared_annotation)) >= 0.5 * len(np.min([len(annotation1), len(annotation2)]))
