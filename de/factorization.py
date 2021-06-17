@@ -109,3 +109,6 @@ def MatrixSubtraction(cellLine1, cellLine2):
         removal_number = num_rows_W1 - num_rows_W2
         w1_edited[:-removal_number,:]
         norm = np.linalg.norm(w1_edited - w2_edited)
+
+    return norm
+
