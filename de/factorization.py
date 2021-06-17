@@ -1,6 +1,7 @@
 """ Methods to implement the factorization/fitting process. """
 
 import numpy as np
+import pandas as pd
 from scipy.stats import gmean
 from scipy.special import expit, logit
 from .importData import importLINCS
@@ -74,10 +75,37 @@ def cellLineComparision(cellLine1, cellLine2):
     intersection_annotation = list(intersection)
 
     index_list1 = []
+    index_list2 = []
 
     for x in intersection_annotation:
         index_value1 = annotation1.index(x)
         index_list1.append(index_value1)
 
+    for x in intersection_annotation:
+        index_value2 = annotation2.index(x)
+        index_list2.append(index_value2)
+    
     index_list1.sort()
-    return index_list1
+    index_list2.sort()
+    return index_list1, index_list2
+
+def MatrixSubtraction(cellLine1, cellLine2):
+    w1, _, _ = cellLineFactorization(cellLine1)
+    w2, _, _= cellLineFactorization(cellLine2)
+    index_list1, index_list2 = cellLineComparision(cellLine1, cellLine2)
+
+    w1_edited = w1[:index_list1]
+    w2_edited = w2[:index_list2]
+
+    num_rows_W1, _ = w1_edited.shape
+    num_rows_W2, _ = w2_edited.shape
+
+    if num_rows_W2 > num_rows_W1:
+        removal_number = num_rows_W2 - num_rows_W1
+        w2_edited[:-removal_number,:]
+        norm = np.linalg.norm(w2_edited - w1_edited)
+
+    elif num_rows_W1 > num_rows_W2:
+        removal_number = num_rows_W1 - num_rows_W2
+        w1_edited[:-removal_number,:]
+        norm = np.linalg.norm(w1_edited - w2_edited)
