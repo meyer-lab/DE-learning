@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import networkx as nx
 
+
 def load_w():
     """
     Loads w from csv file and returns dataframe with gene symbols attached to w values.
