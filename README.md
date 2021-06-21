@@ -1,5 +1,7 @@
-# DE-learning
+# Integrating data-driven and mechanistic approaches in cell regulatory pathway analysis
 
-[![Build Status](https://transduc.seas.ucla.edu/buildStatus/icon?job=meyer-lab%2FDE-learning%2Fmaster)](https://transduc.seas.ucla.edu/job/meyer-lab/job/DE-learning/job/master/)
+![Test](https://github.com/meyer-lab/DE-learning/workflows/Test/badge.svg)
+![Build](https://github.com/meyer-lab/DE-learning/workflows/Build/badge.svg)
+[![codecov](https://codecov.io/gh/meyer-lab/DE-learning/branch/master/graph/badge.svg?token=WO9KA5CWMK)](https://codecov.io/gh/meyer-lab/DE-learning)
 
-Learning a network while restricting dynamics.
+[Manuscript Build](https://meyer-lab.github.io/DE-learning/manuscript.html)

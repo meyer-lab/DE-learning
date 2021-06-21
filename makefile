@@ -1,11 +1,11 @@
 SHELL := /bin/bash
 
-.PHONY: clean test juliaInstall
+.PHONY: clean test
 
-flist = 1 2 3
+flist = 1 2 3 4
 flistFull = $(patsubst %, output/figure%.svg, $(flist))
 
-all: pylint.log $(flistFull) output/manuscript.md coverage.xml
+all: $(flistFull) output/manuscript.md
 
 venv: venv/bin/activate
 
@@ -14,35 +14,35 @@ venv/bin/activate: requirements.txt
 	. venv/bin/activate && pip install -Uqr requirements.txt
 	touch venv/bin/activate
 
+output/figure%.svg: de/figures/figure%.svg
+	@ mkdir -p ./output
+	cp $< $@
+
 output/figure%.svg: genFigures.py de/figures/figure%.py venv
 	@ mkdir -p ./output
 	. venv/bin/activate && ./genFigures.py $*
 
-output/manuscript.md: venv manuscript/*.md venv/bin/activate
+output/manuscript.md: venv manuscript/*.md
 	. venv/bin/activate && manubot process --content-directory=manuscript --output-directory=output --cache-directory=cache --skip-citations --log-level=INFO
 	git remote rm rootstock
 
-output/manuscript.html: venv output/manuscript.md $(patsubst %, output/figure%.svg, $(flist))
-	mkdir output/output
-	cp output/*.svg output/output/
+output/manuscript.html: venv output/manuscript.md $(flistFull)
 	. venv/bin/activate && pandoc --verbose \
 		--defaults=./common/templates/manubot/pandoc/common.yaml \
 		--defaults=./common/templates/manubot/pandoc/html.yaml output/manuscript.md
 
 output/manuscript.docx: venv output/manuscript.md $(flistFull)
-	. venv/bin/activate && pandoc --verbose -t docx $(pandocCommon) \
-		--reference-doc=common/templates/manubot/default.docx \
-		--resource-path=.:content \
-		-o $@ output/manuscript.md
+	. venv/bin/activate && pandoc --verbose \
+		--defaults=./common/templates/manubot/pandoc/common.yaml \
+		--defaults=./common/templates/manubot/pandoc/docx.yaml output/manuscript.md
 
 test: venv
-	. venv/bin/activate && pytest -s
-
-coverage.xml: venv
-	. venv/bin/activate && pytest --junitxml=junit.xml --cov=de --cov-report xml:coverage.xml
-
-pylint.log: venv
-	. venv/bin/activate && (pylint --rcfile=./common/pylintrc de > pylint.log || echo "pylint exited with $?")
+	. venv/bin/activate && pytest -s -x
 
 clean:
-	rm -rf coverage.xml junit.xml output venv
+	rm -rf output venv de/data/GSE*
+
+download: de/data/GSE106127_inst_info.txt.xz de/data/GSE92742_Broad_LINCS_Level2.csv.xz de/data/GSE70138_Broad_LINCS_Level2.csv.xz
+
+de/data/%.xz:
+	wget -N -P ./de/data https://syno.seas.ucla.edu:9001/de-learning/$*.xz
