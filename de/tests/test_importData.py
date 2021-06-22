@@ -9,9 +9,10 @@ import pandas as pd
 import numpy as np
 from ..importData import importRNAseqKO, formMatrix, prepData, importLINCS
 
-
 class TestModel(unittest.TestCase):
     """Test class for importing RNAseq knockout data file and forming matrix of knockouts"""
+
+
 
     def test_import(self):
         """Tests that file is successfully loaded into a DataFrame"""
