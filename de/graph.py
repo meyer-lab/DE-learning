@@ -111,7 +111,6 @@ def set_nodes(dir_graph, pos, ax):
     nx.draw_networkx_nodes(dir_graph, pos, node_size=nodesize, ax=ax)
     return dir_graph
 
-
 def set_edges(dir_graph, w_abs, w_max, pos, ax):
     """
     Given a directed graph, w_new and w_max, calculate edges color and thickness. Then draw the corresponding edge.
