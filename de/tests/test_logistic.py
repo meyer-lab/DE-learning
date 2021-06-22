@@ -5,7 +5,6 @@ import pytest
 import numpy as np
 from ..logistic import logisticF, invlogF
 
-
 @pytest.mark.parametrize("a", [0.5, 1.0, 2.0])
 @pytest.mark.parametrize("b", [0.5, 1.0, 2.0])
 @pytest.mark.parametrize("c", [0.5, 1.0, 2.0])
