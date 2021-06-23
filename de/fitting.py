@@ -8,6 +8,7 @@ from jax.config import config
 from scipy.optimize import minimize
 from .factorization import alpha, factorizeEstimate
 
+
 config.update("jax_enable_x64", True)
 
 
