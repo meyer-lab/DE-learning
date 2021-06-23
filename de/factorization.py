@@ -10,6 +10,7 @@ alpha = 0.1
 
 
 
+
 def calcW(data, eta, alphaIn):
     """Directly calculate w."""
     U = np.copy(data)
