@@ -1,0 +1,6 @@
+import numpy as np
+from ..importData import importRNAseqKO()
+from ..importData import formMatrix()
+
+
+    
