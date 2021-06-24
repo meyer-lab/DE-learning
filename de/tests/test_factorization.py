@@ -6,12 +6,12 @@ import numpy as np
 from scipy.special import expit
 from ..factorization import MatrixSubtraction, cellLineComparision, factorizeEstimate, alpha, cellLineFactorization
 from ..fitting import runOptim
-from ..importData import formMatrix
+from ..importData import ImportMelanoma
 
 
 def test_factorizeEstimate():
     """ Test that this runs successfully with reasonable input. """
-    data = formMatrix()
+    data = ImportMelanoma()
     U = np.copy(data)
     np.fill_diagonal(U, 0.0)
 
