@@ -28,7 +28,7 @@ def importRNAseqKO():
     return data
 
 
-def formMatrix():
+def ImportMelanoma():
     """Takes in parameter of dataframe read in by importRNAseqKO() and forms matrix: rows = gene, columns = knockout model.
     There are 84 knockout models (including negative control) and 83 corresponding genes measured."""
     data_in = importRNAseqKO()

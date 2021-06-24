@@ -3,7 +3,7 @@ from os.path import join, dirname
 import numpy as np
 import pandas as pd
 import networkx as nx
-from .importData import formMatrix
+from .importData import ImportMelanoma
 from .fitting import runOptim, reshapeParams
 
 
@@ -13,7 +13,7 @@ def load_w():
     """
     path_here = dirname(dirname(__file__))
 
-    data = formMatrix()
+    data = ImportMelanoma()
     ps = runOptim(data, niter=400, disp=True)
     w = reshapeParams(ps, data.shape[0])[0]
     genes = np.loadtxt(join(path_here, "de/data/node_Index.csv"), dtype=str)
@@ -25,7 +25,7 @@ def normalize(w):
     """
     Given w matrix, then return normalized w matrix according to gene expression under control conditions
     """
-    control = formMatrix()[:, -1]
+    control = ImportMelanoma()[:, -1]
     for i in range(len(control)):
         w.iloc[:, i] = w.iloc[:, i] * control[i]
     return w
