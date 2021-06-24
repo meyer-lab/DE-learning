@@ -3,7 +3,6 @@ from os.path import join, dirname
 import numpy as np
 import pandas as pd
 import networkx as nx
-from sklearn import preprocessing
 from .importData import ImportMelanoma
 from .fitting import runOptim, reshapeParams
 
