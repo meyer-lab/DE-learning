@@ -4,7 +4,7 @@ Test the factorization model.
 import pytest
 import numpy as np
 from scipy.special import expit
-from ..factorization import cellLineComparision, factorizeEstimate, alpha, cellLineFactorization
+from ..factorization import MatrixSubtraction, cellLineComparision, factorizeEstimate, alpha, cellLineFactorization
 from ..fitting import runOptim
 from ..importData import formMatrix
 
@@ -50,6 +50,22 @@ def test_cellLines():
     _, _, annotation2 = cellLineFactorization(cellLine2)
 
     # assuming the function returns the list of shared genes between the two cell lines
-    shared_annotation = cellLineComparision(cellLine1, cellLine2)
+    shared_annotation, _ = cellLineComparision(cellLine1, cellLine2)
     # make sure at least 50% of the genes in smaller cell line is shared between the two cell lines
     assert np.abs(len(shared_annotation)) >= 0.5 * np.min([len(annotation1), len(annotation2)])
+
+def test_matrixSub():
+    """To test if the matrices subtract properly and if the norm has a reasonble value"""
+    cellLine1 = 'A375'
+    cellLine2 = 'HT29'
+    
+    [matrix_1, matrix_2] = MatrixSubtraction(cellLine1, cellLine2)
+    assert matrix_1.shape() == matrix_2.shape()
+
+    w1, _, _ = cellLineFactorization(cellLine1)
+    w2, _, _ = cellLineFactorization(cellLine2)
+    test_norm1 = np.linalg.norm(w1)
+    test_norm2 = np.linalg.norm(w2)
+
+
+    

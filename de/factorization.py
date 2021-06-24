@@ -94,21 +94,37 @@ def MatrixSubtraction(cellLine1, cellLine2):
     w2, _, _= cellLineFactorization(cellLine2)
     index_list1, index_list2 = cellLineComparision(cellLine1, cellLine2)
 
-    w1_edited = w1[:index_list1]
-    w2_edited = w2[:index_list2]
+    w1_edited = (pd.DataFrame(w1).iloc[index_list1]).values
+    w2_edited = (pd.DataFrame(w2).iloc[index_list2]).values
 
-    num_rows_W1, _ = w1_edited.shape
-    num_rows_W2, _ = w2_edited.shape
+    num_rows_W1, num_cols_W1 = w1_edited.shape
+    num_rows_W2, num_cols_W2 = w2_edited.shape
+
+
+    
 
     if num_rows_W2 > num_rows_W1:
         removal_number = num_rows_W2 - num_rows_W1
-        w2_edited[:-removal_number,:]
-        norm = np.linalg.norm(w2_edited - w1_edited)
-
+        start_point = num_cols_W2 - removal_number
+        w2_final = np.delete(w2_edited, slice(start_point, num_cols_W2, 1), 0)
+        difference_matrix = w2_final - w1_edited
+        norm = np.linalg.norm(difference_matrix)
+        return [w1_edited, w2_final]
+    
+    
     elif num_rows_W1 > num_rows_W2:
         removal_number = num_rows_W1 - num_rows_W2
-        w1_edited[:-removal_number,:]
-        norm = np.linalg.norm(w1_edited - w2_edited)
+        start_point = num_cols_W1 - removal_number
+        w1_final = np.delete(w1_edited, slice(start_point, num_cols_W1, 1), 0)
+        difference_matrix = w2_edited - w1_final
+        norm = np.linalg.norm(difference_matrix)
+        return  [w1_final, w2_edited]
+    
+    
+ 
 
-    return norm
+    
+
+
+
 
