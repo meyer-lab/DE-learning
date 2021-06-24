@@ -3,6 +3,7 @@ from os.path import join, dirname
 import numpy as np
 import pandas as pd
 import networkx as nx
+from sklearn import preprocessing
 from .importData import ImportMelanoma
 from .fitting import runOptim, reshapeParams
 
@@ -121,8 +122,10 @@ def set_edges(dir_graph, w_abs, w_max, pos, ax):
     colors = [dir_graph[u][v]["color"] for u, v in edges]
     thickness = [np.exp((np.abs(dir_graph[u][v]["weight"]) - threshold) / (w_max - threshold)) for u, v in edges]
 
+    # to use this as alpha, normalize between 0.2, 1.0
+    normalized_thickness = ((thickness - np.min(thickness)) / np.ptp(thickness)) * 0.8 + 0.2
     # draw the edges
-    nx.draw_networkx_edges(dir_graph, pos, edgelist=edges, width=thickness, edge_color=colors, ax=ax)
+    nx.draw_networkx_edges(dir_graph, pos, edgelist=edges, width=thickness, alpha=normalized_thickness, edge_color=colors, ax=ax)
     return dir_graph
 
 
