@@ -25,6 +25,6 @@ def Network(w, w_abs, w_max, ax):
     for node in G: 
         if 'set_labels' in above :
             color_map.append('red')
-        else if 'set_labels' in below:
+        elif 'set_labels' in below:
             color_map.append('blue')
     return G
