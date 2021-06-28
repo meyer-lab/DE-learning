@@ -20,11 +20,13 @@ def Network(w, w_abs, w_max, ax):
     set_nodes(G, pos, ax)
     set_edges(G, w_abs, w_max, pos, ax)
     set_labels(G, pos, ax)
-    # determines node color 
+    #set title for graph
+    ax[0].set_title("w Network Graph (downstream)")
+    # determine node color 
     color_map = []
-    for node in G: 
-        if 'set_labels' in above :
+    for nodes in G: 
+        if labels in above :
             color_map.append('red')
-        elif 'set_labels' in below:
+        elif labels in below:
             color_map.append('blue')
     return G
