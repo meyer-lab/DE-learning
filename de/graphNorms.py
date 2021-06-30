@@ -1,10 +1,25 @@
-from .factorization import cellLineComparision, MatrixSubtraction
+from .factorization import cellLineFactorization, MatrixSubtraction
 import matplotlib.pyplot as plt
 import numpy as np
 from math import ceil
 
 
+def calcNorms(cellLine1, cellLine2):
+    
+    _, difference_norm = MatrixSubtraction(cellLine1, cellLine2)
+
+    w1, _, _ = cellLineFactorization(cellLine1)
+    w2, _, _ = cellLineFactorization(cellLine2)
+    np.random.shuffle(w1)
+    np.random.shuffle(w2)
+    norm1 = np.linalg.norm(w1)
+    norm2 = np.linalg.norm(w2)
+
+    return norm1, norm2, difference_norm
+
+
 def plot_norm_graph(diff_norms, cell_line_norms, labels):
+    
     """
     Plot bar graphs for sets of cell lines given a matrix of difference norms, a list of individual norms, and a list of cell line names.
     """
