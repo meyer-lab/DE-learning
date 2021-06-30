@@ -1,13 +1,13 @@
 """
 Tests import of RNAseq knockout data results in dataframe with knockouts as columns, genes measured (rpm) as rows.
 importRNAseqKO should return dataframe with individual replicate columns and rows for the entire genome.
-formMatrix should return dataframe with all replicate columns averaged together, WT removed, and only rows for genes associated with a knockout.
+ImportMelanoma should return dataframe with all replicate columns averaged together, WT removed, and only rows for genes associated with a knockout.
 """
 import unittest
 import pytest
 import pandas as pd
 import numpy as np
-from ..importData import importRNAseqKO, formMatrix, prepData, importLINCS
+from ..importData import importRNAseqKO, ImportMelanoma, prepData, importLINCS
 
 
 class TestModel(unittest.TestCase):
@@ -20,7 +20,7 @@ class TestModel(unittest.TestCase):
 
     def test_matrix(self):
         """Tests that matrix formed is an 83x84 DataFrame with matching knockouts/gene measurements on the diagonal"""
-        matrix = formMatrix()
+        matrix = ImportMelanoma()
         self.assertTrue(isinstance(matrix, np.ndarray))
         self.assertEqual(matrix.shape[0], 83)  # there were 83 knockout models and thus associated genes
         self.assertEqual(matrix.shape[1], 84)  # there is an extra column due to the negative control
