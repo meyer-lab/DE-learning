@@ -55,13 +55,13 @@ def runOptim(data, niter=2000, disp=0, linear=False):
 
     U = np.copy(data)
     np.fill_diagonal(U, 0.0)
-    cost_grad = jit(grad(cost, argnums=0))
+    cost_grad = jit(grad(cost, argnums=0, linear=linear))
 
     def cost_GF(*args):
         outt = cost_grad(*args)
         return np.array(outt)
 
-    res = minimize(cost, x0, args=(data, U), method="L-BFGS-B", jac=cost_GF, options={"maxiter": niter, "disp": disp})
+    res = minimize(cost, x0, args=(data, U, linear), method="L-BFGS-B", jac=cost_GF, options={"maxiter": niter, "disp": disp})
     assert (res.success) or (res.nit == niter)
 
     return res.x
