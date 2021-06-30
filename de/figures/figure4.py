@@ -1,8 +1,11 @@
 """
 This creates Figure 4
 """
-from .graph import add_nodes, add_edges, remove_isolates, set_edges, set_nodes, set_labels
+
+from math import sqrt
 from .figureCommon import subplotLabel, getSetup
+from ..graph import add_nodes, add_edges, remove_isolates, set_edges, set_nodes, set_labels
+from .figure3 import makeFigure
 import networkx as nx
 
 above = ["JUN", "BRD2", "STK11", "PKN2", "NFAT5", "KMT2D", "ADCK3", "FOSL1", "CSK", "BRD8", "CBFB", "TADA2B", "DSTYK", "JUNB", "LATS2", "FEZF2", "MITF", "RUNX3", "SUV420H1", "SOX10", "DOT1L", "PRKRIR"] 
@@ -17,7 +20,7 @@ def Networkedit(w, w_abs, w_max, ax):
     add_nodes(G, w, w_abs)
     add_edges(G, w, w_abs)
     remove_isolates(G)
-    pos = nx.nx_pydot.pydot_layout(G, prog="fdp", scale = 3)
+    pos = nx.nx_pydot.pydot_layout(G, prog="fdp",scale=100.0, k=100.0)
     # draw the nodes, edges and labels
     set_nodes(G, pos, ax)
     set_edges(G, w_abs, w_max, pos, ax)
