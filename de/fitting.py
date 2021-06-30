@@ -28,6 +28,7 @@ def cost(pIn, data, U=None, linear=False):
         np.fill_diagonal(U, 0.0)
 
     w, eta = reshapeParams(pIn, data.shape[0])
+    
     if linear:
         costt = jnp.linalg.norm(eta[:, jnp.newaxis] - alpha * data)
     else:
