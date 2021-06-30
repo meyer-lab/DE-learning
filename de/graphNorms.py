@@ -18,36 +18,40 @@ def calcNorms(cellLine1, cellLine2):
     return norm1, norm2, difference_norm
 
 
-def plot_norm_graph(diff_norms, cell_line_norms, labels):
+def plot_norm_graph(cell_lines):
     
     """
-    Plot bar graphs for sets of cell lines given a matrix of difference norms, a list of individual norms, and a list of cell line names.
+    Plot bar graphs for combinations of cell lines given a list of cell line names.
     """
 
     ncols = 3
-    nplots = len(cell_line_norms)*(len(cell_line_norms)-1)/2
+    nplots = len(cell_lines)*(len(cell_lines)-1)/2
     nrows = ceil(nplots/ncols)
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(7.5*ncols, 6*nrows), squeeze=0, sharex=False, sharey=True)
     axes = np.array(axes)
 
-    # to do: 
+    labels = []
+    norms = []
+
+    for i in range(0,len(cell_lines)-1):
+        for j in range(i+1,len(cell_lines)):
+            cellLine1 = cell_lines[i]
+            cellLine2 = cell_lines[j]
+            label_list = [cellLine1, cellLine2, "Difference"]
+            labels.append(label_list)
+            norms.append(calcNorms(cellLine1, cellLine2))
+
 
     for i, ax in enumerate(axes.reshape(-1)):
         x = [1,2,3] # number of bars
-        values = [1,2,2]
-        ax.set_title(f'Subplot: {i}')
+        values = norms[i]
+        xlabels = labels[i]
+        ax.set_title(xlabels[0] + ' vs. ' + xlabels[1] + ' (Norms)')
         ax.bar(x, height=values)
-        #ax.axes.xaxis.set_visible(False)
-        labels=['a','b','c']
         ax.axes.set_xticks(x)
-        ax.axes.set_xticklabels(labels)
+        ax.axes.set_xticklabels(xlabels)
+        for i, v in enumerate(values):
+            ax.text(i+0.88, v+0.2,"%.3f" % v, va='center')
 
     plt.savefig('norm_graphs.png')
-    
-    
-# test values:
-a = np.matrix('1 2 3 4; 3 4 5 6; 4 5 6 7; 1 2 3 4')
-norms = [2, 3, 2, 2.5]
-labels = ['a', 'b', 'c', 'd']
 
-plot_norm_graph(a, norms, labels)
