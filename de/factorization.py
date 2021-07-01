@@ -66,7 +66,7 @@ def cellLineFactorization(cellLine):
     w, eta = factorizeEstimate(data)
     return w, eta, annotation[0].tolist()
 
-def cellLineComparision(cellLine1, cellLine2):
+def cellLineComparison(cellLine1, cellLine2):
     w1, eta1, annotation1 = cellLineFactorization(cellLine1)
     w2, eta2, annotation2 = cellLineFactorization(cellLine2)
 
@@ -92,7 +92,7 @@ def cellLineComparision(cellLine1, cellLine2):
 def MatrixSubtraction(cellLine1, cellLine2):
     w1, _, _ = cellLineFactorization(cellLine1)
     w2, _, _= cellLineFactorization(cellLine2)
-    index_list1, index_list2 = cellLineComparision(cellLine1, cellLine2)
+    index_list1, index_list2 = cellLineComparison(cellLine1, cellLine2)
 
     w1_df = pd.DataFrame(w1)
     w2_df = pd.DataFrame(w2)
