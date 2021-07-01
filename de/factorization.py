@@ -2,7 +2,7 @@
 
 import numpy as np
 import pandas as pd
-from scipy.stats import gmean
+from scipy.stats import gmean, spearmanr
 from scipy.special import expit, logit
 from .importData import importLINCS
 
@@ -105,7 +105,19 @@ def MatrixSubtraction(cellLine1, cellLine2):
 
     difference_matrix = w2_final - w1_final
     norm = np.linalg.norm(difference_matrix)
-    return difference_matrix, norm
+    return difference_matrix, norm, w1_final, w2_final
+
+def PearsonWMatrix(cellLine1, cellLine2):
+    _, _, w1, w2 = MatrixSubtraction(cellLine1, cellLine2)
+    pearson = np.corrcoef(w1.flatten(), w2.flatten())
+    return pearson
+
+def SpearmanWMatrix(cellLine1, cellLine2):
+    _, _, w1, w2 = MatrixSubtraction(cellLine1, cellLine2)
+    spearman = spearmanr(w1.flatten(), w2.flatten())
+    return spearman
+
+
     
 
     
