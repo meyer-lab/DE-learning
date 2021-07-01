@@ -4,7 +4,7 @@ Test the factorization model.
 import pytest
 import numpy as np
 from scipy.special import expit
-from ..factorization import MatrixSubtraction, cellLineComparision, factorizeEstimate, alpha, cellLineFactorization
+from ..factorization import MatrixSubtraction, cellLineComparison, factorizeEstimate, alpha, cellLineFactorization
 from ..fitting import runOptim
 from ..importData import ImportMelanoma
 
