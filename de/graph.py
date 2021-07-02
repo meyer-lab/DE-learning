@@ -107,8 +107,28 @@ def set_nodes(dir_graph, pos, ax):
     nodes = dir_graph.nodes()
     nodesize = [dir_graph.nodes[u]["pagerank"] * 20000 for u in nodes]
 
+def set_nodes(dir_graph, pos, ax):
+    """
+    Given a directed graph and pos, then draw the corresponding node based on pagerank value.
+    """
+    nodes = dir_graph.nodes()
+    nodesize = [dir_graph.nodes[u]["pagerank"] * 20000 for u in nodes]
+
+    pre_resistant_list = ["JUN", "BRD2", "STK11", "PKN2", "NFAT5", "KMT2D", "ADCK3", "FOSL1", "CSK", "BRD8", "CBFB", "TADA2B", "DSTYK", "JUNB", "LATS2", "FEZF2", "MITF", "RUNX3", "SUV420H1", "SOX10", "DOT1L", "PRKRIR"] 
+    full_resistant_list = ["MAP3K1", "MAP2K7", "NSD1", "KDM1A", "EGFR", "EP300", "SRF", "PRKAA1", "GATA4", "MYBL1", "MTF1"]
+    #color nodes based on pre/resistance
+    color_list = []
+    labels = nx.get_node_attributes(dir_graph, "gene")
+    for key, gene in labels.items():
+        if gene in pre_resistant_list:
+            color_list.append("b")
+        elif gene in full_resistant_list:
+            color_list.append("g")
+        else: 
+            color_list.append("r")
+
     # draw the nodes
-    nx.draw_networkx_nodes(dir_graph, pos, node_size=nodesize, ax=ax)
+    nx.draw_networkx_nodes(dir_graph, pos, ax=ax, node_size=nodesize, node_color=color_list, alpha=0.8,)
     return dir_graph
 
 
@@ -122,7 +142,7 @@ def set_edges(dir_graph, w_abs, w_max, pos, ax):
     thickness = [np.exp((np.abs(dir_graph[u][v]["weight"]) - threshold) / (w_max - threshold)) for u, v in edges]
 
     # draw the edges
-    nx.draw_networkx_edges(dir_graph, pos, edgelist=edges, width=thickness, edge_color=colors, ax=ax)
+    nx.draw_networkx_edges(dir_graph, pos, edgelist=edges, width=thickness, edge_color=colors, ax=ax, alpha=0.4,)
     return dir_graph
 
 
