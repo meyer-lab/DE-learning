@@ -30,7 +30,7 @@ def cost(pIn, data, U=None, linear=False):
     w, eta = reshapeParams(pIn, data.shape[0])
     
     if linear:
-        costt = jnp.linalg.norm(eta[:, jnp.newaxis] - alpha * data)
+        costt = jnp.linalg.norm(eta[:, jnp.newaxis] * (w @ U) - alpha * data)
     else:
         costt = jnp.linalg.norm(eta[:, jnp.newaxis] * expit(w @ U) - alpha * data)
     costt += regularize(pIn, data.shape[0])
@@ -55,7 +55,7 @@ def runOptim(data, niter=2000, disp=0, linear=False):
 
     U = np.copy(data)
     np.fill_diagonal(U, 0.0)
-    cost_grad = jit(grad(cost, argnums=0))#need to pass linear into cost
+    cost_grad = jit(grad(cost, argnums=0), static_argnums=(3,))
 
     def cost_GF(*args):
         outt = cost_grad(*args)
