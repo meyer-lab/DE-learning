@@ -14,7 +14,7 @@ def load_w():
     path_here = dirname(dirname(__file__))
 
     data = ImportMelanoma()
-    ps = runOptim(data, niter=400, disp=True, linear=True)
+    ps = runOptim(data, niter=400, disp=True, linear=True)#should add linear parameter to load_w too?
     w = reshapeParams(ps, data.shape[0])[0]
     genes = np.loadtxt(join(path_here, "de/data/node_Index.csv"), dtype=str)
 
