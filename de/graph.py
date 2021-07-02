@@ -144,11 +144,8 @@ def set_edges(dir_graph, w_abs, w_max, pos, ax):
     # to use this as alpha, normalize between 0.2, 1.0
     normalized_thickness = ((thickness - np.min(thickness)) / np.ptp(thickness)) * 0.8 + 0.2
     # draw the edges
-<<<<<<< HEAD
     nx.draw_networkx_edges(dir_graph, pos, edgelist=edges, width=thickness, edge_color=colors, ax=ax, alpha=0.4,)
-=======
     nx.draw_networkx_edges(dir_graph, pos, edgelist=edges, width=thickness, alpha=normalized_thickness, edge_color=colors, ax=ax)
->>>>>>> cfbcf6193067e424da664cc6e3d6c3830f8b47bf
     return dir_graph
 
 
