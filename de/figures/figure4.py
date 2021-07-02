@@ -13,5 +13,4 @@ def makeFigure():
     subplotLabel(ax)
 
     return f
-
-
+    
