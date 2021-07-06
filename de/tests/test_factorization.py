@@ -59,7 +59,7 @@ def test_matrixSub():
     cellLine1 = 'A375'
     cellLine2 = 'HT29'
     
-    _, difference_norm = MatrixSubtraction(cellLine1, cellLine2)
+    _, difference_norm, _, _ = MatrixSubtraction(cellLine1, cellLine2)
 
     w1, _, _ = cellLineFactorization(cellLine1)
     w2, _, _ = cellLineFactorization(cellLine2)
