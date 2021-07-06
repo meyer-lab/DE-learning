@@ -6,7 +6,7 @@ from math import ceil
 
 def calcNorms(cellLine1, cellLine2):
     
-    _, difference_norm = MatrixSubtraction(cellLine1, cellLine2)
+    _, difference_norm, w1, w2 = MatrixSubtraction(cellLine1, cellLine2)
 
     w1, _, _ = cellLineFactorization(cellLine1)
     w2, _, _ = cellLineFactorization(cellLine2)
