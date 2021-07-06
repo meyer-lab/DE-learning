@@ -1,4 +1,4 @@
-from .factorization import cellLineFactorization, MatrixSubtraction
+from .fitting import cellLineFactorization, MatrixSubtraction
 import matplotlib.pyplot as plt
 import numpy as np
 from math import ceil
@@ -54,4 +54,12 @@ def plot_norm_graph(cell_lines):
             ax.text(i+0.88, v+0.2,"%.3f" % v, va='center')
 
     plt.savefig('norm_graphs.png')
+
+def plot_entries_scatterplot(cellLine1, cellLine2):
+    _, _, w1, w2 = MatrixSubtraction(cellLine1, cellLine2)
+    w1_edit = w1.flatten()
+    w2_edit = w2.flatten()
+    plt.scatter(w1_edit, w2_edit, marker = 'o')
+    plt.title("Flattened Matrice Graph")
+    plt.savefig('w1_w2graph.png')
 
