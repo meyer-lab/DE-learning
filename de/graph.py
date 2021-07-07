@@ -7,14 +7,14 @@ from .importData import ImportMelanoma
 from .fitting import runOptim, reshapeParams
 
 
-def load_w():
+def load_w(linear = False):
     """
     Loads w from csv file and returns dataframe with gene symbols attached to w values.
     """
     path_here = dirname(dirname(__file__))
 
     data = ImportMelanoma()
-    ps = runOptim(data, niter=400, disp=True)
+    ps = runOptim(data, niter=400, disp=True, linear=linear)
     w = reshapeParams(ps, data.shape[0])[0]
     genes = np.loadtxt(join(path_here, "de/data/node_Index.csv"), dtype=str)
 

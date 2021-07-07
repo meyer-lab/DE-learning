@@ -21,16 +21,20 @@ def reshapeParams(p, nGenes):
     return w, eta
 
 
-def cost(pIn, data, U=None):
+def cost(pIn, data, U=None, linear=False):
     """ Returns SSE between model and experimental RNAseq data. """
     if U is None:
         U = np.copy(data)
         np.fill_diagonal(U, 0.0)
 
     w, eta = reshapeParams(pIn, data.shape[0])
-    costt = jnp.linalg.norm(eta[:, jnp.newaxis] * expit(w @ U) - alpha * data)
-    costt += regularize(pIn, data.shape[0])
 
+    if linear:
+        costt = jnp.linalg.norm(eta[:, jnp.newaxis] * (w @ U) - alpha * data)
+    else:
+        costt = jnp.linalg.norm(eta[:, jnp.newaxis] * expit(w @ U) - alpha * data)
+    costt += regularize(pIn, data.shape[0])
+    
     return costt
 
 
@@ -43,7 +47,7 @@ def regularize(pIn, nGenes, strength=0.1):
     return strength * ll
 
 
-def runOptim(data, niter=2000, disp=0):
+def runOptim(data, niter=2000, disp=0, linear=False):
     """ Run the optimization. """
     # TODO: Add bounds to fitting.
     w, eps = factorizeEstimate(data)
@@ -51,13 +55,13 @@ def runOptim(data, niter=2000, disp=0):
 
     U = np.copy(data)
     np.fill_diagonal(U, 0.0)
-    cost_grad = jit(grad(cost, argnums=0))
+    cost_grad = jit(grad(cost, argnums=0), static_argnums=(3,))
 
     def cost_GF(*args):
         outt = cost_grad(*args)
         return np.array(outt)
 
-    res = minimize(cost, x0, args=(data, U), method="L-BFGS-B", jac=cost_GF, options={"maxiter": niter, "disp": disp})
+    res = minimize(cost, x0, args=(data, U, linear), method="L-BFGS-B", jac=cost_GF, options={"maxiter": niter, "disp": disp})
     assert (res.success) or (res.nit == niter)
 
     return res.x
