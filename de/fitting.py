@@ -61,6 +61,7 @@ def runOptim(data, niter=2000, disp=0, linear=False):
         outt = cost_grad(*args)
         return np.array(outt)
 
+    res = minimize(cost, x0, args=(data, U, linear), method="L-BFGS-B", jac=cost_GF, options={"maxiter": niter, "disp": disp})
     assert (res.success) or (res.nit == niter)
 
     return res.x
