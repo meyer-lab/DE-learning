@@ -96,4 +96,3 @@ def plot_corr_graphs(cell_lines):
         ax.set_ylabel(label_list[1])
 
     plt.savefig('corr_graphs.png')
-

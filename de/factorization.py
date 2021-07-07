@@ -116,15 +116,3 @@ def SpearmanWMatrix(cellLine1, cellLine2):
     _, _, w1, w2 = MatrixSubtraction(cellLine1, cellLine2)
     spearman = spearmanr(w1.flatten(), w2.flatten())
     return spearman
-
-
-    
-
-    
-    
-
-    
-
-
-
-

@@ -70,6 +70,3 @@ def test_matrixSub():
 
     assert difference_norm < test_norm1
     assert difference_norm < test_norm2
-
-
-    
