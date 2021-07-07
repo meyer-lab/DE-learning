@@ -11,7 +11,7 @@ from .factorization import alpha, factorizeEstimate
 config.update("jax_enable_x64", True)
 
 
-def reshapeParams(p, nGenes):
+def reshapeParams(p, nGenes, nCellLines):
     """Reshape a vector of parameters into the variables we know."""
     w = jnp.reshape(p[:(nGenes * nGenes)], (nGenes, nGenes))
     eta = p[-nGenes:]
@@ -24,8 +24,9 @@ def reshapeParams(p, nGenes):
 def cost(pIn, data, U=None, linear=False):
     """ Returns SSE between model and experimental RNAseq data. """
     if U is None:
-        U = np.copy(data)
-        np.fill_diagonal(U, 0.0)
+        U = [np.copy(d) for d in data]
+        for ii in range(len(U)):
+            np.fill_diagonal(U[ii], 0.0)
 
     w, eta = reshapeParams(pIn, data.shape[0])
 
@@ -49,12 +50,18 @@ def regularize(pIn, nGenes, strength=0.1):
 
 def runOptim(data, niter=2000, disp=0, linear=False):
     """ Run the optimization. """
-    # TODO: Add bounds to fitting.
-    w, eps = factorizeEstimate(data)
+    if isinstance(data, np.ndarray):
+        data = [data]
+        
+    w, eps = factorizeEstimate(data[0])
     x0 = np.concatenate((w.flatten(), eps))
+    for ii in range(1, len(data)):
+        x0 = np.concatenate((x0, eps))
 
-    U = np.copy(data)
-    np.fill_diagonal(U, 0.0)
+
+    U = [np.copy(d) for d in data]
+    for ii in range(len(U)):
+        np.fill_diagonal(U[ii], 0.0)
     cost_grad = jit(grad(cost, argnums=0), static_argnums=(3,))
 
     def cost_GF(*args):
