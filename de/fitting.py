@@ -11,7 +11,7 @@ from .factorization import alpha, factorizeEstimate
 config.update("jax_enable_x64", True)
 
 
-def reshapeParams(p, nGenes, nCellLines):
+def reshapeParams(p, nGenes, nCellLines=1):
     """Reshape a vector of parameters into the variables we know."""
     w = jnp.reshape(p[:(nGenes * nGenes)], (nGenes, nGenes))
 
