@@ -130,8 +130,8 @@ def cell_type_perturbations(data, inst_info, gene_info, cell_id):
 def importmelanoma():
     """ Imports all Torre genes with Fig 5D data and merges into one matrix"""
     path_here = dirname(dirname(__file__))
-    xdata = pd.read_csv(join(path_here, "de/data/sumarizedResults.txt", sep = " "))
-    ydata = pd.read_csv(join(path_here, "de/data/colonyGrowthResults_allhits.txt", sep = " "))
+    xdata = pd.read_csv(join(path_here, "de/data/sumarizedResults.txt", header=0,sep = " "))
+    ydata = pd.read_csv(join(path_here, "de/data/colonyGrowthResults_allhits.txt", header=0,sep = " "))
     xdata = xdata[:,[0,4]] # meanlFC_IF values
     ydata = xdata[:,[0,2]] # Rcolonies_lFC values 
     #merges data for genes with both meanlFC_IF and Rcolonies_lFC values 
