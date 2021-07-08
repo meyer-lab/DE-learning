@@ -14,11 +14,15 @@ config.update("jax_enable_x64", True)
 def reshapeParams(p, nGenes, nCellLines):
     """Reshape a vector of parameters into the variables we know."""
     w = jnp.reshape(p[:(nGenes * nGenes)], (nGenes, nGenes))
-    eta = p[-nGenes:]
 
-    assert eta.size == w.shape[0]
+    eta_list = [p[-nGenes:]]
+    for i in range(1, nCellLines):
+        eta = p[-nGenes*(i+1):-nGenes*(i)]
+        eta_list.insert(0, eta)
 
-    return w, eta
+    assert eta_list[0].size == w.shape[0]
+
+    return w, eta_list
 
 
 def cost(pIn, data, U=None, linear=False):
@@ -28,20 +32,23 @@ def cost(pIn, data, U=None, linear=False):
         for ii in range(len(U)):
             np.fill_diagonal(U[ii], 0.0)
 
-    w, eta = reshapeParams(pIn, data.shape[0])
+    w, eta = reshapeParams(pIn, data[0].shape[0], len(data))
 
-    if linear:
-        costt = jnp.linalg.norm(eta[:, jnp.newaxis] * (w @ U) - alpha * data)
-    else:
-        costt = jnp.linalg.norm(eta[:, jnp.newaxis] * expit(w @ U) - alpha * data)
-    costt += regularize(pIn, data.shape[0])
+    costt = 0
+    for i in range(len(data)):
+        if linear:
+            costt += jnp.linalg.norm(eta[i][:, jnp.newaxis] * (w @ U[i]) - alpha * data[i])
+        else:
+            costt += jnp.linalg.norm(eta[i][:, jnp.newaxis] * expit(w @ U[i]) - alpha * data[i])
+    
+    costt += regularize(pIn, data[0].shape[0], len(data))
     
     return costt
 
 
-def regularize(pIn, nGenes, strength=0.1):
+def regularize(pIn, nGenes, nCellLines, strength=0.1):
     """Calculate the regularization."""
-    w = reshapeParams(pIn, nGenes)[0]
+    w = reshapeParams(pIn, nGenes, nCellLines)[0]
 
     ll = jnp.linalg.norm(w, ord=1)
     ll += jnp.linalg.norm(w.T @ w - jnp.identity(w.shape[0]))
