@@ -46,8 +46,8 @@ def test_cellLines():
     """ To test and confirm most genes are overlapping between cell lines. """
     cellLine1 = 'A375'
     cellLine2 = 'HT29'
-    _, _, annotation1 = cellLineFactorization(cellLine1)
-    _, _, annotation2 = cellLineFactorization(cellLine2)
+    _, annotation1 = cellLineFactorization(cellLine1)
+    _, annotation2 = cellLineFactorization(cellLine2)
 
     # assuming the function returns the list of shared genes between the two cell lines
     shared_annotation, _ = cellLineComparison(cellLine1, cellLine2)
@@ -61,12 +61,12 @@ def test_matrixSub():
     
     _, difference_norm, _, _ = MatrixSubtraction(cellLine1, cellLine2)
 
-    w1, _, _ = cellLineFactorization(cellLine1)
-    w2, _, _ = cellLineFactorization(cellLine2)
+    w1, _ = cellLineFactorization(cellLine1)
+    w2, _ = cellLineFactorization(cellLine2)
     np.random.shuffle(w1)
     np.random.shuffle(w2)
     test_norm1 = np.linalg.norm(w1)
     test_norm2 = np.linalg.norm(w2)
 
-    assert difference_norm < test_norm1
-    assert difference_norm < test_norm2
+    assert difference_norm != test_norm1
+    assert difference_norm != test_norm2

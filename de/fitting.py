@@ -72,12 +72,12 @@ def runOptim(data, niter=2000, disp=0, linear=False):
 def cellLineFactorization(cellLine):
     """ Import a cell line, fit the model, and return the result. """
     data, annotation = importLINCS(cellLine)
-    w, eta = runOptim(data)
-    return w, eta, annotation[0].tolist()
+    w = runOptim(data)
+    return w,  annotation[0].tolist()
 
 def cellLineComparison(cellLine1, cellLine2):
-    w1, eta1, annotation1 = cellLineFactorization(cellLine1)
-    w2, eta2, annotation2 = cellLineFactorization(cellLine2)
+    _, annotation1 = cellLineFactorization(cellLine1)
+    _, annotation2 = cellLineFactorization(cellLine2)
 
     line1_as_set = set(annotation1)
     intersection = line1_as_set.intersection(annotation2)
@@ -99,8 +99,8 @@ def cellLineComparison(cellLine1, cellLine2):
     return index_list1, index_list2
 
 def MatrixSubtraction(cellLine1, cellLine2):
-    w1, _, _ = cellLineFactorization(cellLine1)
-    w2, _, _= cellLineFactorization(cellLine2)
+    w1, _ = cellLineFactorization(cellLine1)
+    w2, _= cellLineFactorization(cellLine2)
     index_list1, index_list2 = cellLineComparison(cellLine1, cellLine2)
 
     w1_df = pd.DataFrame(w1)
