@@ -130,13 +130,15 @@ def cell_type_perturbations(data, inst_info, gene_info, cell_id):
 def importmelanoma():
     """ Imports all Torre genes with Fig 5D data and merges into one matrix"""
     path_here = dirname(dirname(__file__))
-    xdata = pd.read_csv(join(path_here, "de/data/sumarizedResults.txt", header=0,sep = " "))
-    ydata = pd.read_csv(join(path_here, "de/data/colonyGrowthResults_allhits.txt", header=0,sep = " "))
-    xdata = xdata[:,[0,4]] # meanlFC_IF values
-    ydata = xdata[:,[0,2]] # Rcolonies_lFC values 
+    x_data = pd.read_csv(join(path_here, "de/data/sumarizedResults.txt"), header=0, sep = "  ")
+    x_data = pd.DataFrame(x_data, columns = ["target", "gRNA", "log2_NGFRhi_FC", "meanNumCells", "meanlFC", "sdlFC", "selFC"])
+    xdata = x_data[["target", "meanlFC"]]
+    y_data = pd.read_csv(join(path_here, "de/data/colonyGrowthResults_allhits.txt"), header=0,sep = "  ")
+    y_data = pd.DataFrame(y_data, columns = ["target", "totalRcells_lFC", "Rcolonies_lFC", "survivingcells_lFC", "EffectOnScreen_DP", "EffectOnScreen_VemR", "DPtier", "VemRtier"])
+    ydata = y_data[["target", "Rcolonies_lFC"]]
     #merges data for genes with both meanlFC_IF and Rcolonies_lFC values 
     melan_genes = pd.merge(xdata, ydata, on='target',how='inner') 
-    data = pd.DataFrame(melan_genes, index=melan_genes[0])
+    data = pd.DataFrame(melan_genes) #index=melan_genes[0]
     return data
 
 def splitnodes(data):
