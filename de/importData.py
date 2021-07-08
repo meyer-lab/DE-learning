@@ -126,3 +126,28 @@ def cell_type_perturbations(data, inst_info, gene_info, cell_id):
     # Move control to end of dataframe
     out_celltype = out_celltype[[x for x in out_celltype if x not in ["LUCIFERASE"]] + ["LUCIFERASE"]]
     return out_celltype
+
+def importmelanoma():
+    """ Imports all Torre genes with Fig 5D data and merges into one matrix"""
+    path_here = dirname(dirname(__file__))
+    xdata = pd.read_csv(join(path_here, "de/data/sumarizedResults.txt", sep = " "))
+    ydata = pd.read_csv(join(path_here, "de/data/colonyGrowthResults_allhits.txt", sep = " "))
+    xdata = xdata[:,[0,4]] # meanlFC_IF values
+    ydata = xdata[:,[0,2]] # Rcolonies_lFC values 
+    #merges data for genes with both meanlFC_IF and Rcolonies_lFC values 
+    melan_genes = pd.merge(xdata, ydata, on='target',how='inner') 
+    data = pd.DataFrame(melan_genes, index=melan_genes[0])
+    return data
+
+def splitnodes(data):
+    """Separates genes into resistant and preresistant"""
+    above = [""]
+    below = [""]
+    for i, row in data.iterrows():
+        if data[1] < data[2]:
+            above.append(data[0])
+        elif data[1] > data[2]:
+            below.append(data[0])
+        return above, below
+
+
