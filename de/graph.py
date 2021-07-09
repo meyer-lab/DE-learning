@@ -3,7 +3,7 @@ from os.path import join, dirname
 import numpy as np
 import pandas as pd
 import networkx as nx
-from .importData import ImportMelanoma
+from .importData import ImportMelanoma, importmelanoma, splitnodes
 from .fitting import runOptim, reshapeParams
 
 
@@ -117,12 +117,14 @@ def set_nodes(dir_graph, pos, ax):
     pre_resistant_list = ["JUN", "BRD2", "STK11", "PKN2", "NFAT5", "KMT2D", "ADCK3", "FOSL1", "CSK", "BRD8", "CBFB", "TADA2B", "DSTYK", "JUNB", "LATS2", "FEZF2", "MITF", "RUNX3", "SUV420H1", "SOX10", "DOT1L", "PRKRIR"] 
     full_resistant_list = ["MAP3K1", "MAP2K7", "NSD1", "KDM1A", "EGFR", "EP300", "SRF", "PRKAA1", "GATA4", "MYBL1", "MTF1"]
     #color nodes based on pre/resistance
+    data = importmelanoma()
+    above, below = splitnodes(data)
     color_list = []
     labels = nx.get_node_attributes(dir_graph, "gene")
     for key, gene in labels.items():
-        if gene in pre_resistant_list:
+        if gene in pre_resistant_list or gene in above:
             color_list.append("b")
-        elif gene in full_resistant_list:
+        elif gene in full_resistant_list or gene in below:
             color_list.append("g")
         else: 
             color_list.append("r")
