@@ -4,8 +4,8 @@ Test the factorization model.
 import pytest
 import numpy as np
 from scipy.special import expit
-from ..factorization import factorizeEstimate, alpha
-from ..fitting import runOptim, cellLineComparison, MatrixSubtraction, cellLineFactorization
+from ..factorization import factorizeEstimate, alpha, cellLineComparison, MatrixSubtraction, cellLineFactorization
+from ..fitting import runOptim 
 from ..importData import ImportMelanoma
 
 
@@ -46,8 +46,8 @@ def test_cellLines():
     """ To test and confirm most genes are overlapping between cell lines. """
     cellLine1 = 'A375'
     cellLine2 = 'HT29'
-    _, annotation1 = cellLineFactorization(cellLine1)
-    _, annotation2 = cellLineFactorization(cellLine2)
+    _, _, annotation1 = cellLineFactorization(cellLine1)
+    _, _, annotation2 = cellLineFactorization(cellLine2)
 
     # assuming the function returns the list of shared genes between the two cell lines
     shared_annotation, _ = cellLineComparison(cellLine1, cellLine2)
@@ -55,14 +55,14 @@ def test_cellLines():
     assert np.abs(len(shared_annotation)) >= 0.5 * np.min([len(annotation1), len(annotation2)])
 
 def test_matrixSub():
-    """To test if the matrices subtract properly and if the norm has a reasonble value"""
+    """To test if the matrices subtract properly and if the norm has a reasonable value"""
     cellLine1 = 'A375'
     cellLine2 = 'HT29'
     
     _, difference_norm, _, _ = MatrixSubtraction(cellLine1, cellLine2)
 
-    w1, _ = cellLineFactorization(cellLine1)
-    w2, _ = cellLineFactorization(cellLine2)
+    w1, _, _ = cellLineFactorization(cellLine1)
+    w2, _, _ = cellLineFactorization(cellLine2)
     np.random.shuffle(w1)
     np.random.shuffle(w2)
     test_norm1 = np.linalg.norm(w1)
