@@ -142,13 +142,11 @@ def importmelanoma():
 
 def splitnodes(data):
     """Separates genes into resistant and preresistant"""
-    above = [""]
-    below = [""]
-    for i, row in data.iterrows():
-        if data[1] < data[2]:
-            above.append(data[0])
-        elif data[1] > data[2]:
-            below.append(data[0])
-        return above, below
-
-
+    above = []
+    below = []
+    for x in range(0,31):
+        if data["meanlFC"][x] < data["Rcolonies_lFC"][x]:
+            above.append(data["target"][x])
+        elif data["meanlFC"][x] > data["Rcolonies_lFC"][x]:
+            below.append(data["target"][x])
+    return above, below
