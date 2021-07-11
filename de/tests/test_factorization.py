@@ -59,14 +59,7 @@ def test_matrixSub():
     cellLine1 = 'A375'
     cellLine2 = 'HT29'
     
-    _, difference_norm, _, _ = MatrixSubtraction(cellLine1, cellLine2)
+    norm1, norm2, diff_norm = MatrixSubtraction(cellLine1, cellLine2)
 
-    w1, _, _ = cellLineFactorization(cellLine1)
-    w2, _, _ = cellLineFactorization(cellLine2)
-    np.random.shuffle(w1)
-    np.random.shuffle(w2)
-    test_norm1 = np.linalg.norm(w1)
-    test_norm2 = np.linalg.norm(w2)
-
-    assert difference_norm != test_norm1
-    assert difference_norm != test_norm2
+    assert diff_norm != norm1
+    assert diff_norm != norm2

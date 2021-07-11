@@ -4,18 +4,8 @@ import numpy as np
 from math import ceil
 
 
-def calcNorms(cellLine1, cellLine2):
+
     
-    _, difference_norm, w1, w2 = MatrixSubtraction(cellLine1, cellLine2)
-
-    w1, _, _ = cellLineFactorization(cellLine1)
-    w2, _, _ = cellLineFactorization(cellLine2)
-    np.random.shuffle(w1)
-    np.random.shuffle(w2)
-    norm1 = np.linalg.norm(w1)
-    norm2 = np.linalg.norm(w2)
-
-    return norm1, norm2, difference_norm
 
 
 def plot_norm_graph(cell_lines):
@@ -39,7 +29,7 @@ def plot_norm_graph(cell_lines):
             cellLine2 = cell_lines[j]
             label_list = [cellLine1, cellLine2, "Difference"]
             labels.append(label_list)
-            norms.append(calcNorms(cellLine1, cellLine2))
+            norms.append(MatrixSubtraction(cellLine1, cellLine2))
 
 
     for i, ax in enumerate(axes.reshape(-1)):

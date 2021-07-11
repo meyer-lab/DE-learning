@@ -66,6 +66,8 @@ def cellLineFactorization(cellLine):
     w, eta = factorizeEstimate(data)
     return w, eta, annotation[0].tolist()
 
+
+"""Uses annontation list to generate an array of common genese between two cell lines"""
 def cellLineComparison(cellLine1, cellLine2):
     w1, eta1, annotation1 = cellLineFactorization(cellLine1)
     w2, eta2, annotation2 = cellLineFactorization(cellLine2)
@@ -89,10 +91,20 @@ def cellLineComparison(cellLine1, cellLine2):
     index_list2.sort()
     return index_list1, index_list2
 
+"""Subtracts the w-matrices of two different cell lines and subtracts them. 
+Then, it calculates the norm of the original matrices as well as difference matrix"""
 def MatrixSubtraction(cellLine1, cellLine2):
     w1, _, _ = cellLineFactorization(cellLine1)
     w2, _, _= cellLineFactorization(cellLine2)
     index_list1, index_list2 = cellLineComparison(cellLine1, cellLine2)
+
+
+    w1, _, _ = cellLineFactorization(cellLine1)
+    w2, _, _ = cellLineFactorization(cellLine2)
+    np.random.shuffle(w1)
+    np.random.shuffle(w2)
+    norm1 = np.linalg.norm(w1)
+    norm2 = np.linalg.norm(w2)
 
     w1_df = pd.DataFrame(w1)
     w2_df = pd.DataFrame(w2)
@@ -104,15 +116,6 @@ def MatrixSubtraction(cellLine1, cellLine2):
     w2_final = w2_edited.values
 
     difference_matrix = w2_final - w1_final
-    norm = np.linalg.norm(difference_matrix)
-    return difference_matrix, norm, w1_final, w2_final
+    diff_norm = np.linalg.norm(difference_matrix)
+    return norm1, norm2, diff_norm
 
-def PearsonWMatrix(cellLine1, cellLine2):
-    _, _, w1, w2 = MatrixSubtraction(cellLine1, cellLine2)
-    pearson = np.corrcoef(w1.flatten(), w2.flatten())
-    return pearson
-
-def SpearmanWMatrix(cellLine1, cellLine2):
-    _, _, w1, w2 = MatrixSubtraction(cellLine1, cellLine2)
-    spearman = spearmanr(w1.flatten(), w2.flatten())
-    return spearman
