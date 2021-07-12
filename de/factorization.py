@@ -117,5 +117,5 @@ def MatrixSubtraction(cellLine1, cellLine2):
 
     difference_matrix = w2_final - w1_final
     diff_norm = np.linalg.norm(difference_matrix)
-    return norm1, norm2, diff_norm
+    return norm1, norm2, diff_norm, w1_final, w2_final
 
