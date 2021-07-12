@@ -34,7 +34,7 @@ def cost(pIn, data, U=None, linear=False):
     else:
         costt = jnp.linalg.norm(eta[:, jnp.newaxis] * expit(w @ U) - alpha * data)
     costt += regularize(pIn, data.shape[0])
-    
+
     return costt
 
 
