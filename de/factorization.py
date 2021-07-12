@@ -67,7 +67,7 @@ def cellLineFactorization(cellLine):
     return w, eta, annotation[0].tolist()
 
 
-"""Uses annontation list to generate an array of common genese between two cell lines"""
+"""Uses annotation list to generate an array of common genes between two cell lines"""
 def cellLineComparison(cellLine1, cellLine2):
     w1, eta1, annotation1 = cellLineFactorization(cellLine1)
     w2, eta2, annotation2 = cellLineFactorization(cellLine2)

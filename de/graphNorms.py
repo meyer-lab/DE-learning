@@ -1,18 +1,12 @@
-from .factorization import cellLineFactorization, MatrixSubtraction
+"""Contains functions for graphing w matrix characteristics"""
+from math import ceil
 import matplotlib.pyplot as plt
 import numpy as np
-from math import ceil
-
-
-
-    
+from .factorization import MatrixSubtraction
 
 
 def plot_norm_graph(cell_lines):
-    
-    """
-    Plot bar graphs for combinations of cell lines given a list of cell line names.
-    """
+    """Plot bar graphs for combinations of cell lines given a list of cell line names."""
 
     ncols = 3
     nplots = len(cell_lines)*(len(cell_lines)-1)/2
@@ -29,7 +23,7 @@ def plot_norm_graph(cell_lines):
             cellLine2 = cell_lines[j]
             label_list = [cellLine1, cellLine2, "Difference"]
             labels.append(label_list)
-            norms.append(MatrixSubtraction(cellLine1, cellLine2))
+            norms.append(MatrixSubtraction(cellLine1, cellLine2)[0:3])
 
 
     for i, ax in enumerate(axes.reshape(-1)):
@@ -45,13 +39,6 @@ def plot_norm_graph(cell_lines):
 
     plt.savefig('norm_graphs.png')
 
-def plot_entries_scatterplot(cellLine1, cellLine2):
-    _, _, w1, w2 = MatrixSubtraction(cellLine1, cellLine2)
-    w1_edit = w1.flatten()
-    w2_edit = w2.flatten()
-    plt.scatter(w1_edit, w2_edit, marker = 'o')
-    plt.title("Flattened Matrice Graph")
-    plt.savefig('w1_w2graph.png')
 
 def plot_corr_graphs(cell_lines):
     """Plot all combinations of two w matrices against each other (still using factorizeEstimate instead of runOptim)"""
@@ -71,7 +58,7 @@ def plot_corr_graphs(cell_lines):
             cellLine2 = cell_lines[j]
             label_list = [cellLine1, cellLine2]
             labels.append(label_list)
-            _, _, w1, w2 = MatrixSubtraction(cellLine1, cellLine2)
+            _, _, _, w1, w2 = MatrixSubtraction(cellLine1, cellLine2)
             data.append([w1.flatten(), w2.flatten()])
 
 
