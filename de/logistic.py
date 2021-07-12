@@ -5,7 +5,7 @@ import numpy as np
 
 def logisticF(p, data):
     """ Generalized logistic function. """
-    return np.power(1 + p[0]*np.exp(-p[1]*data), -p[2])
+    return np.power(1 + p[0] * np.exp(-p[1] * data), -p[2])
 
 
 def invlogF(p, invdata):

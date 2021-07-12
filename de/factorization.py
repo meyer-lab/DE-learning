@@ -2,7 +2,7 @@
 
 import numpy as np
 import pandas as pd
-from scipy.stats import gmean, spearmanr
+from scipy.stats import gmean
 from scipy.special import expit, logit
 from .importData import importLINCS
 
@@ -67,10 +67,10 @@ def cellLineFactorization(cellLine):
     return w, eta, annotation[0].tolist()
 
 
-"""Uses annotation list to generate an array of common genes between two cell lines"""
 def cellLineComparison(cellLine1, cellLine2):
-    w1, eta1, annotation1 = cellLineFactorization(cellLine1)
-    w2, eta2, annotation2 = cellLineFactorization(cellLine2)
+    """Uses annotation list to generate an array of common genes between two cell lines"""
+    _, _, annotation1 = cellLineFactorization(cellLine1)
+    _, _, annotation2 = cellLineFactorization(cellLine2)
 
     line1_as_set = set(annotation1)
     intersection = line1_as_set.intersection(annotation2)
@@ -86,18 +86,18 @@ def cellLineComparison(cellLine1, cellLine2):
     for x in intersection_annotation:
         index_value2 = annotation2.index(x)
         index_list2.append(index_value2)
-    
+
     index_list1.sort()
     index_list2.sort()
     return index_list1, index_list2
 
-"""Subtracts the w-matrices of two different cell lines and subtracts them. 
-Then, it calculates the norm of the original matrices as well as difference matrix"""
-def MatrixSubtraction(cellLine1, cellLine2):
-    w1, _, _ = cellLineFactorization(cellLine1)
-    w2, _, _= cellLineFactorization(cellLine2)
-    index_list1, index_list2 = cellLineComparison(cellLine1, cellLine2)
 
+def MatrixSubtraction(cellLine1, cellLine2):
+    """Subtracts the w-matrices of two different cell lines and subtracts them.
+    Then, it calculates the norm of the original matrices as well as difference matrix"""
+    w1, _, _ = cellLineFactorization(cellLine1)
+    w2, _, _ = cellLineFactorization(cellLine2)
+    index_list1, index_list2 = cellLineComparison(cellLine1, cellLine2)
 
     w1, _, _ = cellLineFactorization(cellLine1)
     w2, _, _ = cellLineFactorization(cellLine2)
@@ -118,4 +118,3 @@ def MatrixSubtraction(cellLine1, cellLine2):
     difference_matrix = w2_final - w1_final
     diff_norm = np.linalg.norm(difference_matrix)
     return norm1, norm2, diff_norm, w1_final, w2_final
-

@@ -1,15 +1,12 @@
 """ Methods implementing the model as a fitting process. """
 
 import numpy as np
-import pandas as pd
-from scipy.stats import spearmanr
 from jax import grad, jit
 import jax.numpy as jnp
 from jax.scipy.special import expit
 from jax.config import config
 from scipy.optimize import minimize
 from .factorization import alpha, factorizeEstimate
-from .importData import importLINCS
 
 config.update("jax_enable_x64", True)
 
@@ -37,7 +34,7 @@ def cost(pIn, data, U=None, linear=False):
     else:
         costt = jnp.linalg.norm(eta[:, jnp.newaxis] * expit(w @ U) - alpha * data)
     costt += regularize(pIn, data.shape[0])
-    
+
     return costt
 
 
