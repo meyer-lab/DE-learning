@@ -59,7 +59,7 @@ def test_matrixSub():
     cellLine1 = 'A375'
     cellLine2 = 'HT29'
     
-    norm1, norm2, diff_norm = MatrixSubtraction(cellLine1, cellLine2)
+    norm1, norm2, diff_norm, _, _ = MatrixSubtraction(cellLine1, cellLine2)
 
     assert diff_norm != norm1
     assert diff_norm != norm2
