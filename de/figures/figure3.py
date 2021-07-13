@@ -2,7 +2,6 @@
 This creates Figure 2: w Network Graph
 """
 import numpy as np
-import matplotlib as plt
 from .figureCommon import subplotLabel, getSetup
 from ..graph import Network, load_w, normalize, remove, bar_graph
 
@@ -22,7 +21,7 @@ def makeFigure():
     # set title for the graph
     ax[0].set_title("w Network Graph (downstream)")
 
-    
+
     # create downstream bar graph
     bar_graph(w, "green", ax[1], "downstream")
     # set title for the graph
