@@ -38,7 +38,7 @@ def getSetup(figsize, gridd, multz=None, empts=None):
         multz = dict()
 
     # Setup plotting space and grid
-    f = plt.figure(figsize=(100,100), constrained_layout=True)
+    f = plt.figure(figsize=(100, 100), constrained_layout=True)
     gs1 = gridspec.GridSpec(*gridd, figure=f)
 
     # Get list of axis objects
