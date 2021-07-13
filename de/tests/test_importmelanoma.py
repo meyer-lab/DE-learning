@@ -18,4 +18,4 @@ class TestModel(unittest.TestCase):
         _, _, annotation1 = x_data
         _, _, annotation2 = y_data
         data = importmelanoma()
-        assert np.abs(len(data)) == np.min([len(annotation1), len(annotation2)])
+        assert np.abs(len(data)) == np.sum([len(annotation1), len(annotation2)])
