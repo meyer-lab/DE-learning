@@ -10,7 +10,7 @@ from .importData import ImportMelanoma, importmelanoma, splitnodes
 from .fitting import runOptim, reshapeParams
 
 
-def load_w(linear = False):
+def load_w(linear=False):
     """
     Loads w from csv file and returns dataframe with gene symbols attached to w values.
     """

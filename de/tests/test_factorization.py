@@ -4,8 +4,8 @@ Test the factorization model.
 import pytest
 import numpy as np
 from scipy.special import expit
-from ..factorization import factorizeEstimate, alpha
-from ..fitting import runOptim
+from ..factorization import factorizeEstimate, alpha, cellLineComparison, MatrixSubtraction, cellLineFactorization
+from ..fitting import runOptim 
 from ..importData import ImportMelanoma
 
 
@@ -41,3 +41,25 @@ def test_fit(sizze):
     data = np.random.lognormal(size=sizze)
     outt = runOptim(data, niter=20, disp=False)
     assert np.all(np.isfinite(outt))
+
+def test_cellLines():
+    """ To test and confirm most genes are overlapping between cell lines. """
+    cellLine1 = 'A375'
+    cellLine2 = 'HT29'
+    _, _, annotation1 = cellLineFactorization(cellLine1)
+    _, _, annotation2 = cellLineFactorization(cellLine2)
+
+    # assuming the function returns the list of shared genes between the two cell lines
+    shared_annotation, _ = cellLineComparison(cellLine1, cellLine2)
+    # make sure at least 50% of the genes in smaller cell line is shared between the two cell lines
+    assert np.abs(len(shared_annotation)) >= 0.5 * np.min([len(annotation1), len(annotation2)])
+
+def test_matrixSub():
+    """To test if the matrices subtract properly and if the norm has a reasonable value"""
+    cellLine1 = 'A375'
+    cellLine2 = 'HT29'
+    
+    norm1, norm2, diff_norm, _, _ = MatrixSubtraction(cellLine1, cellLine2)
+
+    assert diff_norm != norm1
+    assert diff_norm != norm2
