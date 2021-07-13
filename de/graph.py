@@ -183,13 +183,13 @@ def Network(w, w_abs, w_max, ax):
     remove_isolates(G)
 
     pos = nx.spring_layout(G, k=0.2)
-    
+
     # draw the nodes, edges and labels
     set_nodes(G, pos, ax)
     set_edges(G, w_abs, w_max, pos, ax)
     set_labels(G, pos, ax)
     make_legend(G, pos, ax)
-    
+
     return G
 
 
