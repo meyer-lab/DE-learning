@@ -6,7 +6,7 @@ import matplotlib as plt
 import matplotlib.patches as mpatches
 import matplotlib.lines as mlines
 import networkx as nx
-from .importData import ImportMelanoma, importmelanoma, splitnodes
+from .importData import ImportMelanoma, importgenes, splitnodes
 from .fitting import runOptim, reshapeParams
 
 
@@ -163,13 +163,14 @@ def set_labels(dir_graph, pos, ax):
     nx.draw_networkx_labels(dir_graph, pos, labels=labels, font_size=48, ax=ax)
     return dir_graph
 
-def make_legend(dir_graph, pos, ax):
-    purple_patch = mpatches.Patch(color = "darkorchid", label = "Pre-resistant")
-    green_patch = mpatches.Patch(color = "mediumturquoise", label = "Resistant")
-    grey_patch = mpatches.Patch(color = "grey", label = "Undetermined")
-    blue_line = mlines.Line2D([],[],color = "blue", label = "Inhibition")
-    red_line = mlines.Line2D([],[],color = "red", label = "Activation")
-    ax.legend(handles=[purple_patch,green_patch,grey_patch,red_line,blue_line], prop=dict(size=50))
+def make_legend(dir_graph, ax):
+    """ This creates legends for nodes and edges in Network """
+    purple_patch = mpatches.Patch(color="darkorchid", label="Pre-resistant")
+    green_patch = mpatches.Patch(color="mediumturquoise", label="Resistant")
+    grey_patch = mpatches.Patch(color="grey", label="Undetermined")
+    blue_line = mlines.Line2D([], [], color="blue", label="Inhibition")
+    red_line = mlines.Line2D([], [], color="red", label="Activation")
+    ax.legend(handles=[purple_patch, green_patch, grey_patch, red_line, blue_line], prop=dict(size=50))
     return dir_graph
 
 def Network(w, w_abs, w_max, ax):
@@ -188,7 +189,7 @@ def Network(w, w_abs, w_max, ax):
     set_nodes(G, pos, ax)
     set_edges(G, w_abs, w_max, pos, ax)
     set_labels(G, pos, ax)
-    make_legend(G, pos, ax)
+    make_legend(G, ax)
 
     return G
 

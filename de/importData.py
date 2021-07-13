@@ -127,17 +127,16 @@ def cell_type_perturbations(data, inst_info, gene_info, cell_id):
     out_celltype = out_celltype[[x for x in out_celltype if x not in ["LUCIFERASE"]] + ["LUCIFERASE"]]
     return out_celltype
 
-def importmelanoma():
+def importgenes():
     """ Imports all Torre genes with Fig 5D data and merges into one matrix"""
     path_here = dirname(dirname(__file__))
     x_data = pd.read_csv(join(path_here, "de/data/sumarizedResults.txt"), header=0, sep = "\t")
-    x_data = pd.DataFrame(x_data, columns = ["target", "gRNA", "log2_NGFRhi_FC", "meanNumCells", "meanlFC", "sdlFC", "selFC"])
-    xdata = x_data[["target", "meanlFC"]] #selects only x values
+    xdata = pd.DataFrame(x_data, columns = ["target", "meanlFC"])
     y_data = pd.read_csv(join(path_here, "de/data/colonyGrowthResults_allhits.txt"), header=0,sep = "\t")
-    y_data = pd.DataFrame(y_data, columns = ["target", "totalRcells_lFC", "Rcolonies_lFC", "survivingcells_lFC", "EffectOnScreen_DP", "EffectOnScreen_VemR", "DPtier", "VemRtier"])
-    ydata = y_data[["target", "Rcolonies_lFC"]] #selects only y values
-    #merges data for genes with both meanlFC_IF and Rcolonies_lFC values 
-    data = pd.merge(xdata, ydata, on="target",how="inner") 
+    ydata = pd.DataFrame(y_data, columns = ["target", "Rcolonies_lFC"])
+
+    #merges data for genes with both meanlFC_IF and Rcolonies_lFC values
+    data = pd.merge(xdata, ydata, on="target",how="inner")
     return data
 
 def splitnodes(data):
