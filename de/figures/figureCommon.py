@@ -38,7 +38,7 @@ def getSetup(figsize, gridd, multz=None, empts=None):
         multz = dict()
 
     # Setup plotting space and grid
-    f = plt.figure(figsize=(100, 100), constrained_layout=True)
+    f = plt.figure(figsize=figsize, constrained_layout=True)
     gs1 = gridspec.GridSpec(*gridd, figure=f)
 
     # Get list of axis objects
@@ -55,10 +55,10 @@ def getSetup(figsize, gridd, multz=None, empts=None):
     return (ax, f)
 
 
-def subplotLabel(axs):
+def subplotLabel(axs, fntsize=16):
     """ Place subplot labels on figure. """
     for ii, ax in enumerate(axs):
-        ax.text(-0.2, 1.2, ascii_lowercase[ii], transform=ax.transAxes, fontsize=50, fontweight="bold", va="top")
+        ax.text(-0.2, 1.2, ascii_lowercase[ii], transform=ax.transAxes, fontsize=fntsize, fontweight="bold", va="top")
 
 
 def overlayCartoon(figFile, cartoonFile, x, y, scalee=1):
