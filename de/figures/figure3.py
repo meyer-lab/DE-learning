@@ -21,7 +21,6 @@ def makeFigure():
     # set title for the graph
     ax[0].set_title("w Network Graph (downstream)")
 
-
     # create downstream bar graph
     bar_graph(w, "green", ax[1], "downstream")
     # set title for the graph
