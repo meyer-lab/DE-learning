@@ -28,6 +28,7 @@ def reshapeParams(p, nGenes, nCellLines=1):
 def cost(pIn, data, U=None, linear=False):
     """ Returns SSE between model and experimental RNAseq data. """
     if U is None:
+<<<<<<< HEAD
         U = [np.copy(d) for d in data]
         for ii in range(len(U)):
             np.fill_diagonal(U[ii], 0.0)
@@ -43,6 +44,19 @@ def cost(pIn, data, U=None, linear=False):
     
     costt += regularize(pIn, data[0].shape[0], len(data))
     
+=======
+        U = np.copy(data)
+        np.fill_diagonal(U, 0.0)
+
+    w, eta = reshapeParams(pIn, data.shape[0])
+
+    if linear:
+        costt = jnp.linalg.norm(eta[:, jnp.newaxis] * (w @ U) - alpha * data)
+    else:
+        costt = jnp.linalg.norm(eta[:, jnp.newaxis] * expit(w @ U) - alpha * data)
+    costt += regularize(pIn, data.shape[0])
+
+>>>>>>> d1ee4c1a36dbc5474ff4699b6ada90f90485430a
     return costt
 
 
