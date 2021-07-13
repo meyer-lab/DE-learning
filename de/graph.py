@@ -123,7 +123,7 @@ def set_nodes(dir_graph, pos, ax):
     #color nodes based on pre/resistance
     color_list = []
     labels = nx.get_node_attributes(dir_graph, "gene")
-    for key, gene in labels.items():
+    for _, gene in labels.items():
         if gene in pre_resistant_list:
             color_list.append("darkorchid")
         elif gene in full_resistant_list:
