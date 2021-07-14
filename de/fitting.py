@@ -1,12 +1,14 @@
 """ Methods implementing the model as a fitting process. """
 
 import numpy as np
+import pandas as pd
 from jax import grad, jit
 import jax.numpy as jnp
 from jax.scipy.special import expit
 from jax.config import config
 from scipy.optimize import minimize
-from .factorization import alpha, factorizeEstimate
+from .factorization import alpha, factorizeEstimate, cellLineComparison
+from .importData import importLINCS
 
 config.update("jax_enable_x64", True)
 
@@ -27,6 +29,8 @@ def reshapeParams(p, nGenes, nCellLines=1):
 
 def cost(pIn, data, U=None, linear=False):
     """ Returns SSE between model and experimental RNAseq data. """
+    if isinstance(data, np.ndarray):
+        data = [data]
     if U is None:
         U = [np.copy(d) for d in data]
         for ii in range(len(U)):
@@ -79,3 +83,26 @@ def runOptim(data, niter=2000, disp=0, linear=False):
     assert (res.success) or (res.nit == niter)
 
     return res.x
+
+def mergedFitting(cellLine1, cellLine2):
+    """Given two cell lines, compute the cost of fitting each of them individually and the cost of fitting a shared w matrix."""
+    index_list1, index_list2 = cellLineComparison(cellLine1, cellLine2)
+    
+    data1, _ = importLINCS(cellLine1)
+    data2, _ = importLINCS(cellLine2)
+    data1_df = pd.DataFrame(data1)
+    data2_df = pd.DataFrame(data2)
+    data1_edited = data1_df.iloc[index_list1, index_list1]
+    data2_edited = data2_df.iloc[index_list2, index_list2]
+    data1_final = data1_edited.values
+    data2_final = data2_edited.values
+
+    w1 = runOptim(data1_final)
+    w2 = runOptim(data2_final)
+    w_shared = runOptim([data1_final, data2_final])
+
+    cost1 = cost(w1, data1_final)
+    cost2 = cost(w2, data2_final)
+    cost_shared = cost(w_shared, [data1_final, data2_final])
+
+    return cost1, cost2, cost_shared
