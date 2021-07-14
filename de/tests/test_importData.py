@@ -7,7 +7,7 @@ import unittest
 import pytest
 import pandas as pd
 import numpy as np
-from ..importData import importRNAseqKO, ImportMelanoma, prepData, importLINCS
+from ..importData import importRNAseqKO, ImportMelanoma, prepData, importLINCS, importgenes
 
 
 class TestModel(unittest.TestCase):
@@ -30,6 +30,12 @@ class TestModel(unittest.TestCase):
         data = prepData()
         self.assertTrue(isinstance(data, pd.DataFrame))
         self.assertEqual(data.shape, (63677, 85))
+
+    def test_merge(self):
+        """Tests that merged DataFrame has three columns: target, meanlFC, and Rcolonies_lFC"""
+        matrix = importgenes()
+        self.assertTrue(isinstance(matrix, pd.DataFrame))
+        self.assertEqual(matrix.shape[1], 3)
 
 
 @pytest.mark.parametrize("cellLine", ["A375", "A549", "HA1E", "MCF7"])
