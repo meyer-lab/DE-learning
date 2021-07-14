@@ -24,7 +24,7 @@ matplotlib.rcParams['legend.borderpad'] = 0.35
 def getSetup(figsize, gridd, multz=None, empts=None):
     """ Establish figure set-up with subplots. """
     sns.set(style="whitegrid",
-            font_scale=0.7,
+            font_scale=5,
             color_codes=True,
             palette="colorblind",
             rc={'grid.linestyle': 'dotted',
@@ -55,10 +55,10 @@ def getSetup(figsize, gridd, multz=None, empts=None):
     return (ax, f)
 
 
-def subplotLabel(axs):
+def subplotLabel(axs, fntsize=16):
     """ Place subplot labels on figure. """
     for ii, ax in enumerate(axs):
-        ax.text(-0.2, 1.2, ascii_lowercase[ii], transform=ax.transAxes, fontsize=16, fontweight="bold", va="top")
+        ax.text(-0.2, 1.2, ascii_lowercase[ii], transform=ax.transAxes, fontsize=fntsize, fontweight="bold", va="top")
 
 
 def overlayCartoon(figFile, cartoonFile, x, y, scalee=1):
