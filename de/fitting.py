@@ -13,12 +13,13 @@ from .importData import importLINCS
 config.update("jax_enable_x64", True)
 
 
-def reshapeParams(p, nGenes, nCellLines=1):
+def reshapeParams(p, nGenes):
     """Reshape a vector of parameters into the variables we know."""
     w = jnp.reshape(p[:(nGenes * nGenes)], (nGenes, nGenes))
+    nCellLines = len(p)/nGenes - nGenes
 
     eta_list = [p[-nGenes:]]
-    for i in range(1, nCellLines):
+    for i in range(1, int(nCellLines)):
         eta = p[-nGenes*(i+1):-nGenes*(i)]
         eta_list.insert(0, eta)
 
@@ -36,7 +37,7 @@ def cost(pIn, data, U=None, linear=False):
         for ii in range(len(U)):
             np.fill_diagonal(U[ii], 0.0)
 
-    w, eta = reshapeParams(pIn, data[0].shape[0], len(data))
+    w, eta = reshapeParams(pIn, data[0].shape[0])
 
     costt = 0
     for i in range(len(data)):
@@ -45,14 +46,14 @@ def cost(pIn, data, U=None, linear=False):
         else:
             costt += jnp.linalg.norm(eta[i][:, jnp.newaxis] * expit(w @ U[i]) - alpha * data[i])
     
-    costt += regularize(pIn, data[0].shape[0], len(data))
+    costt += regularize(pIn, data[0].shape[0])
     
     return costt
 
 
-def regularize(pIn, nGenes, nCellLines, strength=0.1):
+def regularize(pIn, nGenes, strength=0.1):
     """Calculate the regularization."""
-    w = reshapeParams(pIn, nGenes, nCellLines)[0]
+    w = reshapeParams(pIn, nGenes)[0]
 
     ll = jnp.linalg.norm(w, ord=1)
     ll += jnp.linalg.norm(w.T @ w - jnp.identity(w.shape[0]))
@@ -81,7 +82,7 @@ def runOptim(data, niter=2000, disp=0, linear=False):
 
     res = minimize(cost, x0, args=(data, U, linear), method="L-BFGS-B", jac=cost_GF, options={"maxiter": niter, "disp": disp})
     assert (res.success) or (res.nit == niter)
-
+        
     return res.x
 
 def mergedFitting(cellLine1, cellLine2):
