@@ -39,7 +39,7 @@ def makeFigure():
 
     full, pre, rand = cluster_dist()
     # TODO: find the equivalent values of the w matrix for full, pre, and random indexes, and use ax[4].hist to plot them.
-    ax[4].hist()
+    # ax[4].hist()
     ax[5].axis('off')
     return f
 
