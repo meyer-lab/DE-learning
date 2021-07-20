@@ -35,6 +35,7 @@ def cost(pIn, data, U=None, linear=False):
         costt = jnp.linalg.norm(eta[:, jnp.newaxis] * expit(w @ U) - alpha * data)
     costt += regularize(pIn, data.shape[0])
 
+    print(costt)
     return costt
 
 
@@ -43,7 +44,7 @@ def regularize(pIn, nGenes, strength=0.1):
     w = reshapeParams(pIn, nGenes)[0]
 
     ll = jnp.linalg.norm(w, ord=1)
-    ll += jnp.linalg.norm(w.T @ w - jnp.identity(w.shape[0]))
+    # ll += jnp.linalg.norm(w.T @ w - jnp.identity(w.shape[0]))
     return strength * ll
 
 
