@@ -270,8 +270,24 @@ def loop_figure(loop, G_1):
     set_edges(G_test, w_abs, w_max, pos, ax=None)
     set_labels(G_test, pos, ax=None)
 
-def cluster(G, thickness):
-    """
-    Calculates clustering coefficient for Networkx graph
-    """
-    nx.clustering(G, nodes=G.number_of_nodes, weight=thickness)
+def all_w(linear=False):
+    path_here = dirname(dirname(__file__))
+
+    data = ImportMelanoma()
+    ps = runOptim(data, niter=400, disp=True, linear=linear)
+    w = reshapeParams(ps, data.shape[0])[0]
+    control = ImportMelanoma()[:, -1]
+    for i in range(len(control)):
+        w.iloc[:, i] = w.iloc[:, i] * control[i]
+    w = w.drop(["POLR2A"], axis=0)
+    w = w.drop(["POLR2A"], axis=1)
+    m = w.columns
+    w_2 = w.to_numpy()
+    for i in range(len(m)):
+        if w_2[0, i] == 0:
+            w = w.drop([m[i]], axis=0)
+            w = w.drop([m[i]], axis=1)
+    return w
+
+
+    
