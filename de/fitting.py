@@ -80,7 +80,7 @@ def runOptim(data, niter=2000, disp=0, linear=False):
         outt = cost_grad(*args)
         return np.array(outt)
 
-    res = minimize(cost, x0, args=(data, U, linear), method="L-BFGS-B", jac=cost_GF, options={"maxiter": niter, "disp": disp})
+    res = minimize(cost, x0, args=(data, U, linear), method="CG", jac=cost_GF, options={"maxiter": niter, "disp": disp})
     assert (res.success) or (res.nit == niter)
         
     return res.x
@@ -99,7 +99,7 @@ def mergedFitting(cellLine1, cellLine2):
     data2_final = data2_edited.values
     shared_data = [data1_final, data2_final]
 
-    p = runOptim(shared_data, disp=1)
+    p = runOptim(shared_data, niter=3000)
 
     w_shared, eta_list = reshapeParams(p, shared_data[0].shape[0])
     cost_1 = cost(np.concatenate((w_shared.flatten(), eta_list[0])), data1_final)
