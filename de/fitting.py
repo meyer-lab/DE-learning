@@ -23,7 +23,7 @@ def reshapeParams(p, nGenes):
         eta = p[-nGenes*(i+1):-nGenes*(i)]
         eta_list.insert(0, eta)
 
-    assert eta_list[0].size == w.shape[0]
+    assert len(eta_list[0]) == w.shape[0]
 
     return w, eta_list
 
@@ -81,7 +81,7 @@ def runOptim(data, niter=2000, disp=0, linear=False):
         return np.array(outt)
 
     res = minimize(cost, x0, args=(data, U, linear), method="L-BFGS-B", jac=cost_GF, options={"maxiter": niter, "disp": disp})
-    # #assert (res.success) or (res.nit == niter)
+    #assert (res.success) or (res.nit == niter)
         
     return res.x
 
@@ -99,10 +99,11 @@ def mergedFitting(cellLine1, cellLine2):
     data2_final = data2_edited.values
     shared_data = [data1_final, data2_final]
 
-    w = runOptim(shared_data)
-    w_shared, eta_list = reshapeParams(w, shared_data[0].shape[0])
-    cost_1 = cost([w_shared.flatten(), eta_list[0]], data1_final)
-    cost_2 = cost([w_shared.flatten(), eta_list[1]], data2_final)
+    p = runOptim(shared_data)
+
+    w_shared, eta_list = reshapeParams(p, shared_data[0].shape[0])
+    cost_1 = cost(np.concatenate((w_shared.flatten(), eta_list[0])), data1_final)
+    cost_2 = cost(np.concatenate((w_shared.flatten(), eta_list[1])), data2_final)
     cost_shared = cost(w_shared, [data1_final, data2_final])
 
     return cost_1, cost_2, cost_shared
