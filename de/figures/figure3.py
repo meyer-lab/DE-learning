@@ -9,7 +9,7 @@ from ..graph import Network, load_w, normalize, remove, bar_graph
 def makeFigure():
     """ Get a list of the axis objects and create a figure. """
     # Get list of axis objects
-    ax, f = getSetup((12, 12), (2, 2))
+    ax, f = getSetup((100, 100), (2, 2))
     # load w
     w = load_w()
     w = normalize(w)
@@ -34,5 +34,5 @@ def makeFigure():
     # set title for the graph
     ax[3].set_title("Bar Graph (upstream)")
     # Add subplot labels
-    subplotLabel(ax)
+    subplotLabel(ax, fntsize=50)
     return f

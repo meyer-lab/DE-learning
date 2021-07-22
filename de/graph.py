@@ -2,19 +2,22 @@
 from os.path import join, dirname
 import numpy as np
 import pandas as pd
+import matplotlib as plt
+import matplotlib.patches as mpatches
+import matplotlib.lines as mlines
 import networkx as nx
-from .importData import ImportMelanoma
+from .importData import ImportMelanoma, importgenes, splitnodes
 from .fitting import runOptim, reshapeParams
 
 
-def load_w():
+def load_w(linear=False):
     """
     Loads w from csv file and returns dataframe with gene symbols attached to w values.
     """
     path_here = dirname(dirname(__file__))
 
     data = ImportMelanoma()
-    ps = runOptim(data, niter=400, disp=True)
+    ps = runOptim(data, niter=400, disp=True, linear=linear)
     w = reshapeParams(ps, data.shape[0])[0]
     genes = np.loadtxt(join(path_here, "de/data/node_Index.csv"), dtype=str)
 
@@ -105,10 +108,32 @@ def set_nodes(dir_graph, pos, ax):
     Given a directed graph and pos, then draw the corresponding node based on pagerank value.
     """
     nodes = dir_graph.nodes()
-    nodesize = [dir_graph.nodes[u]["pagerank"] * 20000 for u in nodes]
+    nodesize = [dir_graph.nodes[u]["pagerank"] * 260000 for u in nodes]
 
+def set_nodes(dir_graph, pos, ax):
+    """
+    Given a directed graph and pos, then draw the corresponding node based on pagerank value.
+    """
+    nodes = dir_graph.nodes()
+    nodesize = [dir_graph.nodes[u]["pagerank"] * 260000 for u in nodes]
+
+    pre_resistant_list = ["JUN", "BRD2", "STK11", "PKN2", "NFAT5", "KMT2D", "ADCK3", "FOSL1", "CSK", "BRD8", "CBFB", "TADA2B", "DSTYK", "JUNB", "LATS2", "FEZF2", "MITF", "RUNX3", "SUV420H1", "SOX10", "DOT1L", "PRKRIR", 'FEZF2', 'SOX10', 'ADCK3', 'BRD8', 'CBFB', 'CSK', 'DOT1L', 'DSTYK', 'FOSL1', 'JUN', 'JUNB', 'KMT2D', 'LATS2', 'MITF', 'NFAT5', 'PKN2', 'PRKRIR', 'RUNX3', 'STK11', 'SUV420H1'] 
+    full_resistant_list = ["MAP3K1", "MAP2K7", "NSD1", "KDM1A", "EGFR", "EP300", "SRF", "PRKAA1", "GATA4", "MYBL1", "MTF1", 'EGFR', 'EP300', 'GATA4', 'KDM1A', 'MAP2K7', 'MAP3K1', 'MTF1', 'MYBL1', 'NSD1', 'PRKAA1', 'SRF']
+    unknown = []
+    #color nodes based on pre/resistance
+    color_list = []
+    labels = nx.get_node_attributes(dir_graph, "gene")
+    for _, gene in labels.items():
+        if gene in pre_resistant_list:
+            color_list.append("darkorchid")
+        elif gene in full_resistant_list:
+            color_list.append("mediumturquoise")
+        else: 
+            unknown.append(gene)
+            color_list.append("grey")
+    
     # draw the nodes
-    nx.draw_networkx_nodes(dir_graph, pos, node_size=nodesize, ax=ax)
+    nx.draw_networkx_nodes(dir_graph, pos, ax=ax, node_size=nodesize, node_color=color_list, alpha=0.65)
     return dir_graph
 
 
@@ -124,7 +149,7 @@ def set_edges(dir_graph, w_abs, w_max, pos, ax):
     # to use this as alpha, normalize between 0.2, 1.0
     normalized_thickness = ((thickness - np.min(thickness)) / np.ptp(thickness)) * 0.8 + 0.2
     # draw the edges
-    nx.draw_networkx_edges(dir_graph, pos, edgelist=edges, width=thickness, alpha=normalized_thickness, edge_color=colors, ax=ax)
+    nx.draw_networkx_edges(dir_graph, pos, edgelist=edges, width=thickness, edge_color=colors, arrowsize=65, ax=ax, alpha=normalized_thickness)
     return dir_graph
 
 
@@ -135,9 +160,18 @@ def set_labels(dir_graph, pos, ax):
     labels = nx.get_node_attributes(dir_graph, "gene")
 
     # draw the labels
-    nx.draw_networkx_labels(dir_graph, pos, labels=labels, font_size=6, ax=ax)
+    nx.draw_networkx_labels(dir_graph, pos, labels=labels, font_size=48, ax=ax)
     return dir_graph
 
+def make_legend(dir_graph, ax):
+    """ This creates legends for nodes and edges in Network """
+    purple_patch = mpatches.Patch(color="darkorchid", label="Pre-resistant")
+    green_patch = mpatches.Patch(color="mediumturquoise", label="Resistant")
+    grey_patch = mpatches.Patch(color="grey", label="Undetermined")
+    blue_line = mlines.Line2D([], [], color="blue", label="Inhibition")
+    red_line = mlines.Line2D([], [], color="red", label="Activation")
+    ax.legend(handles=[purple_patch, green_patch, grey_patch, red_line, blue_line], prop=dict(size=50))
+    return dir_graph
 
 def Network(w, w_abs, w_max, ax):
     """
@@ -149,12 +183,13 @@ def Network(w, w_abs, w_max, ax):
     add_edges(G, w, w_abs)
     remove_isolates(G)
 
-    pos = nx.nx_pydot.pydot_layout(G, prog="fdp")
+    pos = nx.spring_layout(G, k=0.2)
 
     # draw the nodes, edges and labels
     set_nodes(G, pos, ax)
     set_edges(G, w_abs, w_max, pos, ax)
     set_labels(G, pos, ax)
+    make_legend(G, ax)
 
     return G
 
