@@ -2,6 +2,7 @@
 This creates Figure 2: w Network Graph
 """
 import numpy as np
+from networkx.algorithms.shortest_paths.weighted import single_source_dijkstra
 from .figureCommon import subplotLabel, getSetup
 from ..graph import Network, load_w, normalize, remove, bar_graph
 
@@ -36,3 +37,20 @@ def makeFigure():
     # Add subplot labels
     subplotLabel(ax, fntsize=50)
     return f
+
+def cluster_dist(G):
+    w = load_w()
+    fullR = w[26, 1, 69, 48, 42, 31, 0, 18, 9, 2, 4, 71, 13, 27, 32, 17, 39, 61, 70, 64, 12, 54]
+    preR = w[36, 35, 46, 28, 15, 16, 68, 52, 20, 41, 40, 16, 46]
+    full = []
+    pre = []
+    rand = []
+
+    for _ in range(50):
+        full.append(np.random.choice(fullR, 2))
+        pre.append(np.random.choice(preR, 2))
+        rand.append(np.concatenate([np.random.choice(fullR,1), np.random.choice(preR, 1)]))
+    full_dij = single_source_dijkstra(G, source=str(full[0]), target=str(full[1]), weight=True)
+    pre_dij = single_source_dijkstra(G, source=pre[0], target=pre[1], weight=True)
+    rand_dij = single_source_dijkstra(G, source=rand[0], target=rand[1], weight=True)
+    return full_dij, pre_dij, rand_dij
