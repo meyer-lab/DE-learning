@@ -2,9 +2,10 @@
 This creates Figure 2: w Network Graph
 """
 import numpy as np
+import networkx as nx
 from networkx.algorithms.shortest_paths.weighted import single_source_dijkstra
 from .figureCommon import subplotLabel, getSetup
-from ..graph import Network, load_w, normalize, remove, bar_graph
+from ..graph import Network, load_w, normalize, remove, bar_graph, add_nodes, add_edges, remove_isolates
 
 
 def makeFigure():
@@ -38,19 +39,32 @@ def makeFigure():
     subplotLabel(ax, fntsize=50)
     return f
 
-def cluster_dist(G):
-    w = load_w()
-    fullR = w[26, 1, 69, 48, 42, 31, 0, 18, 9, 2, 4, 71, 13, 27, 32, 17, 39, 61, 70, 64, 12, 54]
-    preR = w[36, 35, 46, 28, 15, 16, 68, 52, 20, 41, 40, 16, 46]
-    full = []
-    pre = []
-    rand = []
+def cluster_dist():
 
-    for _ in range(50):
-        full.append(np.random.choice(fullR, 2))
-        pre.append(np.random.choice(preR, 2))
-        rand.append(np.concatenate([np.random.choice(fullR,1), np.random.choice(preR, 1)]))
-    full_dij = single_source_dijkstra(G, source=str(full[0]), target=str(full[1]), weight=True)
-    pre_dij = single_source_dijkstra(G, source=pre[0], target=pre[1], weight=True)
-    rand_dij = single_source_dijkstra(G, source=rand[0], target=rand[1], weight=True)
-    return full_dij, pre_dij, rand_dij
+    full = ["JUN", "BRD2", "STK11", "PKN2", "NFAT5"] 
+    pre = ["MAP3K1", "MAP2K7", "NSD1", "KDM1A", "EGFR"]
+
+    w = load_w()
+    w = normalize(w)
+    w = remove(w)
+
+    w_abs = np.absolute(w.to_numpy())
+    G = nx.DiGraph()
+    # add nodes and edges
+    add_nodes(G, w, w_abs)
+    add_edges(G, w, w_abs)
+    remove_isolates(G)
+
+    w_full = []
+    w_pre = []
+    w_rand = []
+
+    for _ in range(5):
+        temp1 = np.random.choice(full, 2)
+        w_full.append(single_source_dijkstra(G, source=temp1[0], target=temp1[1], weight=True))
+        temp2 = np.random.choice(pre, 2)
+        w_pre.append(single_source_dijkstra(G, source=temp2[0], target=temp2[1], weight=True))
+        temp3 = np.concatenate([np.random.choice(full,1), np.random.choice(pre, 1)])
+        w_rand.append(single_source_dijkstra(G, source=temp3[0], target=temp3[1], weight=True))
+
+    return w_full, w_pre, w_rand
