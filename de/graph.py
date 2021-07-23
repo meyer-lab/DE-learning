@@ -102,14 +102,6 @@ def remove_isolates(dir_graph):
 
     return dir_graph
 
-
-def set_nodes(dir_graph, pos, ax):
-    """
-    Given a directed graph and pos, then draw the corresponding node based on pagerank value.
-    """
-    nodes = dir_graph.nodes()
-    nodesize = [dir_graph.nodes[u]["pagerank"] * 260000 for u in nodes]
-
 def set_nodes(dir_graph, pos, ax):
     """
     Given a directed graph and pos, then draw the corresponding node based on pagerank value.

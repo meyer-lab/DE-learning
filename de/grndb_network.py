@@ -3,6 +3,8 @@ from os.path import join, dirname
 import networkx as nx
 import pandas as pd
 import numpy as np
+import matplotlib.patches as mpatches
+import matplotlib.lines as mlines
 from .graph import remove_isolates, set_nodes, set_labels
 
 def load_w_GRNdb():
@@ -34,8 +36,8 @@ def pagerank_GRNdb(w, num_iterations: int = 100, d: float = 0.85):
     w = np.absolute(w)  # PageRank only works with unsigned networks, so we'll take the absolute value.
     N = w.shape[1]
     for i in range(N):
-        if sum(w.iloc[:, i]) != 0: # avoid dividing by zero
-            w.iloc[:, i] /= sum(w.iloc[:, i])
+        if sum(w[:, i]) != 0: # avoid dividing by zero
+            w[:, i] /= sum(w[:, i])
     v = np.random.rand(N, 1)
     v = v / np.linalg.norm(v, 1)
     w_hat = (d * w + (1 - d) / N)
@@ -43,17 +45,17 @@ def pagerank_GRNdb(w, num_iterations: int = 100, d: float = 0.85):
         v = w_hat @ v
     return v
 
-def add_nodes_GRNdb(dir_graph, w, w_abs):
+def add_nodes_GRNdb(dir_graph, w):
     """
     Given a directed graph and w matrix, adds a node to the directed graph for each gene.
     """
-    w_abs = np.copy(w_abs)
-    v = pagerank_GRNdb(w_abs)
+    w_np = np.copy(w.to_numpy(dtype=np.float64))
+    v = pagerank_GRNdb(w_np)
     for i in range(len(v)):
         dir_graph.add_node(i, gene=w.columns[i], pagerank=v[i])
     return dir_graph
 
-def add_edges_GRNdb(dir_graph, w, w_abs):
+def add_edges_GRNdb(dir_graph, w):
     """
     Given a directed graph and w matrix, adds an unweighted, directed edge from gene j to gene i representing an interaction, if it exists.
     """
@@ -75,15 +77,25 @@ def set_edges_GRNdb(dir_graph, pos, ax):
     nx.draw_networkx_edges(dir_graph, pos, edgelist=edges, edge_color=colors, arrowsize=65, ax=ax)
     return dir_graph
 
-def Network_GRNdb(w, w_abs, w_max, ax):
+def make_legend_GRNdb(dir_graph, ax):
     """
-    Given w, w_abs, w_max and ax, draw the corresponding Networkx graph.
+    Given a directed graph, creates legend for node and edge colors.
+    """
+    purple_patch = mpatches.Patch(color="darkorchid", label="Pre-resistant")
+    green_patch = mpatches.Patch(color="mediumturquoise", label="Resistant")
+    grey_patch = mpatches.Patch(color="grey", label="Undetermined")
+    ax.legend(handles=[purple_patch, green_patch, grey_patch], prop=dict(size=50))
+    return dir_graph
+
+def Network_GRNdb(w, ax):
+    """
+    Given w and ax, draw the corresponding Networkx graph.
     """
     G = nx.DiGraph()
 
     # add nodes and edges
-    add_nodes_GRNdb(G, w, w_abs)
-    add_edges_GRNdb(G, w, w_abs)
+    add_nodes_GRNdb(G, w)
+    add_edges_GRNdb(G, w)
 
     # remove unconnected nodes
     remove_isolates(G)
@@ -94,7 +106,13 @@ def Network_GRNdb(w, w_abs, w_max, ax):
     set_nodes(G, pos, ax)
     set_edges_GRNdb(G, pos, ax)
     set_labels(G, pos, ax)
-    # make_legend(G, ax)
+    make_legend_GRNdb(G, ax)
 
+    # remove self-interacting loops
+    m = list(nx.simple_cycles(G))
+    for l in m:
+        if len(l) == 1:
+            G.remove_edges_from([(l[0], l[0])])
+    
     return G
 
