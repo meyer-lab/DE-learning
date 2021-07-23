@@ -37,11 +37,6 @@ def makeFigure():
     ax[3].set_title("Bar Graph (upstream)")
     # Add subplot labels
     subplotLabel(ax, fntsize=50)
-    
-    full, pre, rand = cluster_dist()
-    # TODO: find the equivalent values of the w matrix for full, pre, and random indexes, and use ax[4].hist to plot them 
-    # ax[4].hist()
-    ax[5].axis('off')
     return f
 
 def cluster_dist(G):

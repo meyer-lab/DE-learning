@@ -134,6 +134,7 @@ def importgenes():
     xdata = pd.DataFrame(x_data, columns = ["target", "meanlFC"])
     y_data = pd.read_csv(join(path_here, "de/data/colonyGrowthResults_allhits.txt"), header=0,sep = "\t")
     ydata = pd.DataFrame(y_data, columns = ["target", "Rcolonies_lFC"])
+
     #merges data for genes with both meanlFC_IF and Rcolonies_lFC values 
     data = pd.merge(xdata, ydata, on="target",how="inner") 
     return data
