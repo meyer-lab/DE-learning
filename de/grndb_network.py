@@ -4,8 +4,7 @@ import networkx as nx
 import pandas as pd
 import numpy as np
 import matplotlib.patches as mpatches
-import matplotlib.lines as mlines
-from .graph import remove_isolates, set_nodes, set_labels
+from .graph import remove_isolates, set_labels
 
 def load_w_GRNdb():
     """
@@ -66,6 +65,32 @@ def add_edges_GRNdb(dir_graph, w):
                 dir_graph.add_edge(j, i, color="green")
     return dir_graph
 
+def set_nodes_GRNdb(dir_graph, pos, ax):
+    """
+    Given a directed graph and pos, then draw the corresponding node based on pagerank value.
+    """
+    nodes = dir_graph.nodes()
+    nodesize = [dir_graph.nodes[u]["pagerank"] * (14744338*260000) for u in nodes]
+
+    pre_resistant_list = ["JUN", "BRD2", "STK11", "PKN2", "NFAT5", "KMT2D", "ADCK3", "FOSL1", "CSK", "BRD8", "CBFB", "TADA2B", "DSTYK", "JUNB", "LATS2", "FEZF2", "MITF", "RUNX3", "SUV420H1", "SOX10", "DOT1L", "PRKRIR", 'FEZF2', 'SOX10', 'ADCK3', 'BRD8', 'CBFB', 'CSK', 'DOT1L', 'DSTYK', 'FOSL1', 'JUN', 'JUNB', 'KMT2D', 'LATS2', 'MITF', 'NFAT5', 'PKN2', 'PRKRIR', 'RUNX3', 'STK11', 'SUV420H1']
+    full_resistant_list = ["MAP3K1", "MAP2K7", "NSD1", "KDM1A", "EGFR", "EP300", "SRF", "PRKAA1", "GATA4", "MYBL1", "MTF1", 'EGFR', 'EP300', 'GATA4', 'KDM1A', 'MAP2K7', 'MAP3K1', 'MTF1', 'MYBL1', 'NSD1', 'PRKAA1', 'SRF']
+    unknown = []
+    #color nodes based on pre/resistance
+    color_list = []
+    labels = nx.get_node_attributes(dir_graph, "gene")
+    for _, gene in labels.items():
+        if gene in pre_resistant_list:
+            color_list.append("darkorchid")
+        elif gene in full_resistant_list:
+            color_list.append("mediumturquoise")
+        else:
+            unknown.append(gene)
+            color_list.append("grey")
+
+    # draw the nodes
+    nx.draw_networkx_nodes(dir_graph, pos, ax=ax, node_size=nodesize, node_color=color_list, alpha=0.65)
+    return dir_graph
+
 def set_edges_GRNdb(dir_graph, pos, ax):
     """
     Given a directed graph, draws singly colored, unweighted, directed edges to represent interactions.
@@ -103,7 +128,7 @@ def Network_GRNdb(w, ax):
     pos = nx.spring_layout(G, k=0.2)
 
     # draw the nodes, edges, labels and legend
-    set_nodes(G, pos, ax)
+    set_nodes_GRNdb(G, pos, ax)
     set_edges_GRNdb(G, pos, ax)
     set_labels(G, pos, ax)
     make_legend_GRNdb(G, ax)

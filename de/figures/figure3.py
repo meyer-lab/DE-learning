@@ -4,12 +4,12 @@ This creates Figure 2: w Network Graph
 import numpy as np
 from .figureCommon import subplotLabel, getSetup
 from ..graph import Network, load_w, normalize, remove, bar_graph
-
+from ..grndb_network import load_w_GRNdb, Network_GRNdb
 
 def makeFigure():
     """ Get a list of the axis objects and create a figure. """
     # Get list of axis objects
-    ax, f = getSetup((100, 100), (2, 2))
+    ax, f = getSetup((100, 150), (3, 2))
     # load w
     w = load_w()
     w = normalize(w)
@@ -33,6 +33,15 @@ def makeFigure():
     bar_graph(w_trans, "orange", ax[3], "upstream")
     # set title for the graph
     ax[3].set_title("Bar Graph (upstream)")
+
+    # Plot Mia's network (GRNdb) 
+    w_GRNdb = load_w_GRNdb()
+    Network_GRNdb(w_GRNdb, ax[4])
+    ax[4].set_title("w Network Graph - GRNdb")
+
+    # Plot nothing in the place of ax[5]
+    ax[5].axis("off")
+
     # Add subplot labels
     subplotLabel(ax, fntsize=50)
     return f
