@@ -12,14 +12,29 @@ alpha = 0.1
 
 def calcW(data, eta, alphaIn):
     """Directly calculate w."""
-    U = np.copy(data)
-    np.fill_diagonal(U, 0.0)
 
-    B = (data * alphaIn) / eta[:, np.newaxis]
-    assert np.all(np.isfinite(B))
-    B = logit(np.clip(B, 0.0001, 0.9999))
-    assert np.all(np.isfinite(B))
-    return np.linalg.lstsq(U.T, B.T, rcond=None)[0].T
+    w = None
+
+    
+    if (all(isinstance(i, np.ndarray) for i in data)):
+      for x in data:
+        U1 = np.copy(x)
+        np.fill_diagonal(U1, 0.0)
+        B = (x * alphaIn) / eta[:, np.newaxis]
+        assert np.all(np.isfinite(B))
+        B = logit(np.clip(B, 0.0001, 0.9999))
+        assert np.all(np.isfinite(B))
+        np.concatenate(w, np.linalg.lstsq(U1.T, B.T, rcond=None)[0].T)
+    else:
+      U1 = np.copy(data)
+      np.fill_diagonal(U1, 0.0)
+      B = (data * alphaIn) / eta[:, np.newaxis]
+      assert np.all(np.isfinite(B))
+      B = logit(np.clip(B, 0.0001, 0.9999))
+      assert np.all(np.isfinite(B))
+      np.concatenate(w, np.linalg.lstsq(U1.T, B.T, rcond=None)[0].T)
+
+    return w
 
 
 def calcEta(data, w, alphaIn):
