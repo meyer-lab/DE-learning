@@ -40,16 +40,16 @@ def makeFigure():
     return f
 
 def cluster_dist():
-
-    full = ["JUN", "BRD2", "STK11", "PKN2", "NFAT5"] 
-    pre = ["MAP3K1", "MAP2K7", "NSD1", "KDM1A", "EGFR"]
+    G = nx.DiGraph()
+    full = ["JUN", "BRD2", "SOX10"] 
+    pre = ["MAP3K1", "MTF1", "SRF"]
 
     w = load_w()
     w = normalize(w)
     w = remove(w)
 
     w_abs = np.absolute(w.to_numpy())
-    G = nx.DiGraph()
+    
     # add nodes and edges
     add_nodes(G, w, w_abs)
     add_edges(G, w, w_abs)
@@ -58,13 +58,17 @@ def cluster_dist():
     w_full = []
     w_pre = []
     w_rand = []
-
+    
     for _ in range(5):
+        nodes_list  = list(G.nodes(data="gene")) 
         temp1 = np.random.choice(full, 2)
-        w_full.append(single_source_dijkstra(G, source=temp1[0], target=temp1[1], weight=True))
+        #w_full.append(single_source_dijkstra(G, source=G.nodes(temp1[0]), target=G.nodes(temp1[1]), weight=True))  "trying source is a string"
+        id1 = [(np.where(nodes_list == (temp1[0]))), (np.where(nodes_list == (temp1[1])))] #types are not equal 
+        w_full.append(single_source_dijkstra(G, source=id1[0], target=id1[1], weight=True)) #wont take array, but also wont allow it to do float()/int()
+        
         temp2 = np.random.choice(pre, 2)
         w_pre.append(single_source_dijkstra(G, source=temp2[0], target=temp2[1], weight=True))
         temp3 = np.concatenate([np.random.choice(full,1), np.random.choice(pre, 1)])
         w_rand.append(single_source_dijkstra(G, source=temp3[0], target=temp3[1], weight=True))
-
     return w_full, w_pre, w_rand
+       
