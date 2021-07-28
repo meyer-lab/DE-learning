@@ -4,8 +4,8 @@ This creates Figure 2: w Network Graph
 import numpy as np
 import networkx as nx
 from networkx.algorithms.shortest_paths.weighted import single_source_dijkstra
-from .figureCommon import subplotLabel, getSetup
-from ..graph import Network, load_w, normalize, remove, bar_graph, add_nodes, add_edges, remove_isolates
+from de.figures.figureCommon import subplotLabel, getSetup
+from de.graph import Network, load_w, normalize, remove, bar_graph, add_nodes, add_edges, remove_isolates
 
 
 def makeFigure():
@@ -61,7 +61,7 @@ def cluster_dist():
 
     for _ in range(5):
         temp1 = np.random.choice(full, 2)
-        w_full.append(single_source_dijkstra(G, source=temp1[0], target=temp1[1], weight=True))
+        w_full.append(single_source_dijkstra(G, source=G.nodes[0][str(temp1[0])], target=G.nodes[1][str(temp1[1])], weight=True))
         temp2 = np.random.choice(pre, 2)
         w_pre.append(single_source_dijkstra(G, source=temp2[0], target=temp2[1], weight=True))
         temp3 = np.concatenate([np.random.choice(full,1), np.random.choice(pre, 1)])
