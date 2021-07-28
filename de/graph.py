@@ -274,6 +274,5 @@ def loop_figure(loop, G_1):
 def histogram(w_full, w_pre, w_rand):
     """ Get clustering data and plot distribution """
     bins = np.linspace(0,5)
-    plt.hist(w_full, bins, alpha=0.7, color="g", label="Full")
-    plt.hist(w_pre, bins, alpha=0.7, color="b", label="Pre")
-    plt.hist(w_rand, bins, alpha=0.7, color="r", label="Random")
+    plt.hist([w_full, w_pre, w_rand], bins, alpha=0.7, label=["Full", "Pre", "Random"])
+    plt.legend()

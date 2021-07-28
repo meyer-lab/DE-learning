@@ -66,14 +66,5 @@ def cluster_dist():
         temp2 = np.random.choice(pre, 2)
         w_pre.append(bf.bellman_ford(G, source=temp2[0], target=temp2[1], weight="length")[0])
         temp3 = np.concatenate([np.random.choice(full,1), np.random.choice(pre, 1)])
-        w_rand.append(bf.bellman_ford(G, source=temp3[0], target=temp3[1], weight="length")[0])
-    return w_full, w_pre, w_rand, np.mean(w_full), np.mean(w_pre), np.mean(w_rand)
-    
-def MakeDistFig():
-    """ Get a list of the axis objects and create a figure. """
-    # Get list of axis objects
-    ax, f = getSetup((100, 100), (2, 2))
-    w_full, w_pre, w_rand = cluster_dist()
-    histogram(w_full, w_pre, w_rand, ax[2])
-    ax[2].set_title("Distance Distribution")
-    return f 
+        w_rand.append(bf.bellman_ford(G, source=temp3[0], target=temp3[1], weight="length")[0])    
+
