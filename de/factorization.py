@@ -33,9 +33,7 @@ def calcW(data, eta, alphaIn):
             U = np.concatenate((U, U1), axis=1)
             B = np.concatenate((B, B1), axis=1)    
 
-    w = np.linalg.lstsq(U.T, B.T, rcond=None)[0].T
-
-    return w
+    return np.linalg.lstsq(U.T, B.T, rcond=None)[0].T
 
 
 def calcEta(data, w, alphaIn):
@@ -53,22 +51,25 @@ def factorizeEstimate(data, tol=1e-9, maxiter=10000):
     if isinstance(data, np.ndarray):
         data = [data]
     
-    w = np.zeros((data.shape[0], data.shape[0]))
+    w = np.zeros((data[0].shape[0], data[0].shape[0]))
     # Make the U matrix
-    U = np.copy(data)
-    np.fill_diagonal(U, 0.0)
+    U = [np.copy(d) for d in data]
+    for ii in range(len(U)):
+        np.fill_diagonal(U[ii], 0.0)
 
     # Use the data to try and initialize the parameters
     for ii in range(maxiter):
-        eta = calcEta(data, w, alpha)
-        assert np.all(np.isfinite(eta))
-        assert eta.shape == (data.shape[0], )
-        w = calcW(data, eta, alpha)
-        assert np.all(np.isfinite(w))
+        cost = 0
+        for j, x in enumerate(data):
+            eta = calcEta(x, w, alpha)
+            assert np.all(np.isfinite(eta))
+            assert eta.shape == (data[0].shape[0], )
+            w = calcW(data, eta, alpha)
+            assert np.all(np.isfinite(w))
 
-        assert w.shape == (data.shape[0], data.shape[0])
+            assert w.shape == (data[0].shape[0], data[0].shape[0])
 
-        cost = np.linalg.norm(eta[:, np.newaxis] * expit(w @ U) - alpha * data)
+            cost += np.linalg.norm(eta[:, np.newaxis] * expit(w @ U[j]) - alpha * x)
 
         if ii > 10 and (costLast - cost) < tol:
             # TODO: I believe the cost should be strictly decreasing, so look into this.
