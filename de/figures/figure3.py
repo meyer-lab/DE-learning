@@ -32,6 +32,9 @@ def makeFigure():
     w_abs = np.absolute(w_trans.to_numpy())
     w_max = np.max(w_abs)
 
+    # plot the hypothesis test distribution for full and pre-resistant and the random selection
+    w_full, w_pre, w_rand = cluster_dist()
+    histogram(w_full, w_pre, w_rand, ax[2])
     # create upstream bar graph
     bar_graph(w_trans, "orange", ax[3], "upstream")
     # set title for the graph
@@ -42,11 +45,9 @@ def makeFigure():
 
 def cluster_dist():
     G = nx.Graph()
-
     w = load_w()
     w = normalize(w)
     w = remove(w)
-
     w_abs = np.absolute(w.to_numpy())
     
     # add nodes and edges
@@ -69,3 +70,4 @@ def cluster_dist():
         w_rand.append(bf.bellman_ford(G, source=temp3[0], target=temp3[1], weight="length")[0])
         return w_full, w_pre, w_rand    
 
+    return w_full, w_pre, w_rand
