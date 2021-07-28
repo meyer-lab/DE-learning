@@ -3,7 +3,8 @@ This creates Figure 2: w Network Graph
 """
 import numpy as np
 import networkx as nx
-from networkx.algorithms.shortest_paths.weighted import single_source_dijkstra
+import bellmanford as bf
+from networkx.algorithms.shortest_paths.weighted import _bellman_ford, bellman_ford_path_length, single_source_dijkstra
 from .figureCommon import subplotLabel, getSetup
 from ..graph import Network, load_w, normalize, remove, bar_graph, add_nodes, add_edges, remove_isolates
 
@@ -40,8 +41,8 @@ def makeFigure():
     return f
 
 def cluster_dist():
-    G = nx.DiGraph()
-    full = ["JUN", "BRD2", "SOX10"] 
+    G = nx.Graph()
+    full = ["JUNB", "MITF", "SOX10"] 
     pre = ["MAP3K1", "MTF1", "SRF"]
 
     w = load_w()
@@ -59,16 +60,16 @@ def cluster_dist():
     w_pre = []
     w_rand = []
     
-    for _ in range(5):
-        nodes_list  = list(G.nodes(data="gene")) 
-        temp1 = np.random.choice(full, 2)
-        #w_full.append(single_source_dijkstra(G, source=G.nodes(temp1[0]), target=G.nodes(temp1[1]), weight=True))  "trying source is a string"
-        id1 = [(np.where(nodes_list == (temp1[0]))), (np.where(nodes_list == (temp1[1])))] #types are not equal 
-        w_full.append(single_source_dijkstra(G, source=id1[0], target=id1[1], weight=True)) #wont take array, but also wont allow it to do float()/int()
-        
-        temp2 = np.random.choice(pre, 2)
-        w_pre.append(single_source_dijkstra(G, source=temp2[0], target=temp2[1], weight=True))
-        temp3 = np.concatenate([np.random.choice(full,1), np.random.choice(pre, 1)])
-        w_rand.append(single_source_dijkstra(G, source=temp3[0], target=temp3[1], weight=True))
-    return w_full, w_pre, w_rand
+    #for _ in range(5):
+        nodes_list  = np.array(G.nodes(data="gene"))
+        node_id = np.where(nodes_list == full)[0][0]
+        #temp1 = np.random.choice(full, 2)
+    path_length, path_nodes, negative_cycle = bf.bellman_ford(G, source=37, target=25, weight="length")
+        #id1 = [(np.where(nodes_list == (temp1[0]))), (np.where(nodes_list == (temp1[1])))] #types are not equal 
+        #w_full.append(single_source_dijkstra(G, source=str(id1[0]), target=str(id1[1]), weight=True)) 
+        #temp2 = np.random.choice(pre, 2)
+        #w_pre.append(single_source_dijkstra(G, source=temp2[0], target=temp2[1], weight=True))
+        #temp3 = np.concatenate([np.random.choice(full,1), np.random.choice(pre, 1)])
+        #w_rand.append(single_source_dijkstra(G, source=temp3[0], target=temp3[1], weight=True))
+    return(path_length, path_nodes, negative_cycle)
        
