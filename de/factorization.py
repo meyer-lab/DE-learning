@@ -15,20 +15,25 @@ def calcW(data, eta, alphaIn):
     if isinstance(data, np.ndarray):
         data = [data]
 
-    w = None
+    U = None
+    B = None
     
     for x in data:
         U1 = np.copy(x)
         np.fill_diagonal(U1, 0.0)
-        B = (U1 * alphaIn) / eta[:, np.newaxis]
-        assert np.all(np.isfinite(B))
-        B = logit(np.clip(B, 0.0001, 0.9999))
-        assert np.all(np.isfinite(B))
+        B1 = (x * alphaIn) / eta[:, np.newaxis]
+        assert np.all(np.isfinite(B1))
+        B1 = logit(np.clip(B1, 0.0001, 0.9999))
+        assert np.all(np.isfinite(B1))
 
-        if w is None:
-            w = np.linalg.lstsq(U1.T, B.T, rcond=None)[0].T
+        if B is None:
+            U = U1
+            B = B1
         else:
-            w = np.concatenate((w, np.linalg.lstsq(U1.T, B.T, rcond=None)[0].T), axis=1)
+            U = np.concatenate((U, U1), axis=1)
+            B = np.concatenate((B, B1), axis=1)    
+
+    w = np.linalg.lstsq(U.T, B.T, rcond=None)[0].T
 
     return w
 
@@ -45,6 +50,9 @@ def factorizeEstimate(data, tol=1e-9, maxiter=10000):
     """ Initialize the parameters based on the data. """
     assert maxiter > 0
     # TODO: Add tolerance for termination.
+    if isinstance(data, np.ndarray):
+        data = [data]
+    
     w = np.zeros((data.shape[0], data.shape[0]))
     # Make the U matrix
     U = np.copy(data)
