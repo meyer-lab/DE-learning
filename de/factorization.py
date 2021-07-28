@@ -20,7 +20,7 @@ def calcW(data, eta, alphaIn):
     for x in data:
         U1 = np.copy(x)
         np.fill_diagonal(U1, 0.0)
-        B = (x * alphaIn) / eta[:, np.newaxis]
+        B = (U1 * alphaIn) / eta[:, np.newaxis]
         assert np.all(np.isfinite(B))
         B = logit(np.clip(B, 0.0001, 0.9999))
         assert np.all(np.isfinite(B))
