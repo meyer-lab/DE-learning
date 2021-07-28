@@ -4,7 +4,6 @@ This creates Figure 2: w Network Graph
 import numpy as np
 import networkx as nx
 import bellmanford as bf
-from networkx.algorithms.shortest_paths.weighted import _bellman_ford, bellman_ford_path_length, single_source_dijkstra
 from .figureCommon import subplotLabel, getSetup
 from ..graph import Network, load_w, normalize, remove, bar_graph, add_nodes, add_edges, remove_isolates
 
@@ -42,8 +41,6 @@ def makeFigure():
 
 def cluster_dist():
     G = nx.Graph()
-    full = ["JUNB", "MITF", "SOX10"] 
-    pre = ["MAP3K1", "MTF1", "SRF"]
 
     w = load_w()
     w = normalize(w)
@@ -60,16 +57,15 @@ def cluster_dist():
     w_pre = []
     w_rand = []
     
-    #for _ in range(5):
+    full = [24, 1, 65, 45, 40, 29, 0, 17, 9, 2, 4, 67, 13, 25, 30, 37, 57, 66, 60, 12, 50, ]
+    pre = [34, 33, 43, 27, 15, 16, 64, 48, 18, 39, 38]
+    for _ in range(5):
         nodes_list  = np.array(G.nodes(data="gene"))
-        node_id = np.where(nodes_list == full)[0][0]
-        #temp1 = np.random.choice(full, 2)
-    path_length, path_nodes, negative_cycle = bf.bellman_ford(G, source=37, target=25, weight="length")
-        #id1 = [(np.where(nodes_list == (temp1[0]))), (np.where(nodes_list == (temp1[1])))] #types are not equal 
-        #w_full.append(single_source_dijkstra(G, source=str(id1[0]), target=str(id1[1]), weight=True)) 
-        #temp2 = np.random.choice(pre, 2)
-        #w_pre.append(single_source_dijkstra(G, source=temp2[0], target=temp2[1], weight=True))
-        #temp3 = np.concatenate([np.random.choice(full,1), np.random.choice(pre, 1)])
-        #w_rand.append(single_source_dijkstra(G, source=temp3[0], target=temp3[1], weight=True))
-    return(path_length, path_nodes, negative_cycle)
+        temp1 = np.random.choice(full, 2)
+        w_full.append(bf.bellman_ford(G, source=temp1[0], target=temp1[1], weight="length")[0]) # the first output of the function is the path length
+        temp2 = np.random.choice(pre, 2)
+        w_pre.append(bf.bellman_ford(G, source=temp2[0], target=temp2[1], weight="length")[0])
+        temp3 = np.concatenate([np.random.choice(full,1), np.random.choice(pre, 1)])
+        w_rand.append(bf.bellman_ford(G, source=temp3[0], target=temp3[1], weight="length")[0])
+        return w_full, w_pre, w_rand
        
