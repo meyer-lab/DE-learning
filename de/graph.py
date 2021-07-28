@@ -2,12 +2,13 @@
 from os.path import join, dirname
 import numpy as np
 import pandas as pd
-import matplotlib as plt
+import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import matplotlib.lines as mlines
 import networkx as nx
 from .importData import ImportMelanoma, importgenes, splitnodes
 from .fitting import runOptim, reshapeParams
+
 
 
 def load_w(linear=False):
@@ -269,3 +270,10 @@ def loop_figure(loop, G_1):
     set_nodes(G_test, pos, ax=None)
     set_edges(G_test, w_abs, w_max, pos, ax=None)
     set_labels(G_test, pos, ax=None)
+
+def histogram(w_full, w_pre, w_rand):
+    """ Get clustering data and plot distribution """
+    bins = np.linspace(0,5)
+    plt.hist(w_full, bins, alpha=0.7, color="g", label="Full")
+    plt.hist(w_pre, bins, alpha=0.7, color="b", label="Pre")
+    plt.hist(w_rand, bins, alpha=0.7, color="r", label="Random")
