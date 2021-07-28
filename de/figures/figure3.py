@@ -3,6 +3,7 @@ This creates Figure 2: w Network Graph
 """
 import numpy as np
 import networkx as nx
+import bellmanford as bf
 from networkx.algorithms.shortest_paths.weighted import single_source_dijkstra
 from de.figures.figureCommon import subplotLabel, getSetup
 from de.graph import Network, load_w, normalize, remove, bar_graph, add_nodes, add_edges, remove_isolates
@@ -41,15 +42,13 @@ def makeFigure():
 
 def cluster_dist():
     G = nx.DiGraph()
-    full = ["JUN", "BRD2", "SOX10"] 
-    pre = ["MAP3K1", "MTF1", "SRF"]
 
     w = load_w()
     w = normalize(w)
     w = remove(w)
 
     w_abs = np.absolute(w.to_numpy())
-    
+
     # add nodes and edges
     add_nodes(G, w, w_abs)
     add_edges(G, w, w_abs)
@@ -58,14 +57,16 @@ def cluster_dist():
     w_full = []
     w_pre = []
     w_rand = []
-    
+
+    pre = 
+    full = 
     for _ in range(5):
         nodes_list  = list(G.nodes(data="gene")) 
         temp1 = np.random.choice(full, 2)
-        w_full.append(single_source_dijkstra(G, source=G.nodes[0][str(temp1[0])], target=G.nodes[1][str(temp1[1])], weight=True))
+        w_full.append(bf.bellman_ford(G, source=temp1[0], target=temp1[1], weight="length")[0]) # the first output of the function is the path length
         temp2 = np.random.choice(pre, 2)
-        w_pre.append(single_source_dijkstra(G, source=temp2[0], target=temp2[1], weight=True))
+        w_pre.append(bf.bellman_ford(G, source=temp2[0], target=temp2[1], weight="length")[0])
         temp3 = np.concatenate([np.random.choice(full,1), np.random.choice(pre, 1)])
-        w_rand.append(single_source_dijkstra(G, source=temp3[0], target=temp3[1], weight=True))
+        w_rand.append(bf.bellman_ford(G, source=temp3[0], target=temp3[1], weight="length")[0])
     return w_full, w_pre, w_rand
        
