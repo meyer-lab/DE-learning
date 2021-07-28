@@ -2,7 +2,6 @@
 from os.path import join, dirname
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import matplotlib.lines as mlines
 import networkx as nx
@@ -273,6 +272,9 @@ def loop_figure(loop, G_1):
 
 def histogram(w_full, w_pre, w_rand, ax):
     """ Get clustering data and plot distribution """
-    # bins = np.linspace(0, 5)
+    # bins = np.linspace(0, 3)
     ax.hist([w_full, w_pre, w_rand], alpha=0.7, label=["Full R", "Pre R", "Random"])
     ax.legend()
+    ax.set_xlabel("Node distance")
+    ax.set_ylabel("Frequency")
+    ax.set_title("Network distance distributions")
