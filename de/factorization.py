@@ -17,7 +17,7 @@ def calcW(data, eta, alphaIn):
 
     U = None
     B = None
-    
+
     for x in data:
         U1 = np.copy(x)
         np.fill_diagonal(U1, 0.0)
@@ -31,7 +31,7 @@ def calcW(data, eta, alphaIn):
             B = B1
         else:
             U = np.concatenate((U, U1), axis=1)
-            B = np.concatenate((B, B1), axis=1)    
+            B = np.concatenate((B, B1), axis=1)
 
     return np.linalg.lstsq(U.T, B.T, rcond=None)[0].T
 
@@ -50,7 +50,7 @@ def factorizeEstimate(data, tol=1e-9, maxiter=10000):
     # TODO: Add tolerance for termination.
     if isinstance(data, np.ndarray):
         data = [data]
-    
+
     w = np.zeros((data[0].shape[0], data[0].shape[0]))
     # Make the U matrix
     U = [np.copy(d) for d in data]

@@ -11,7 +11,7 @@ def importLINCS(cellLine):
     data = np.load(join(path_here, "de/data/", cellLine + "_RNAi_matrix.npy"))
     annotation = pd.read_csv(join(path_here, "de/data/", cellLine + "_genes.txt"), header=None)
     data = np.delete(data, -1, axis=1)
-    
+
     return data, annotation
 
 

@@ -5,7 +5,7 @@ import pytest
 import numpy as np
 from scipy.special import expit
 from ..factorization import factorizeEstimate, alpha, cellLineComparison, MatrixSubtraction, cellLineFactorization
-from ..fitting import runOptim 
+from ..fitting import runOptim
 from ..importData import ImportMelanoma
 
 
@@ -58,7 +58,7 @@ def test_matrixSub():
     """To test if the matrices subtract properly and if the norm has a reasonable value"""
     cellLine1 = 'A375'
     cellLine2 = 'HT29'
-    
+
     norm1, norm2, diff_norm, _, _ = MatrixSubtraction(cellLine1, cellLine2)
 
     assert diff_norm != norm1

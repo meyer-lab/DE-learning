@@ -45,9 +45,9 @@ def cost(pIn, data, U=None, linear=False):
             costt += jnp.linalg.norm(eta[i][:, jnp.newaxis] * (w @ U[i]) - alpha * data[i])
         else:
             costt += jnp.linalg.norm(eta[i][:, jnp.newaxis] * expit(w @ U[i]) - alpha * data[i])
-    
+
     costt += regularize(pIn, data[0].shape[0])
-    
+
     return costt
 
 
@@ -64,7 +64,7 @@ def runOptim(data, niter=2000, disp=0, linear=False):
     """ Run the optimization. """
     if isinstance(data, np.ndarray):
         data = [data]
-        
+
     w, eps = factorizeEstimate(data[0])
     x0 = np.concatenate((w.flatten(), eps))
     for ii in range(1, len(data)):
@@ -82,13 +82,13 @@ def runOptim(data, niter=2000, disp=0, linear=False):
 
     res = minimize(cost, x0, args=(data, U, linear), method="CG", jac=cost_GF, options={"maxiter": niter, "disp": disp})
     assert (res.success) or (res.nit == niter)
-        
+
     return res.x
 
 def mergedFitting(cellLine1, cellLine2):
     """Given two cell lines, compute the cost of fitting each of them individually and the cost of fitting a shared w matrix."""
     index_list1, index_list2 = cellLineComparison(cellLine1, cellLine2)
-    
+
     data1, _ = importLINCS(cellLine1)
     data2, _ = importLINCS(cellLine2)
     data1_df = pd.DataFrame(data1)
