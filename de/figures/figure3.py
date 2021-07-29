@@ -35,7 +35,13 @@ def makeFigure():
 
     # plot the hypothesis test distribution for full and pre-resistant and the random selection
     w_full, w_pre, w_rand = cluster_dist()
-    histogram(w_full, w_pre, w_rand, ax[2])
+    ax[2].hist([w_full, w_pre, w_rand], alpha=0.7, label=["Full R", "Pre R", "Random"])
+    ax[2].legend()
+    ax[2].set_xlabel("Node distance")
+    ax[2].set_ylabel("Frequency")
+    ax[2].set_title("Network distance distributions")
+    max_dist = np.maximum()
+    ax[2].set_xticklabels()
     # create upstream bar graph
     bar_graph(w_trans, "orange", ax[3], "upstream")
     # set title for the graph

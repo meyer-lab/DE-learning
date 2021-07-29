@@ -269,6 +269,7 @@ def loop_figure(loop, G_1):
     set_nodes(G_test, pos, ax=None)
     set_edges(G_test, w_abs, w_max, pos, ax=None)
     set_labels(G_test, pos, ax=None)
+<<<<<<< HEAD
 
 def histogram(w_full, w_pre, w_rand, ax):
     """ Get clustering data and plot distribution """
@@ -278,3 +279,5 @@ def histogram(w_full, w_pre, w_rand, ax):
     ax.set_xlabel("Node distance")
     ax.set_ylabel("Frequency")
     ax.set_title("Network distance distributions")
+=======
+>>>>>>> 6259bbf85a9239cd5960d0d1aa202d00c9ef40d6
