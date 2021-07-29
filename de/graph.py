@@ -270,9 +270,3 @@ def loop_figure(loop, G_1):
     set_nodes(G_test, pos, ax=None)
     set_edges(G_test, w_abs, w_max, pos, ax=None)
     set_labels(G_test, pos, ax=None)
-
-def histogram(w_full, w_pre, w_rand, ax):
-    """ Get clustering data and plot distribution """
-    # bins = np.linspace(0, 5)
-    ax.hist([w_full, w_pre, w_rand], alpha=0.7, label=["Full R", "Pre R", "Random"])
-    ax.legend()
