@@ -273,7 +273,7 @@ def loop_figure(loop, G_1):
 def histogram(w_full, w_pre, w_rand, ax):
     """ Get clustering data and plot distribution """
     # bins = np.linspace(0, 3)
-    ax.hist([w_full, w_pre, w_rand], alpha=0.7, label=["Full R", "Pre R", "Random"])
+    ax.hist([w_full, w_pre, w_rand], alpha=0.7, label=["Resistant", "Pre-resistant", "Random"])
     ax.legend()
     ax.set_xlabel("Node distance")
     ax.set_ylabel("Frequency")

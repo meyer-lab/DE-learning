@@ -70,4 +70,4 @@ def cluster_dist():
         temp3 = np.concatenate([np.random.choice(full,1), np.random.choice(pre, 1)])
         w_rand.append(bf.bellman_ford(G, source=temp3[0], target=temp3[1], weight="length")[0]) 
 
-    return w_full, w_pre, w_rand
+    return w_full, w_pre, w_rand, np.mean(w_full), np.mean(w_pre), np.mean(w_rand)
