@@ -7,7 +7,7 @@ import networkx as nx
 import matplotlib as plt
 import bellmanford as bf
 from .figureCommon import subplotLabel, getSetup
-from ..graph import Network, load_w, normalize, remove, bar_graph, add_nodes, add_edges, remove_isolates, histogram
+from ..graph import Network, load_w, normalize, remove, bar_graph, add_nodes, add_edges, remove_isolates
 
 
 def makeFigure():
@@ -40,8 +40,8 @@ def makeFigure():
     ax[2].set_xlabel("Node distance")
     ax[2].set_ylabel("Frequency")
     ax[2].set_title("Network distance distributions")
-    max_dist = np.maximum()
-    ax[2].set_xticklabels()
+    max_dist = np.max(np.concatenate([w_full, w_pre, w_rand])) #takes maximum of distance values
+    ax[2].set_xticklabels(list(range(1,max_dist)))
     # create upstream bar graph
     bar_graph(w_trans, "orange", ax[3], "upstream")
     # set title for the graph
