@@ -66,14 +66,14 @@ def cluster_dist():
     w_pre = []
     w_rand = []
     
-    full = [24, 1, 65, 45, 40, 29, 0, 17, 9, 2, 4, 67, 13, 25, 30, 37, 57, 66, 60, 12, 50]
-    pre = [34, 33, 43, 27, 15, 16, 64, 48, 18, 39, 38]
+    full = [26, 1, 68, 48, 42, 31, 0, 18, 9, 2, 4, 70, 13, 27, 32, 17, 39, 60, 69, 63, 12, 53]
+    pre = [36, 35, 46, 28, 15, 16, 67, 51, 20, 41, 40]
     for _ in range(70):
-        temp1 = np.random.choice(full, 2)
+        temp1 = np.random.sample(full, 2)
         w_full.append(bf.bellman_ford(G, source=temp1[0], target=temp1[1], weight="length")[0]) # the first output of the function is the path length
-        temp2 = np.random.choice(pre, 2)
+        temp2 = np.random.sample(pre, 2)
         w_pre.append(bf.bellman_ford(G, source=temp2[0], target=temp2[1], weight="length")[0])
-        temp3 = np.concatenate([np.random.choice(full,1), np.random.choice(pre, 1)])
+        temp3 = np.concatenate([np.random.sample(full,1), np.random.sample(pre, 1)])
         w_rand.append(bf.bellman_ford(G, source=temp3[0], target=temp3[1], weight="length")[0]) 
 
     return w_full, w_pre, w_rand, np.mean(w_full), np.mean(w_pre), np.mean(w_rand)
