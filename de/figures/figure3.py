@@ -4,7 +4,7 @@ This creates Figure 2: w Network Graph
 from networkx.algorithms.cluster import _weighted_triangles_and_degree_iter
 import numpy as np
 import networkx as nx
-import matplotlib as plt
+import random 
 import bellmanford as bf
 from .figureCommon import subplotLabel, getSetup
 from ..graph import Network, load_w, normalize, remove, bar_graph, add_nodes, add_edges, remove_isolates
@@ -41,7 +41,7 @@ def makeFigure():
     ax[2].set_ylabel("Frequency")
     ax[2].set_title("Network distance distributions")
     max_dist = np.max(np.concatenate([w_full, w_pre, w_rand])) #takes maximum of distance values
-    ax[2].set_xticklabels(list(range(1,max_dist)))
+    ax[2].set_xticks((np.linspace(1.0,max_dist, max_dist)))
     # create upstream bar graph
     bar_graph(w_trans, "orange", ax[3], "upstream")
     # set title for the graph
@@ -69,11 +69,11 @@ def cluster_dist():
     full = [24, 1, 65, 45, 40, 29, 0, 17, 9, 2, 4, 67, 13, 25, 30, 37, 57, 66, 60, 12, 50]
     pre = [34, 33, 43, 27, 15, 16, 64, 48, 18, 39, 38]
     for _ in range(70):
-        temp1 = np.random.sample(full, 2)
+        temp1 = random.sample(full, 2)
         w_full.append(bf.bellman_ford(G, source=temp1[0], target=temp1[1], weight="length")[0]) # the first output of the function is the path length
-        temp2 = np.random.sample(pre, 2)
+        temp2 = random.sample(pre, 2)
         w_pre.append(bf.bellman_ford(G, source=temp2[0], target=temp2[1], weight="length")[0])
-        temp3 = np.concatenate([np.random.sample(full,1), np.random.sample(pre, 1)])
+        temp3 = np.concatenate([np.random.choice(full,1), np.random.choice(pre, 1)])
         w_rand.append(bf.bellman_ford(G, source=temp3[0], target=temp3[1], weight="length")[0]) 
 
-    return w_full, w_pre, w_rand, np.mean(w_full), np.mean(w_pre), np.mean(w_rand)
+    return w_full, w_pre, w_rand #np.mean(w_full), np.mean(w_pre), np.mean(w_rand)
