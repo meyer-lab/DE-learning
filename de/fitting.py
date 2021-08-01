@@ -1,6 +1,7 @@
 """ Methods implementing the model as a fitting process. """
 
 import numpy as np
+import random
 from jax import grad, jit
 import jax.numpy as jnp
 from jax.scipy.special import expit
@@ -66,3 +67,19 @@ def runOptim(data, niter=2000, disp=0, linear=False):
     assert (res.success) or (res.nit == niter)
 
     return res.x
+
+def cross_val(U):
+    """ Prepare the test and train data. """
+    mat_size = U.shape[0]
+    row = random.choices(list(np.arange(mat_size)), k=500)
+    column = random.choices(list(np.arange(mat_size)), k=500)
+
+    train_mat = np.copy(U)
+    test_mat = np.empty((U.shape[0], U.shape[1]))
+    test_mat[:, :] = np.nan
+    indexes = list(zip(row, column))
+    for i, val in enumerate(indexes):
+        train_mat[val] = np.nan
+        test_mat[val] = U[val]
+
+    return train_mat, test_mat
