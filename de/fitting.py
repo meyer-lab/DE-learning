@@ -1,13 +1,12 @@
 """ Methods implementing the model as a fitting process. """
 
 import numpy as np
-import random
 from jax import grad, jit
 import jax.numpy as jnp
 from jax.scipy.special import expit
 from jax.config import config
 from scipy.optimize import minimize
-from .factorization import alpha, factorizeEstimate
+from .factorization import alpha, factorizeEstimate, cross_val
 
 config.update("jax_enable_x64", True)
 
@@ -56,30 +55,24 @@ def runOptim(data, niter=2000, disp=0, linear=False):
     x0 = np.concatenate((w.flatten(), eps))
 
     U = np.copy(data)
+    U_train, U_test, data_train, data_test = cross_val(U, data)
+    U_train = np.ma.array(U_train, mask=np.isnan(U_train))
+    U_test = np.ma.array(U_test, mask=np.isnan(U_test))
+    data_train = np.ma.array(data_train, mask=np.isnan(data_train))
+    data_test = np.ma.array(data_test, mask=np.isnan(data_test))
+
     np.fill_diagonal(U, 0.0)
     cost_grad = jit(grad(cost, argnums=0), static_argnums=(3,))
 
     def cost_GF(*args):
         outt = cost_grad(*args)
         return np.array(outt)
+    print(data.shape)
+    print(U.shape)
+    print(data_train.shape)
+    print(U_train.shape)
 
-    res = minimize(cost, x0, args=(data, U, linear), method="L-BFGS-B", jac=cost_GF, options={"maxiter": niter, "disp": disp})
+    res = minimize(cost, x0, args=(data_train, U_train, linear), method="L-BFGS-B", jac=cost_GF, options={"maxiter": niter, "disp": disp})
     assert (res.success) or (res.nit == niter)
 
     return res.x
-
-def cross_val(U):
-    """ Prepare the test and train data. """
-    mat_size = U.shape[0]
-    row = random.choices(list(np.arange(mat_size)), k=500)
-    column = random.choices(list(np.arange(mat_size)), k=500)
-
-    train_mat = np.copy(U)
-    test_mat = np.empty((U.shape[0], U.shape[1]))
-    test_mat[:, :] = np.nan
-    indexes = list(zip(row, column))
-    for i, val in enumerate(indexes):
-        train_mat[val] = np.nan
-        test_mat[val] = U[val]
-
-    return train_mat, test_mat
