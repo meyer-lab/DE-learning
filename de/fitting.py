@@ -45,21 +45,22 @@ def regularize(pIn, nGenes, strength=0.1):
     return strength * ll
 
 
-def runOptim(data, niter=20000, disp=0, linear=False):
+def runOptim(data, niter=2000, disp=0, linear=False):
     """ Run the optimization. """
     # TODO: Add bounds to fitting.
     w, eps = factorizeEstimate(data)
     x0 = np.concatenate((w.flatten(), eps))
+
     U = np.copy(data)
-
-    U_train, U_test, data_train, data_test = cross_val(U, data)
-    np.fill_diagonal(U_train, 0.0)
-
+    np.fill_diagonal(U, 0.0)
     cost_grad = jit(grad(cost, argnums=0), static_argnums=(3,))
+
     def cost_GF(*args):
         outt = cost_grad(*args)
         return np.array(outt)
 
-    res = minimize(cost, x0, args=(data_train, U_train, linear), method="L-BFGS-B", options={"maxiter": niter, "disp": disp})
+    res = minimize(cost, x0, args=(data, U, linear), method="L-BFGS-B", jac=cost_GF, options={"maxiter": niter, "disp": disp})
     assert (res.success) or (res.nit == niter)
+
     return res.x
+
