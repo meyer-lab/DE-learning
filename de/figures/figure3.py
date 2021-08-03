@@ -2,6 +2,7 @@
 This creates Figure 2: w Network Graph
 """
 from networkx.algorithms.cluster import _weighted_triangles_and_degree_iter
+from networkx.algorithms.shortest_paths.weighted import bellman_ford_path_length
 import numpy as np
 import networkx as nx
 import random 
@@ -56,6 +57,8 @@ def cluster_dist():
     w = normalize(w)
     w = remove(w)
     w_abs = np.absolute(w.to_numpy())
+    edges = G.edges()
+    weight_abs = [(np.abs(G[u][v]["weight"])) for u, v in edges]
     
     # add nodes and edges
     add_nodes(G, w, w_abs)
@@ -70,10 +73,10 @@ def cluster_dist():
     pre = [34, 33, 43, 27, 15, 16, 64, 48, 18, 39, 38]
     for _ in range(70):
         temp1 = random.sample(full, 2)
-        w_full.append(bf.bellman_ford(G, source=temp1[0], target=temp1[1], weight="length")[0]) # the first output of the function is the path length
+        w_full.append(bellman_ford_path_length(G, source=temp1[0], target=temp1[1], weight=weight_abs)) # the first output of the function is the path length
         temp2 = random.sample(pre, 2)
-        w_pre.append(bf.bellman_ford(G, source=temp2[0], target=temp2[1], weight="length")[0])
+        w_pre.append(bellman_ford_path_length(G, source=temp2[0], target=temp2[1], weight=weight_abs))
         temp3 = np.concatenate([np.random.choice(full,1), np.random.choice(pre, 1)])
-        w_rand.append(bf.bellman_ford(G, source=temp3[0], target=temp3[1], weight="length")[0]) 
+        w_rand.append(bellman_ford_path_length(G, source=temp3[0], target=temp3[1], weight=weight_abs)) 
 
     return w_full, w_pre, w_rand #np.mean(w_full), np.mean(w_pre), np.mean(w_rand)
