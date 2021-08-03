@@ -9,6 +9,7 @@ from scipy.optimize import minimize
 from .factorization import alpha, factorizeEstimate, cross_val
 
 config.update("jax_enable_x64", True)
+config.parse_flags_with_absl()
 
 
 def reshapeParams(p, nGenes):
@@ -50,12 +51,15 @@ def runOptim(data, niter=20000, disp=0, linear=False):
     w, eps = factorizeEstimate(data)
     x0 = np.concatenate((w.flatten(), eps))
     U = np.copy(data)
+
     U_train, U_test, data_train, data_test = cross_val(U, data)
     np.fill_diagonal(U_train, 0.0)
+
     cost_grad = jit(grad(cost, argnums=0), static_argnums=(3,))
     def cost_GF(*args):
         outt = cost_grad(*args)
         return np.array(outt)
-    res = minimize(cost, x0, args=(data_train, U_train, linear), method="L-BFGS-B", jac=cost_GF, options={"maxiter": niter, "disp": disp})
+
+    res = minimize(cost, x0, args=(data_train, U_train, linear), method="L-BFGS-B", options={"maxiter": niter, "disp": disp})
     assert (res.success) or (res.nit == niter)
     return res.x
