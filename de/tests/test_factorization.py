@@ -4,7 +4,7 @@ Test the factorization model.
 import pytest
 import numpy as np
 from scipy.special import expit
-from ..factorization import factorizeEstimate, alpha, cellLineComparison, MatrixSubtraction, cellLineFactorization
+from ..factorization import factorizeEstimate, alpha, cellLineComparison, MatrixSubtraction, cellLineFactorization, cross_val
 from ..fitting import runOptim 
 from ..importData import ImportMelanoma
 
@@ -63,3 +63,8 @@ def test_matrixSub():
 
     assert diff_norm != norm1
     assert diff_norm != norm2
+
+def test_crossval():
+    """ Tests the cross val function that creates the train and test data. """
+    data = ImportMelanoma()
+    p = runOptim(data, niter=5, disp=1)
