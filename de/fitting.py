@@ -31,7 +31,9 @@ def cost(pIn, data, U=None, linear=False):
     if linear:
         costt = jnp.sqrt(jnp.nansum(jnp.square(eta[:, jnp.newaxis] * (w @ U) - alpha * data)))
     else:
-        costt = jnp.sqrt(jnp.nansum(jnp.square(eta[:, jnp.newaxis] * expit(w @ U) - alpha * data)))
+        diff = eta[:, jnp.newaxis] * expit(w @ U) - alpha * data
+        diff_train = cross_val(diff)
+        costt = jnp.sqrt(jnp.nansum(jnp.square(diff)))
     costt += regularize(pIn, data.shape[0])
     print(costt)
     return costt
@@ -53,8 +55,7 @@ def runOptim(data, niter=20000, disp=0, linear=False):
     x0 = np.concatenate((w.flatten(), eps))
     U = np.copy(data)
 
-    U_train, U_test, data_train, data_test = cross_val(U, data)
-    np.fill_diagonal(U_train, 0.0)
+    np.fill_diagonal(U, 0.0)
 
     cost_grad = jit(grad(cost, argnums=0), static_argnums=(3,))
     def cost_GF(*args):
@@ -62,7 +63,6 @@ def runOptim(data, niter=20000, disp=0, linear=False):
         print(outt)
         return np.array(outt)
 
-    res = minimize(cost, x0, args=(data_train, U_train, linear), method="CG", jac=cost_GF, options={"maxiter": niter, "disp": disp})
+    res = minimize(cost, x0, args=(data, U, linear), method="CG", jac=cost_GF, options={"maxiter": niter, "disp": disp})
     assert (res.success) or (res.nit == niter)
     return res.x
-
