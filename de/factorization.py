@@ -127,7 +127,7 @@ def cross_val(X):
     column = random.choices(list(np.arange(mat_size)), k=50)
     train_X = np.copy(X)
     test_X = np.empty((X.shape[0], X.shape[1]))
-    test_X[:, :] = np.nan
+    test_X[:, :] = 0.0
     indexes = list(zip(row, column))
     for _, val in enumerate(indexes):
         train_X[val] = 0.0
