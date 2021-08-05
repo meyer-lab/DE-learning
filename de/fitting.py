@@ -9,7 +9,6 @@ from scipy.optimize import minimize
 from .factorization import alpha, factorizeEstimate, cross_val
 
 config.update("jax_enable_x64", True)
-config.parse_flags_with_absl()
 
 
 def reshapeParams(p, nGenes):
@@ -33,7 +32,7 @@ def cost(pIn, data, U=None, linear=False):
     else:
         diff = eta[:, jnp.newaxis] * expit(w @ U) - alpha * data
         diff_train = cross_val(diff)
-        costt = jnp.sqrt(jnp.nansum(jnp.square(diff)))
+        costt = jnp.sqrt(jnp.nansum(jnp.square(diff_train)))
     costt += regularize(pIn, data.shape[0])
     print(costt)
     return costt
