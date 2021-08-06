@@ -3,10 +3,11 @@ Test the factorization model.
 '''
 import pytest
 import numpy as np
+import numpy.ma as ma
 from scipy.special import expit
 from ..factorization import factorizeEstimate, alpha, cellLineComparison, MatrixSubtraction, cellLineFactorization, cross_val
-from ..fitting import runOptim 
-from ..importData import ImportMelanoma
+from ..fitting import runOptim, impute
+from ..importData import ImportMelanoma, importLINCS
 
 
 def test_factorizeEstimate():
@@ -46,8 +47,8 @@ def test_cellLines():
     """ To test and confirm most genes are overlapping between cell lines. """
     cellLine1 = 'A375'
     cellLine2 = 'HT29'
-    _, _, annotation1 = cellLineFactorization(cellLine1)
-    _, _, annotation2 = cellLineFactorization(cellLine2)
+    _, annotation1 = importLINCS(cellLine1)
+    _, annotation2 = importLINCS(cellLine2)
 
     # assuming the function returns the list of shared genes between the two cell lines
     shared_annotation, _ = cellLineComparison(cellLine1, cellLine2)
@@ -67,4 +68,7 @@ def test_matrixSub():
 def test_crossval():
     """ Tests the cross val function that creates the train and test data. """
     data = ImportMelanoma()
-    p = runOptim(data, niter=5, disp=1)
+    train_X, test_X = cross_val(data)
+    full_X = impute(train_X)
+
+    print(ma.corrcoef(ma.masked_invalid(full_X.flatten()), ma.masked_invalid(test_X.flatten())))

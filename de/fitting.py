@@ -60,26 +60,31 @@ def runOptim(data, niter=2000, disp=0):
 
     res = minimize(cost, x0, args=(data, U), method="L-BFGS-B", jac=cost_GF, options={"maxiter": niter, "disp": disp})
     assert (res.success) or (res.nit == niter)
-    print(res.fun)
 
     return res.x
 
 
-def impute(data):
+def impute(data, fitting=False):
     """ Impute by repeated fitting. """
     missing = np.isnan(data)
     data = np.nan_to_num(data)
 
     for ii in range(10):
-        # Fit
-        xx = runOptim(data, niter=20)
-
-        # Fill-in with model prediction
-        w, eta = reshapeParams(xx, data.shape[0])
         U = np.copy(data)
         np.fill_diagonal(U, 0.0)
+        data_last = np.copy(data)
 
+        # Fit
+        if fitting:
+            xx = runOptim(data, niter=500)
+            w, eta = reshapeParams(xx, data.shape[0])
+        else:
+            w, eta = factorizeEstimate(data)
+
+        # Fill-in with model prediction
         predictt = eta[:, jnp.newaxis] * expit(w @ U) / alpha
         data[missing] = predictt[missing]
+
+        print(np.linalg.norm(data - data_last))
 
     return data
