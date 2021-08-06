@@ -2,7 +2,6 @@
 
 import numpy as np
 import pandas as pd
-import random
 from scipy.stats import gmean
 from scipy.special import expit, logit
 from .importData import importLINCS
@@ -120,16 +119,15 @@ def MatrixSubtraction(cellLine1, cellLine2):
     diff_norm = np.linalg.norm(difference_matrix)
     return norm1, norm2, diff_norm, w1_final, w2_final
 
-def cross_val(X):
+
+def cross_val(X, n=20):
     """ Prepare the test and train data. """
-    mat_size = X.shape[0]
-    row = random.choices(list(np.arange(mat_size)), k=50)
-    column = random.choices(list(np.arange(mat_size)), k=50)
+    row = np.random.choice(X.shape[0], n, replace=False)
+    col = np.random.choice(X.shape[1], n, replace=False)
     train_X = np.copy(X)
-    test_X = np.empty((X.shape[0], X.shape[1]))
-    test_X[:, :] = 0.0
-    indexes = list(zip(row, column))
-    for _, val in enumerate(indexes):
-        train_X[val] = 0.0
-        test_X[val] = X[val]
+    test_X = np.full_like(X, np.nan)
+    train_X[row, col] = np.nan
+    test_X[row, col] = X[row, col]
+    assert np.sum(np.isnan(train_X)) == n
+    assert np.sum(np.isfinite(test_X)) == n
     return train_X, test_X
