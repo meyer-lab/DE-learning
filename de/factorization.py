@@ -138,3 +138,16 @@ def MatrixSubtraction(cellLine1, cellLine2):
     difference_matrix = w2_final - w1_final
     diff_norm = np.linalg.norm(difference_matrix)
     return norm1, norm2, diff_norm, w1_final, w2_final
+
+
+def cross_val(X, n=20):
+    """ Prepare the test and train data. """
+    row = np.random.choice(X.shape[0], n, replace=False)
+    col = np.random.choice(X.shape[1], n, replace=False)
+    train_X = np.copy(X)
+    test_X = np.full_like(X, np.nan)
+    train_X[row, col] = np.nan
+    test_X[row, col] = X[row, col]
+    assert np.sum(np.isnan(train_X)) == n
+    assert np.sum(np.isfinite(test_X)) == n
+    return train_X, test_X

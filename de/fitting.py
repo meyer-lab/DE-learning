@@ -28,7 +28,7 @@ def reshapeParams(p, nGenes):
     return w, eta_list
 
 
-def cost(pIn, data, U=None, linear=False):
+def cost(pIn, data, U=None):
     """ Returns SSE between model and experimental RNAseq data. """
     if isinstance(data, np.ndarray):
         data = [data]
@@ -41,10 +41,7 @@ def cost(pIn, data, U=None, linear=False):
 
     costt = 0
     for i in range(len(data)):
-        if linear:
-            costt += jnp.linalg.norm(eta[i][:, jnp.newaxis] * (w @ U[i]) - alpha * data[i])
-        else:
-            costt += jnp.linalg.norm(eta[i][:, jnp.newaxis] * expit(w @ U[i]) - alpha * data[i])
+        costt += jnp.linalg.norm(eta[i][:, jnp.newaxis] * expit(w @ U[i]) - alpha * data[i])
 
     costt += regularize(pIn, data[0].shape[0])
 
@@ -60,7 +57,7 @@ def regularize(pIn, nGenes, strength=0.1):
     return strength * ll
 
 
-def runOptim(data, niter=2000, disp=0, linear=False):
+def runOptim(data, niter=2000, disp=0):
     """ Run the optimization. """
     if isinstance(data, np.ndarray):
         data = [data]
@@ -80,10 +77,11 @@ def runOptim(data, niter=2000, disp=0, linear=False):
         outt = cost_grad(*args)
         return np.array(outt)
 
-    res = minimize(cost, x0, args=(data, U, linear), method="CG", jac=cost_GF, options={"maxiter": niter, "disp": disp})
+    res = minimize(cost, x0, args=(data, U), method="L-BFGS-B", jac=cost_GF, options={"maxiter": niter, "disp": disp})
     assert (res.success) or (res.nit == niter)
 
     return res.x
+
 
 def mergedFitting(cellLine1, cellLine2):
     """Given two cell lines, compute the cost of fitting each of them individually and the cost of fitting a shared w matrix."""
@@ -107,3 +105,29 @@ def mergedFitting(cellLine1, cellLine2):
     cost_shared = cost(p, [data1_final, data2_final])
 
     return cost_1, cost_2, cost_shared
+
+
+def impute(data, fitting=False):
+    """ Impute by repeated fitting. """
+    missing = np.isnan(data)
+    data = np.nan_to_num(data)
+
+    for ii in range(10):
+        U = np.copy(data)
+        np.fill_diagonal(U, 0.0)
+        data_last = np.copy(data)
+
+        # Fit
+        if fitting:
+            xx = runOptim(data, niter=500)
+            w, eta = reshapeParams(xx, data.shape[0])
+        else:
+            w, eta = factorizeEstimate(data)
+
+        # Fill-in with model prediction
+        predictt = eta[:, jnp.newaxis] * expit(w @ U) / alpha
+        data[missing] = predictt[missing]
+
+        print(np.linalg.norm(data - data_last))
+
+    return data
