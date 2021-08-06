@@ -32,5 +32,19 @@ def SSE(data, U, model):
     
     return sum_errors
 
-def runCV(model):
+def runCV():
     
+    data = ImportMelanoma()
+    U = np.copy(data)
+    np.fill_diagonal(U, 0.0)
+
+    train_data, test_data, train_U, test_U = cross_val(data, U)
+
+    model = Lasso(max_iter=300000)
+    model.fit(train_U, train_data)
+
+    p = model.predict(test_U)
+    diff = np.absolute(data - p)
+    
+    square = np.power(diff,2)
+    sum_errors = np.sum(square)
