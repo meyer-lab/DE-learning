@@ -120,21 +120,15 @@ def MatrixSubtraction(cellLine1, cellLine2):
     diff_norm = np.linalg.norm(difference_matrix)
     return norm1, norm2, diff_norm, w1_final, w2_final
 
-def cross_val(X, Y):
+
+def cross_val(X, n=20):
     """ Prepare the test and train data. """
-    mat_size = X.shape[0]
-    row = random.choices(list(np.arange(mat_size)), k=50)
-    column = random.choices(list(np.arange(mat_size)), k=50)
+    row = np.random.choice(X.shape[0], n, replace=False)
+    col = np.random.choice(X.shape[1], n, replace=False)
     train_X = np.copy(X)
-    test_X = np.empty((X.shape[0], X.shape[1]))
-    train_Y = np.copy(Y)
-    test_Y = np.empty((Y.shape[0], Y.shape[1]))
-    test_X[:, :] = np.nan
-    test_Y[:, :] = np.nan
-    indexes = list(zip(row, column))
-    for _, val in enumerate(indexes):
-        train_X[val] = np.nan
-        train_Y[val] = np.nan
-        test_X[val] = X[val]
-        test_Y[val] = Y[val]
-    return train_X, test_X, train_Y, test_Y
+    test_X = np.full_like(X, np.nan)
+    train_X[row, col] = np.nan
+    test_X[row, col] = X[row, col]
+    assert np.sum(np.isnan(train_X)) == n
+    assert np.sum(np.isfinite(test_X)) == n
+    return train_X, test_X

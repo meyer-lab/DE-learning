@@ -37,7 +37,7 @@ output/manuscript.docx: venv output/manuscript.md $(flistFull)
 		--defaults=./common/templates/manubot/pandoc/docx.yaml output/manuscript.md
 
 test: venv
-	. venv/bin/activate && pytest -s -x
+	. venv/bin/activate && pytest -s -x -v
 
 clean:
 	rm -rf output venv de/data/GSE*
