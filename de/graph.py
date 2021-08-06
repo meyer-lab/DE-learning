@@ -2,22 +2,21 @@
 from os.path import join, dirname
 import numpy as np
 import pandas as pd
-import matplotlib as plt
 import matplotlib.patches as mpatches
 import matplotlib.lines as mlines
 import networkx as nx
-from .importData import ImportMelanoma, importgenes, splitnodes
+from .importData import ImportMelanoma
 from .fitting import runOptim, reshapeParams
 
 
-def load_w(linear=False):
+def load_w():
     """
     Loads w from csv file and returns dataframe with gene symbols attached to w values.
     """
     path_here = dirname(dirname(__file__))
 
     data = ImportMelanoma()
-    ps = runOptim(data, niter=400, disp=True, linear=linear)
+    ps = runOptim(data, niter=400, disp=True)
     w = reshapeParams(ps, data.shape[0])[0]
     genes = np.loadtxt(join(path_here, "de/data/node_Index.csv"), dtype=str)
 
