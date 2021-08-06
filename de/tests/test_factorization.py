@@ -6,7 +6,7 @@ import numpy as np
 import numpy.ma as ma
 from scipy.special import expit
 from ..factorization import factorizeEstimate, alpha, cellLineComparison, MatrixSubtraction, cellLineFactorization, cross_val
-from ..fitting import runOptim, impute
+from ..fitting import runOptim, impute, mergedFitting
 from ..importData import ImportMelanoma, importLINCS
 
 
@@ -64,6 +64,15 @@ def test_matrixSub():
 
     assert diff_norm != norm1
     assert diff_norm != norm2
+
+def test_mergedFitting():
+    """ To test if the fitting works on multiple cell lines and the shared cost has a reasonable value. """
+    cellLine1 = 'A375'
+    cellLine2 = 'HT29'
+
+    cost1, cost2, shared_cost = mergedFitting(cellLine1, cellLine2)
+
+    assert abs(shared_cost - (cost1+cost2)) < 100
 
 def test_crossval():
     """ Tests the cross val function that creates the train and test data. """
