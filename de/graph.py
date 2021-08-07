@@ -89,7 +89,6 @@ def set_nodes(dir_graph, pos, ax):
     """
     Given a directed graph and pos, then draw the corresponding node based on pagerank value.
     """
-    nodes = dir_graph.nodes()
     node_pageranks = nx.pagerank(dir_graph)
     pr_vals = node_pageranks.values()
     pr_list = list(pr_vals)
