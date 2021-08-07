@@ -48,31 +48,13 @@ def remove(w):
     return w
 
 
-def pagerank(w, num_iterations: int = 100, d: float = 0.85):
-    """
-    Given an adjecency matrix, calculate the pagerank value.
-    Notice: All the elements in w should be no less than zeros; Also, the elements of each column should sum up to 1.
-    """
-    w = np.absolute(w)  # PageRank only works with unsigned networks, so we'll take the absolute value.
-    N = w.shape[1]
-    for i in range(N):
-        w[:, i] /= sum(w[:, i])
-    v = np.random.rand(N, 1)
-    v = v / np.linalg.norm(v, 1)
-    w_hat = (d * w + (1 - d) / N)
-    for i in range(num_iterations):
-        v = w_hat @ v
-    return v
-
-
 def add_nodes(dir_graph, w, w_abs):
     """
     Given a directed graph and w matrix, adds a node to the directed graph for each gene.
     """
     w_abs = np.copy(w_abs)
-    v = pagerank(w_abs)
-    for i in range(len(v)):
-        dir_graph.add_node(i, gene=w.columns[i], pagerank=v[i])
+    for i in range(len(w_abs)):
+        dir_graph.add_node(i, gene=w.columns[i])
     return dir_graph
 
 
@@ -84,11 +66,12 @@ def add_edges(dir_graph, w, w_abs):
     threshold = np.mean(w_abs) + 0.2 * np.std(w_abs)  # lower threshold in order to find more possible loops
     for i in range(w.shape[1]):
         for j in range(w.shape[1]):
-            if w_abs[i, j] > threshold:
-                if w[i, j] > 0:
-                    dir_graph.add_edge(j, i, color="red", weight=w[i, j])
-                else:
-                    dir_graph.add_edge(j, i, color="blue", weight=w[i, j])
+            if not i == j: # exclude self-loops
+                if w_abs[i, j] > threshold:
+                    if w[i, j] > 0:
+                        dir_graph.add_edge(j, i, color="red", weight=w[i, j])
+                    else:
+                        dir_graph.add_edge(j, i, color="blue", weight=w[i, j])
     return dir_graph
 
 
@@ -107,14 +90,11 @@ def set_nodes(dir_graph, pos, ax):
     Given a directed graph and pos, then draw the corresponding node based on pagerank value.
     """
     nodes = dir_graph.nodes()
-    nodesize = [dir_graph.nodes[u]["pagerank"] * 260000 for u in nodes]
-
-def set_nodes(dir_graph, pos, ax):
-    """
-    Given a directed graph and pos, then draw the corresponding node based on pagerank value.
-    """
-    nodes = dir_graph.nodes()
-    nodesize = [dir_graph.nodes[u]["pagerank"] * 260000 for u in nodes]
+    node_pageranks = nx.pagerank(dir_graph)
+    pr_vals = node_pageranks.values()
+    pr_list = list(pr_vals)
+    pr_list = [i * 260000 for i in pr_list]
+    nodesize = np.array(pr_list)
 
     pre_resistant_list = ["JUN", "BRD2", "STK11", "PKN2", "NFAT5", "KMT2D", "ADCK3", "FOSL1", "CSK", "BRD8", "CBFB", "TADA2B", "DSTYK", "JUNB", "LATS2", "FEZF2", "MITF", "RUNX3", "SUV420H1", "SOX10", "DOT1L", "PRKRIR", 'FEZF2', 'SOX10', 'ADCK3', 'BRD8', 'CBFB', 'CSK', 'DOT1L', 'DSTYK', 'FOSL1', 'JUN', 'JUNB', 'KMT2D', 'LATS2', 'MITF', 'NFAT5', 'PKN2', 'PRKRIR', 'RUNX3', 'STK11', 'SUV420H1'] 
     full_resistant_list = ["MAP3K1", "MAP2K7", "NSD1", "KDM1A", "EGFR", "EP300", "SRF", "PRKAA1", "GATA4", "MYBL1", "MTF1", 'EGFR', 'EP300', 'GATA4', 'KDM1A', 'MAP2K7', 'MAP3K1', 'MTF1', 'MYBL1', 'NSD1', 'PRKAA1', 'SRF']
