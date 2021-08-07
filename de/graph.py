@@ -16,7 +16,7 @@ def load_w():
     path_here = dirname(dirname(__file__))
 
     data = ImportMelanoma()
-    ps = runOptim(data, niter=400, disp=True)
+    ps = runOptim(data, niter=400)
     w = reshapeParams(ps, data.shape[0])[0]
     genes = np.loadtxt(join(path_here, "de/data/node_Index.csv"), dtype=str)
 
@@ -89,11 +89,8 @@ def set_nodes(dir_graph, pos, ax):
     """
     Given a directed graph and pos, then draw the corresponding node based on pagerank value.
     """
-    node_pageranks = nx.pagerank(dir_graph)
-    pr_vals = node_pageranks.values()
-    pr_list = list(pr_vals)
-    pr_list = [i * 260000 for i in pr_list]
-    nodesize = np.array(pr_list)
+    pgrnk = nx.pagerank(dir_graph)
+    nodesize = np.array(pgrnk.values()) * 260000
 
     pre_resistant_list = ["JUN", "BRD2", "STK11", "PKN2", "NFAT5", "KMT2D", "ADCK3", "FOSL1", "CSK", "BRD8", "CBFB", "TADA2B", "DSTYK", "JUNB", "LATS2", "FEZF2", "MITF", "RUNX3", "SUV420H1", "SOX10", "DOT1L", "PRKRIR", 'FEZF2', 'SOX10', 'ADCK3', 'BRD8', 'CBFB', 'CSK', 'DOT1L', 'DSTYK', 'FOSL1', 'JUN', 'JUNB', 'KMT2D', 'LATS2', 'MITF', 'NFAT5', 'PKN2', 'PRKRIR', 'RUNX3', 'STK11', 'SUV420H1'] 
     full_resistant_list = ["MAP3K1", "MAP2K7", "NSD1", "KDM1A", "EGFR", "EP300", "SRF", "PRKAA1", "GATA4", "MYBL1", "MTF1", 'EGFR', 'EP300', 'GATA4', 'KDM1A', 'MAP2K7', 'MAP3K1', 'MTF1', 'MYBL1', 'NSD1', 'PRKAA1', 'SRF']
