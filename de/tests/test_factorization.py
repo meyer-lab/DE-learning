@@ -65,10 +65,26 @@ def test_matrixSub():
     assert diff_norm != norm1
     assert diff_norm != norm2
 
-def test_crossval():
+def test_crossval_Melanoma():
     """ Tests the cross val function that creates the train and test data. """
     data = ImportMelanoma()
     train_X, test_X = cross_val(data)
     full_X = impute(train_X)
 
     print(ma.corrcoef(ma.masked_invalid(full_X.flatten()), ma.masked_invalid(test_X.flatten())))
+
+
+def test_crossval_LINCS(cellLine):
+    """ Tests the cross val function that creates the train and test data. """
+    data, _ = importLINCS(cellLine)
+    train_X, test_X = cross_val(data)
+    full_X = impute(train_X)
+
+    U = np.copy(data)
+    np.fill_diagonal(U, 0.0)
+    train_Y, test_Y = cross_val(data)
+    full_Y = impute(train_Y)
+
+    
+    print(ma.corrcoef(ma.masked_invalid(full_X.flatten()), ma.masked_invalid(test_X.flatten())))
+    print(ma.corrcoef(ma.masked_invalid(full_Y.flatten()), ma.masked_invalid(test_Y.flatten())))
