@@ -44,7 +44,7 @@ def calcEta(data, w, alphaIn):
     return gmean(eta, axis=1)
 
 
-def factorizeEstimate(data, tol=1e-9, maxiter=10000):
+def factorizeEstimate(data, tol=1e-9, maxiter=20):
     """ Initialize the parameters based on the data. """
     assert maxiter > 0
     # TODO: Add tolerance for termination.
@@ -74,7 +74,7 @@ def factorizeEstimate(data, tol=1e-9, maxiter=10000):
         for ii in range(len(data)):
             cost += np.linalg.norm(etas[ii][:, np.newaxis] * expit(w @ U[ii]) - alpha * data[ii])
 
-        if ii > 10 and (costLast - cost) < tol:
+        if ii > 3 and (costLast - cost) < tol:
             # TODO: I believe the cost should be strictly decreasing, so look into this.
             break
 
@@ -92,8 +92,11 @@ def cellLineFactorization(cellLine):
 
 def cellLineComparison(cellLine1, cellLine2):
     """Uses annotation list to generate an array of common genes between two cell lines"""
-    _, _, annotation1 = cellLineFactorization(cellLine1)
-    _, _, annotation2 = cellLineFactorization(cellLine2)
+    _, annotation1 = importLINCS(cellLine1)
+    _, annotation2 = importLINCS(cellLine2)
+
+    annotation1 = annotation1[0].tolist()
+    annotation2 = annotation2[0].tolist()
 
     intersection = set(annotation1).intersection(annotation2)
     intersection_annotation = list(intersection)

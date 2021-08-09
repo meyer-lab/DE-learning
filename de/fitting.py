@@ -97,14 +97,9 @@ def mergedFitting(cellLine1, cellLine2):
     data2_final = data2_edited.values
     shared_data = [data1_final, data2_final]
 
-    p = factorizeEstimate(shared_data)
+    w_shared, eta_list = factorizeEstimate(shared_data)
 
-    w_shared, eta_list = reshapeParams(p, shared_data[0].shape[0])
-    cost_1 = cost(np.concatenate((w_shared.flatten(), eta_list[0])), data1_final)
-    cost_2 = cost(np.concatenate((w_shared.flatten(), eta_list[1])), data2_final)
-    cost_shared = cost(p, [data1_final, data2_final])
-
-    return cost_1, cost_2, cost_shared
+    return w_shared, eta_list
 
 
 def impute(data, fitting=False):

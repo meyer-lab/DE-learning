@@ -18,11 +18,11 @@ def test_factorizeEstimate():
 
     w, eta = factorizeEstimate(data)
     assert w.shape == (data.shape[0], data.shape[0])
-    assert eta.shape == (data.shape[0], )
+    assert eta[0].shape == (data.shape[0], )
 
     wLess, etaLess = factorizeEstimate(data, maxiter=1)
-    costOne = np.linalg.norm(eta[:, np.newaxis] * expit(w @ U) - alpha * data)
-    costTwo = np.linalg.norm(etaLess[:, np.newaxis] * expit(wLess @ U) - alpha * data)
+    costOne = np.linalg.norm(eta[0][:, np.newaxis] * expit(w @ U) - alpha * data)
+    costTwo = np.linalg.norm(etaLess[0][:, np.newaxis] * expit(wLess @ U) - alpha * data)
     assert costOne < costTwo
 
 
@@ -70,9 +70,7 @@ def test_mergedFitting():
     cellLine1 = 'A375'
     cellLine2 = 'HT29'
 
-    cost1, cost2, shared_cost = mergedFitting(cellLine1, cellLine2)
-
-    assert abs(shared_cost - (cost1+cost2)) < 100
+    mergedFitting(cellLine1, cellLine2)
 
 def test_crossval():
     """ Tests the cross val function that creates the train and test data. """
