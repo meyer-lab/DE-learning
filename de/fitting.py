@@ -7,6 +7,7 @@ from jax.scipy.special import expit
 from jax.config import config
 from scipy.optimize import minimize
 from .factorization import alpha, factorizeEstimate
+from .linearModel import runFitting
 
 config.update("jax_enable_x64", True)
 
@@ -64,7 +65,7 @@ def runOptim(data, niter=2000, disp=0):
     return res.x
 
 
-def impute(data, fitting=False):
+def impute(data, fitting=False, linear=False):
     """ Impute by repeated fitting. """
     missing = np.isnan(data)
     data = np.nan_to_num(data)
@@ -76,13 +77,20 @@ def impute(data, fitting=False):
 
         # Fit
         if fitting:
-            xx = runOptim(data, niter=500)
-            w, eta = reshapeParams(xx, data.shape[0])
+            if linear:
+                w, prediction = runFitting(data, U)
+            else:    
+                xx = runOptim(data, niter=500)
+                w, eta = reshapeParams(xx, data.shape[0])
         else:
             w, eta = factorizeEstimate(data)
 
         # Fill-in with model prediction
-        predictt = eta[:, jnp.newaxis] * expit(w @ U) / alpha
+        if linear:
+            predictt = prediction
+        else:    
+            predictt = eta[:, jnp.newaxis] * expit(w @ U) / alpha
+        
         data[missing] = predictt[missing]
 
         print(np.linalg.norm(data - data_last))

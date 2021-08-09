@@ -1,26 +1,24 @@
 from sklearn.linear_model import Lasso
 from .importData import ImportMelanoma, importLINCS
-from .factorization import cross_val
 import numpy as np
 
-def runFitting(cellLine=None, max_iter=300000):
+def runFitting(data, U=None, max_iter=300000):
     #cellLines = ["A375", "A549", "HA1E", "HT29", "MCF7", "PC3"]
-    if cellLine is None:
-        data = ImportMelanoma()
-    else:
-        data, annotation = importLINCS(cellLine)
     
-    U = np.copy(data)
-    np.fill_diagonal(U, 0.0)
+    if U is None:
+        U = np.copy(data)
+        np.fill_diagonal(U, 0.0)
 
     model = Lasso(max_iter=max_iter)
     model.fit(U, data)
 
-    cost = SSE(data, U, model)
+    p = model.predict(U)
+
+    #cost = SSE(data, U, model)
     
     #np.savetxt(f"{cellLine}.csv", model.coef_, delimiter=",")
 
-    return model.coef_, cost
+    return model.coef_, p
 
 def SSE(data, U, model):
 
@@ -31,20 +29,3 @@ def SSE(data, U, model):
     sum_errors = np.sum(square)
     
     return sum_errors
-
-def runCV():
-    
-    data = ImportMelanoma()
-    U = np.copy(data)
-    np.fill_diagonal(U, 0.0)
-
-    train_data, test_data, train_U, test_U = cross_val(data, U)
-
-    model = Lasso(max_iter=300000)
-    model.fit(train_U, train_data)
-
-    p = model.predict(test_U)
-    diff = np.absolute(data - p)
-    
-    square = np.power(diff,2)
-    sum_errors = np.sum(square)
