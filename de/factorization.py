@@ -18,10 +18,10 @@ def calcW(data, eta, alphaIn):
     U = None
     B = None
 
-    for x in data:
+    for i, x in enumerate(data):
         U1 = np.copy(x)
         np.fill_diagonal(U1, 0.0)
-        B1 = (x * alphaIn) / eta[:, np.newaxis]
+        B1 = (x * alphaIn) / eta[i][:, np.newaxis]
         assert np.all(np.isfinite(B1))
         B1 = logit(np.clip(B1, 0.0001, 0.9999))
         assert np.all(np.isfinite(B1))
@@ -57,19 +57,22 @@ def factorizeEstimate(data, tol=1e-9, maxiter=10000):
     for ii in range(len(U)):
         np.fill_diagonal(U[ii], 0.0)
 
+    costLast = np.inf
+
     # Use the data to try and initialize the parameters
     for ii in range(maxiter):
-        cost = 0
-        for j, x in enumerate(data):
-            eta = calcEta(x, w, alpha)
+        etas = [calcEta(x, w, alpha) for x in data]
+        for eta in etas:
             assert np.all(np.isfinite(eta))
             assert eta.shape == (data[0].shape[0], )
-            w = calcW(data, eta, alpha)
-            assert np.all(np.isfinite(w))
 
-            assert w.shape == (data[0].shape[0], data[0].shape[0])
+        w = calcW(data, etas, alpha)
+        assert np.all(np.isfinite(w))
+        assert w.shape == (data[0].shape[0], data[0].shape[0])
 
-            cost += np.linalg.norm(eta[:, np.newaxis] * expit(w @ U[j]) - alpha * x)
+        cost = 0
+        for ii in range(len(data)):
+            cost += np.linalg.norm(etas[ii][:, np.newaxis] * expit(w @ U[ii]) - alpha * data[ii])
 
         if ii > 10 and (costLast - cost) < tol:
             # TODO: I believe the cost should be strictly decreasing, so look into this.
@@ -77,7 +80,7 @@ def factorizeEstimate(data, tol=1e-9, maxiter=10000):
 
         costLast = cost
 
-    return w, eta
+    return w, etas
 
 
 def cellLineFactorization(cellLine):

@@ -62,10 +62,10 @@ def runOptim(data, niter=2000, disp=0):
     if isinstance(data, np.ndarray):
         data = [data]
 
-    w, eps = factorizeEstimate(data[0])
-    x0 = np.concatenate((w.flatten(), eps))
-    for ii in range(1, len(data)):
-        x0 = np.concatenate((x0, eps))
+    w, eps = factorizeEstimate(data)
+    x0 = w.flatten()
+    for ep in eps:
+        x0 = np.concatenate((x0, ep))
 
 
     U = [np.copy(d) for d in data]
@@ -97,7 +97,7 @@ def mergedFitting(cellLine1, cellLine2):
     data2_final = data2_edited.values
     shared_data = [data1_final, data2_final]
 
-    p = runOptim(shared_data, niter=3000)
+    p = factorizeEstimate(shared_data)
 
     w_shared, eta_list = reshapeParams(p, shared_data[0].shape[0])
     cost_1 = cost(np.concatenate((w_shared.flatten(), eta_list[0])), data1_final)
