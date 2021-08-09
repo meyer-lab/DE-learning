@@ -73,20 +73,11 @@ def cellLineComparison(cellLine1, cellLine2):
     _, _, annotation1 = cellLineFactorization(cellLine1)
     _, _, annotation2 = cellLineFactorization(cellLine2)
 
-    line1_as_set = set(annotation1)
-    intersection = line1_as_set.intersection(annotation2)
+    intersection = set(annotation1).intersection(annotation2)
     intersection_annotation = list(intersection)
 
-    index_list1 = []
-    index_list2 = []
-
-    for x in intersection_annotation:
-        index_value1 = annotation1.index(x)
-        index_list1.append(index_value1)
-
-    for x in intersection_annotation:
-        index_value2 = annotation2.index(x)
-        index_list2.append(index_value2)
+    index_list1 = [annotation1.index(x) for x in intersection_annotation]
+    index_list2 = [annotation2.index(x) for x in intersection_annotation]
 
     index_list1.sort()
     index_list2.sort()
