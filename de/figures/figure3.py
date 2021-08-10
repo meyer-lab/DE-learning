@@ -33,14 +33,14 @@ def makeFigure():
     w_max = np.max(w_abs)
 
     # plot the hypothesis test distribution for full and pre-resistant and the random selection
-    w_full, w_pre, w_rand = cluster_dist()
-    ax[2].hist([w_full, w_pre, w_rand], alpha=0.7, label=["Full R", "Pre R", "Random"])
+    dist_full, dist_pre, dist_rand = cluster_dist()
+    ax[2].hist([dist_full, dist_pre, dist_rand], alpha=0.7, label=["Full R", "Pre R", "Random"])
     ax[2].legend()
     ax[2].set_xlabel("Node distance")
     ax[2].set_ylabel("Frequency")
     ax[2].set_title("Network distance distributions")
-    max_dist = int(np.max(np.concatenate([w_full, w_pre, w_rand]))) #takes maximum of distance values
-    ax[2].set_xticks((np.linspace(1,max_dist,max_dist))) 
+    max_dist = np.max(np.concatenate([dist_full, dist_pre, dist_rand])) #takes maximum of distance values
+    ax[2].set_xticks((np.linspace(0,max_dist, 10))) 
     # create upstream bar graph
     bar_graph(w_trans, "orange", ax[3], "upstream")
     # set title for the graph
@@ -92,4 +92,4 @@ def cluster_dist():
             dist_rand.append(nx.bellman_ford_path_length(G, source=a3, target=b3, weight="weight")) 
         except NetworkXUnbounded or NetworkXNoPath:
             pass
-    return dist_full, dist_pre, dist_rand #np.mean(w_full), np.mean(w_pre), np.mean(w_rand)
+    return dist_full, dist_pre, dist_rand #np.mean(dist_full), np.mean(w_pre), np.mean(w_rand)
