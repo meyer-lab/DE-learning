@@ -67,10 +67,16 @@ def test_matrixSub():
 
 def test_mergedFitting():
     """ To test if the fitting works on multiple cell lines and the shared cost has a reasonable value. """
-    cellLine1 = 'A375'
-    cellLine2 = 'HT29'
+    data = ImportMelanoma()
+    w1, eta_list1 = factorizeEstimate(data)
+    eta1 = eta_list1[0]
+    
+    data_list = [data, data]
+    w2, eta_list2 = factorizeEstimate(data_list)
+    eta2 = eta_list2[0]
 
-    mergedFitting(cellLine1, cellLine2)
+    print(np.linalg.norm(eta2-eta1))
+    print(np.linalg.norm(w2-w1))
 
 def test_crossval():
     """ Tests the cross val function that creates the train and test data. """
