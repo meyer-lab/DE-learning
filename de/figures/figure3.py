@@ -50,8 +50,7 @@ def makeFigure():
     return f
 
 def cluster_dist():
-    """Takes random pairs of resistant, pre-resistant, and one of each nodes then finds inverse weighted path length.
-    """
+    """ This function plots the distribution of distances betweek the two full- and pre-resistant clusters. """
     G = nx.Graph()
     w = load_w()
     w = normalize(w)
@@ -75,23 +74,17 @@ def cluster_dist():
     for _ in range(70):
         try:
             temp1 = random.sample(full, 2)
-            a1 = temp1[0]
-            b1 = temp1[1]
-            dist_full.append(nx.bellman_ford_path_length(G, source=a1, target=b1, weight="weight"))
+            dist_full.append(nx.bellman_ford_path_length(G, source=temp1[0], target=temp1[1], weight="weight")) # the first output of the function is the path length
         except NetworkXUnbounded or NetworkXNoPath:
             pass
         try:
             temp2 = random.sample(pre, 2)
-            a2 = temp2[0]
-            b2 = temp2[1]
-            dist_pre.append(nx.bellman_ford_path_length(G, source=a2, target=b2, weight="weight"))
+            dist_pre.append(nx.bellman_ford_path_length(G, source=temp2[0], target=temp2[1], weight="weight")) 
         except NetworkXUnbounded or NetworkXNoPath:
             pass
         try:
             temp3 = np.concatenate([np.random.choice(full,1), np.random.choice(pre, 1)])
-            a3 = temp3[0]
-            b3 = temp3[1]
-            dist_rand.append(nx.bellman_ford_path_length(G, source=a3, target=b3, weight="weight"))
+            dist_rand.append(nx.bellman_ford_path_length(G, source=temp3[0], target=temp3[1], weight="weight")) 
         except NetworkXUnbounded or NetworkXNoPath:
             pass
     return dist_full, dist_pre, dist_rand
