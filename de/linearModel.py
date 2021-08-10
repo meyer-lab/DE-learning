@@ -14,8 +14,9 @@ def runFitting(data, U=None, max_iter=300000):
 
     p = model.predict(U)
 
-    #cost = SSE(data, U, model)
-    
+    cost = SSE(data, U, model)
+    print(f"cost: {cost}")
+
     #np.savetxt(f"{cellLine}.csv", model.coef_, delimiter=",")
 
     return model.coef_, p
