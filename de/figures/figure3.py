@@ -42,7 +42,7 @@ def makeFigure():
     ax[2].set_ylabel("Frequency")
     ax[2].set_title("Network distance distributions")
     max_dist = int(np.max(np.concatenate([w_full, w_pre, w_rand]))) #takes maximum of distance values
-    ax[2].set_xticks((np.linspace(1,max_dist, max_dist)))
+    ax[2].set_xticks((np.linspace(1,max_dist,max_dist))) 
     # create upstream bar graph
     bar_graph(w_trans, "orange", ax[3], "upstream")
     # set title for the graph
@@ -60,15 +60,15 @@ def cluster_dist():
 
     # add nodes and edges
     add_nodes(G, w, w_abs)
-    add_edges(G, w, w_abs)
+    add_edges(G, 1/(w), 1/(w_abs))
     remove_isolates(G)
 
     for u,v in G.edges:
         G.edges[u, v]['weight'] = np.abs(G.edges[u, v]['weight'])
 
-    w_full = []
-    w_pre = []
-    w_rand = []
+    dist_full = []
+    dist_pre = []
+    dist_rand = []
     
     full = [24, 1, 65, 45, 40, 29, 0, 17, 9, 2, 4, 67, 13, 25, 30, 37, 57, 66, 60, 12, 50]
     pre = [34, 33, 43, 27, 15, 16, 64, 48, 18, 39, 38]
@@ -77,21 +77,21 @@ def cluster_dist():
             temp1 = random.sample(full, 2)
             a1 = temp1[0]
             b1 = temp1[1]
-            w_full.append(nx.bellman_ford_path_length(G, source=a1, target=b1, weight="weight")) # the first output of the function is the path length
-        except NetworkXUnbounded:
+            dist_full.append(nx.bellman_ford_path_length(G, source=a1, target=b1, weight="weight")) # the first output of the function is the path length
+        except NetworkXUnbounded or NetworkXNoPath:
             pass
         try:
             temp2 = random.sample(pre, 2)
             a2 = temp2[0]
             b2 = temp2[1]
-            w_pre.append(nx.bellman_ford_path_length(G, source=a2, target=b2, weight="weight")) 
-        except NetworkXUnbounded:
+            dist_pre.append(nx.bellman_ford_path_length(G, source=a2, target=b2, weight="weight")) 
+        except NetworkXUnbounded or NetworkXNoPath:
             pass
         try:
             temp3 = np.concatenate([np.random.choice(full,1), np.random.choice(pre, 1)])
             a3 = temp3[0]
             b3 = temp3[1]
-            w_rand.append(nx.bellman_ford_path_length(G, source=a3, target=b3, weight="weight")) 
-        except NetworkXUnbounded:
+            dist_rand.append(nx.bellman_ford_path_length(G, source=a3, target=b3, weight="weight")) 
+        except NetworkXUnbounded or NetworkXNoPath:
             pass
-    return w_full, w_pre, w_rand #np.mean(w_full), np.mean(w_pre), np.mean(w_rand)
+    return dist_full, dist_pre, dist_rand #np.mean(w_full), np.mean(w_pre), np.mean(w_rand)
