@@ -72,20 +72,11 @@ def cellLineComparison(cellLine1, cellLine2):
     _, _, annotation1 = cellLineFactorization(cellLine1)
     _, _, annotation2 = cellLineFactorization(cellLine2)
 
-    line1_as_set = set(annotation1)
-    intersection = line1_as_set.intersection(annotation2)
+    intersection = set(annotation1).intersection(annotation2)
     intersection_annotation = list(intersection)
 
-    index_list1 = []
-    index_list2 = []
-
-    for x in intersection_annotation:
-        index_value1 = annotation1.index(x)
-        index_list1.append(index_value1)
-
-    for x in intersection_annotation:
-        index_value2 = annotation2.index(x)
-        index_list2.append(index_value2)
+    index_list1 = [annotation1.index(x) for x in intersection_annotation]
+    index_list2 = [annotation2.index(x) for x in intersection_annotation]
 
     index_list1.sort()
     index_list2.sort()
@@ -118,3 +109,16 @@ def MatrixSubtraction(cellLine1, cellLine2):
     difference_matrix = w2_final - w1_final
     diff_norm = np.linalg.norm(difference_matrix)
     return norm1, norm2, diff_norm, w1_final, w2_final
+
+
+def cross_val(X, n=20):
+    """ Prepare the test and train data. """
+    row = np.random.choice(X.shape[0], n, replace=False)
+    col = np.random.choice(X.shape[1], n, replace=False)
+    train_X = np.copy(X)
+    test_X = np.full_like(X, np.nan)
+    train_X[row, col] = np.nan
+    test_X[row, col] = X[row, col]
+    assert np.sum(np.isnan(train_X)) == n
+    assert np.sum(np.isfinite(test_X)) == n
+    return train_X, test_X
