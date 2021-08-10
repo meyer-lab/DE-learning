@@ -52,7 +52,7 @@ def runOptim(data, niter=2000, disp=0):
 
     U = np.copy(data)
     np.fill_diagonal(U, 0.0)
-    cost_grad = jit(grad(cost, argnums=0), static_argnums=(3,))
+    cost_grad = jit(grad(cost, argnums=0))
 
     def cost_GF(*args):
         outt = cost_grad(*args)

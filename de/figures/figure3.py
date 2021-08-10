@@ -1,8 +1,6 @@
 """
 This creates Figure 2: w Network Graph
 """
-from networkx.algorithms.cluster import _weighted_triangles_and_degree_iter
-from networkx.algorithms.shortest_paths.weighted import bellman_ford_path_length
 from networkx.exception import NetworkXNoPath, NetworkXUnbounded
 import numpy as np
 import networkx as nx
@@ -60,11 +58,11 @@ def cluster_dist():
 
     # add nodes and edges
     add_nodes(G, w, w_abs)
-    add_edges(G, 1/(w), 1/(w_abs))
+    add_edges(G, w, w_abs)
     remove_isolates(G)
 
     for u,v in G.edges:
-        G.edges[u, v]['weight'] = np.abs(G.edges[u, v]['weight'])
+        G.edges[u, v]['weight'] = np.abs(1/G.edges[u, v]['weight'])
 
     dist_full = []
     dist_pre = []
