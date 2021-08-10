@@ -5,8 +5,8 @@ import pytest
 import numpy as np
 import numpy.ma as ma
 from scipy.special import expit
-from ..factorization import factorizeEstimate, alpha, cellLineComparison, MatrixSubtraction, cellLineFactorization, cross_val
-from ..fitting import runOptim, impute, mergedFitting
+from ..factorization import factorizeEstimate, alpha, cellLineComparison, MatrixSubtraction, cross_val
+from ..fitting import impute
 from ..importData import ImportMelanoma, importLINCS
 
 
@@ -36,13 +36,6 @@ def test_factorizeBlank(level):
     np.testing.assert_allclose(eta, 2 * level * alpha)
 
 
-@pytest.mark.parametrize("sizze", [(8, 8), (12, 13), (15, 14)])
-def test_fit(sizze):
-    """ Test that this runs successfully with reasonable input. """
-    data = np.random.lognormal(size=sizze)
-    outt = runOptim(data, niter=20, disp=False)
-    assert np.all(np.isfinite(outt))
-
 def test_cellLines():
     """ To test and confirm most genes are overlapping between cell lines. """
     cellLine1 = 'A375'
@@ -65,18 +58,23 @@ def test_matrixSub():
     assert diff_norm != norm1
     assert diff_norm != norm2
 
+
 def test_mergedFitting():
     """ To test if the fitting works on multiple cell lines and the shared cost has a reasonable value. """
     data = ImportMelanoma()
     w1, eta_list1 = factorizeEstimate(data)
     eta1 = eta_list1[0]
-    
-    data_list = [data, data]
-    w2, eta_list2 = factorizeEstimate(data_list)
+
+    w2, eta_list2 = factorizeEstimate([data, data])
     eta2 = eta_list2[0]
 
-    print(np.linalg.norm(eta2-eta1))
-    print(np.linalg.norm(w2-w1))
+    # Both etas should be the same
+    assert np.linalg.norm(eta_list2[0] - eta_list2[1]) < 0.0001
+    assert np.linalg.norm(eta1 - eta2) < 0.0001
+
+    # w should be identical
+    assert np.linalg.norm(w1 - w2) < 0.0001
+
 
 def test_crossval():
     """ Tests the cross val function that creates the train and test data. """

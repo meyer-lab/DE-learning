@@ -2,85 +2,9 @@
 
 import numpy as np
 import pandas as pd
-from jax import grad, jit
-import jax.numpy as jnp
-from jax.scipy.special import expit
-from jax.config import config
-from scipy.optimize import minimize
+from scipy.special import expit
 from .factorization import alpha, factorizeEstimate, cellLineComparison
 from .importData import importLINCS
-
-config.update("jax_enable_x64", True)
-
-
-def reshapeParams(p, nGenes):
-    """Reshape a vector of parameters into the variables we know."""
-    w = jnp.reshape(p[:(nGenes * nGenes)], (nGenes, nGenes))
-    nCellLines = len(p)/nGenes - nGenes
-
-    eta_list = [p[-nGenes:]]
-    for i in range(1, int(nCellLines)):
-        eta = p[-nGenes*(i+1):-nGenes*(i)]
-        eta_list.insert(0, eta)
-
-    assert eta_list[0].shape[0] == w.shape[0]
-
-    return w, eta_list
-
-
-def cost(pIn, data, U=None):
-    """ Returns SSE between model and experimental RNAseq data. """
-    if isinstance(data, np.ndarray):
-        data = [data]
-    if U is None:
-        U = [np.copy(d) for d in data]
-        for ii in range(len(U)):
-            np.fill_diagonal(U[ii], 0.0)
-
-    w, eta = reshapeParams(pIn, data[0].shape[0])
-
-    costt = 0
-    for i in range(len(data)):
-        costt += jnp.linalg.norm(eta[i][:, jnp.newaxis] * expit(w @ U[i]) - alpha * data[i])
-
-    costt += regularize(pIn, data[0].shape[0])
-
-    return costt
-
-
-def regularize(pIn, nGenes, strength=0.1):
-    """Calculate the regularization."""
-    w = reshapeParams(pIn, nGenes)[0]
-
-    ll = jnp.linalg.norm(w, ord=1)
-    ll += jnp.linalg.norm(w.T @ w - jnp.identity(w.shape[0]))
-    return strength * ll
-
-
-def runOptim(data, niter=2000, disp=0):
-    """ Run the optimization. """
-    if isinstance(data, np.ndarray):
-        data = [data]
-
-    w, eps = factorizeEstimate(data)
-    x0 = w.flatten()
-    for ep in eps:
-        x0 = np.concatenate((x0, ep))
-
-
-    U = [np.copy(d) for d in data]
-    for ii in range(len(U)):
-        np.fill_diagonal(U[ii], 0.0)
-    cost_grad = jit(grad(cost, argnums=0), static_argnums=(3,))
-
-    def cost_GF(*args):
-        outt = cost_grad(*args)
-        return np.array(outt)
-
-    res = minimize(cost, x0, args=(data, U), method="L-BFGS-B", jac=cost_GF, options={"maxiter": niter, "disp": disp})
-    assert (res.success) or (res.nit == niter)
-
-    return res.x
 
 
 def mergedFitting(cellLine1, cellLine2):
@@ -102,7 +26,7 @@ def mergedFitting(cellLine1, cellLine2):
     return w_shared, eta_list
 
 
-def impute(data, fitting=False):
+def impute(data):
     """ Impute by repeated fitting. """
     missing = np.isnan(data)
     data = np.nan_to_num(data)
@@ -113,14 +37,10 @@ def impute(data, fitting=False):
         data_last = np.copy(data)
 
         # Fit
-        if fitting:
-            xx = runOptim(data, niter=500)
-            w, eta = reshapeParams(xx, data.shape[0])
-        else:
-            w, eta = factorizeEstimate(data)
+        w, eta = factorizeEstimate(data)
 
         # Fill-in with model prediction
-        predictt = eta[:, jnp.newaxis] * expit(w @ U) / alpha
+        predictt = eta[0][:, np.newaxis] * expit(w @ U) / alpha
         data[missing] = predictt[missing]
 
         print(np.linalg.norm(data - data_last))

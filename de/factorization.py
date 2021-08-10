@@ -71,8 +71,8 @@ def factorizeEstimate(data, tol=1e-9, maxiter=20):
         assert w.shape == (data[0].shape[0], data[0].shape[0])
 
         cost = 0
-        for ii in range(len(data)):
-            cost += np.linalg.norm(etas[ii][:, np.newaxis] * expit(w @ U[ii]) - alpha * data[ii])
+        for jj in range(len(data)):
+            cost += np.linalg.norm(etas[jj][:, np.newaxis] * expit(w @ U[jj]) - alpha * data[jj])
 
         if ii > 3 and (costLast - cost) < tol:
             # TODO: I believe the cost should be strictly decreasing, so look into this.

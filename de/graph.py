@@ -6,7 +6,7 @@ import matplotlib.patches as mpatches
 import matplotlib.lines as mlines
 import networkx as nx
 from .importData import ImportMelanoma
-from .fitting import runOptim, reshapeParams
+from .factorization import factorizeEstimate
 
 
 def load_w():
@@ -16,8 +16,7 @@ def load_w():
     path_here = dirname(dirname(__file__))
 
     data = ImportMelanoma()
-    ps = runOptim(data, niter=400, disp=True)
-    w = reshapeParams(ps, data.shape[0])[0]
+    w, _ = factorizeEstimate(data)
     genes = np.loadtxt(join(path_here, "de/data/node_Index.csv"), dtype=str)
 
     return pd.DataFrame(w, columns=genes, index=genes)
