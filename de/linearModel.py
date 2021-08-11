@@ -1,5 +1,4 @@
 from sklearn.linear_model import Lasso
-from .importData import ImportMelanoma, importLINCS
 import numpy as np
 
 def runFitting(data, U=None, max_iter=300000):
@@ -10,11 +9,8 @@ def runFitting(data, U=None, max_iter=300000):
         np.fill_diagonal(U, 0.0)
     model = Lasso(max_iter=max_iter)
     model.fit(U, data)
-    p = model.predict(U)
-    cost = SSE(data, U, model)
-    print(f"cost: {cost}")
 
-    return model.coef_, p
+    return model
 
 def SSE(data, U, model):
     """Calculates the SSE of the model"""

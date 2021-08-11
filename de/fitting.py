@@ -5,6 +5,7 @@ import pandas as pd
 from scipy.special import expit
 from .factorization import alpha, factorizeEstimate, cellLineComparison
 from .importData import importLINCS
+from .linearModel import runFitting
 
 
 def mergedFitting(cellLine1, cellLine2):
@@ -25,10 +26,11 @@ def mergedFitting(cellLine1, cellLine2):
 
     return w_shared, eta_list
 
-def impute(data):
+def impute(data, test_data=None, linear=False):
     """ Impute by repeated fitting. """
     missing = np.isnan(data)
     data = np.nan_to_num(data)
+    test_data = np.nan_to_num(test_data)
 
     for ii in range(10):
         U = np.copy(data)
@@ -36,10 +38,16 @@ def impute(data):
         data_last = np.copy(data)
 
         # Fit
-        w, eta = factorizeEstimate(data)
+        if linear:
+            model = runFitting(data)
+        else:
+            w, eta = factorizeEstimate(data)
 
         # Fill-in with model prediction
-        predictt = eta[0][:, np.newaxis] * expit(w @ U) / alpha
+        if linear:
+            predictt = model.predict(test_data)
+        else:
+            predictt = eta[0][:, np.newaxis] * expit(w @ U) / alpha
         data[missing] = predictt[missing]
 
         print(np.linalg.norm(data - data_last))
