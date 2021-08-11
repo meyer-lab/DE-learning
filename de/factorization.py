@@ -144,7 +144,7 @@ def cross_val(X, Y, n=20):
     col = np.random.choice(X.shape[1], n, replace=False)
     train_X = np.copy(X)
     test_X = np.full_like(X, np.nan)
-    train_Y = np.full_like(Y, np.nan)
+    test_Y = np.full_like(Y, np.nan)
     train_X[row, col] = np.nan
     test_X[row, col] = X[row, col]
     test_Y[row, col] = Y[row, col]

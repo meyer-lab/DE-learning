@@ -10,6 +10,8 @@ def runFitting(data, U=None, max_iter=300000):
     model = Lasso(max_iter=max_iter)
     model.fit(U, data)
 
+    #print(f"cost: {SSE(data, U, model)}")
+
     return model
 
 def SSE(data, U, model):

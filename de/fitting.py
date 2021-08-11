@@ -46,6 +46,11 @@ def impute(data, test_data=None, linear=False):
         # Fill-in with model prediction
         if linear:
             predictt = model.predict(test_data)
+            #cost
+            diff = np.absolute(data - predictt)
+            square = np.power(diff,2)
+            sum_errors = np.sum(square)
+            print(f"cost: {sum_errors}")
         else:
             predictt = eta[0][:, np.newaxis] * expit(w @ U) / alpha
         data[missing] = predictt[missing]
