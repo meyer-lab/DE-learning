@@ -25,7 +25,6 @@ def mergedFitting(cellLine1, cellLine2):
 
     return w_shared, eta_list
 
-
 def impute(data):
     """ Impute by repeated fitting. """
     missing = np.isnan(data)
