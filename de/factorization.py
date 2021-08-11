@@ -13,13 +13,27 @@ alpha = 0.1
 
 def calcW(data, eta, alphaIn):
     """Directly calculate w."""
-    U = np.copy(data)
-    np.fill_diagonal(U, 0.0)
+    if isinstance(data, np.ndarray):
+        data = [data]
 
-    B = (data * alphaIn) / eta[:, np.newaxis]
-    assert np.all(np.isfinite(B))
-    B = logit(np.clip(B, 0.0001, 0.9999))
-    assert np.all(np.isfinite(B))
+    U = None
+    B = None
+
+    for i, x in enumerate(data):
+        U1 = np.copy(x)
+        np.fill_diagonal(U1, 0.0)
+        B1 = (x * alphaIn) / eta[i][:, np.newaxis]
+        assert np.all(np.isfinite(B1))
+        B1 = logit(np.clip(B1, 0.0001, 0.9999))
+        assert np.all(np.isfinite(B1))
+
+        if B is None:
+            U = U1
+            B = B1
+        else:
+            U = np.concatenate((U, U1), axis=1)
+            B = np.concatenate((B, B1), axis=1)
+
     return np.linalg.lstsq(U.T, B.T, rcond=None)[0].T
 
 
@@ -31,34 +45,43 @@ def calcEta(data, w, alphaIn):
     return gmean(eta, axis=1)
 
 
-def factorizeEstimate(data, tol=1e-9, maxiter=10000):
+def factorizeEstimate(data, tol=1e-9, maxiter=20):
     """ Initialize the parameters based on the data. """
     assert maxiter > 0
     # TODO: Add tolerance for termination.
-    w = np.zeros((data.shape[0], data.shape[0]))
+    if isinstance(data, np.ndarray):
+        data = [data]
+
+    w = np.zeros((data[0].shape[0], data[0].shape[0]))
     # Make the U matrix
-    U = np.copy(data)
-    np.fill_diagonal(U, 0.0)
+    U = [np.copy(d) for d in data]
+    for ii in range(len(U)):
+        np.fill_diagonal(U[ii], 0.0)
+
+    costLast = np.inf
 
     # Use the data to try and initialize the parameters
     for ii in range(maxiter):
-        eta = calcEta(data, w, alpha)
-        assert np.all(np.isfinite(eta))
-        assert eta.shape == (data.shape[0], )
-        w = calcW(data, eta, alpha)
+        etas = [calcEta(x, w, alpha) for x in data]
+        for eta in etas:
+            assert np.all(np.isfinite(eta))
+            assert eta.shape == (data[0].shape[0], )
+
+        w = calcW(data, etas, alpha)
         assert np.all(np.isfinite(w))
+        assert w.shape == (data[0].shape[0], data[0].shape[0])
 
-        assert w.shape == (data.shape[0], data.shape[0])
+        cost = 0
+        for jj in range(len(data)):
+            cost += np.linalg.norm(etas[jj][:, np.newaxis] * expit(w @ U[jj]) - alpha * data[jj])
 
-        cost = np.linalg.norm(eta[:, np.newaxis] * expit(w @ U) - alpha * data)
-
-        if ii > 10 and (costLast - cost) < tol:
+        if ii > 3 and (costLast - cost) < tol:
             # TODO: I believe the cost should be strictly decreasing, so look into this.
             break
 
         costLast = cost
 
-    return w, eta
+    return w, etas
 
 
 def cellLineFactorization(cellLine):
@@ -70,8 +93,11 @@ def cellLineFactorization(cellLine):
 
 def cellLineComparison(cellLine1, cellLine2):
     """Uses annotation list to generate an array of common genes between two cell lines"""
-    _, _, annotation1 = cellLineFactorization(cellLine1)
-    _, _, annotation2 = cellLineFactorization(cellLine2)
+    _, annotation1 = importLINCS(cellLine1)
+    _, annotation2 = importLINCS(cellLine2)
+
+    annotation1 = annotation1[0].tolist()
+    annotation2 = annotation2[0].tolist()
 
     intersection = set(annotation1).intersection(annotation2)
     intersection_annotation = list(intersection)
