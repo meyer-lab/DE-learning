@@ -5,8 +5,8 @@ import pytest
 import numpy as np
 import numpy.ma as ma
 from scipy.special import expit
-from ..factorization import factorizeEstimate, alpha, cellLineComparison, MatrixSubtraction, cross_val
-from ..fitting import impute
+from ..factorization import factorizeEstimate, alpha, cellLineComparison, MatrixSubtraction, split_data
+from ..impute import impute
 from ..importData import ImportMelanoma, importLINCS
 
 
@@ -76,10 +76,10 @@ def test_mergedFitting():
     assert np.linalg.norm(w1 - w2) < 0.0001
 
 
-def test_crossval():
+def test_split_data():
     """ Tests the cross val function that creates the train and test data. """
     data = ImportMelanoma()
-    train_X, test_X = cross_val(data)
+    train_X, test_X = split_data(data)
     full_X = impute(train_X)
 
     print(ma.corrcoef(ma.masked_invalid(full_X.flatten()), ma.masked_invalid(test_X.flatten())))
