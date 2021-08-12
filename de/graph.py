@@ -1,4 +1,5 @@
-"""Contains functions for creating directed graph from w matrix."""
+""" Contains functions for creating directed graph from w matrix. """
+
 from os.path import join, dirname
 import numpy as np
 import pandas as pd

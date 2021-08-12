@@ -1,4 +1,5 @@
-"""Contains functions for graphing w matrix characteristics"""
+""" Contains functions for graphing w matrix characteristics. """
+
 from math import ceil
 import matplotlib.pyplot as plt
 import numpy as np
@@ -6,7 +7,7 @@ from .factorization import MatrixSubtraction
 
 
 def plot_norm_graph(cell_lines):
-    """Plot bar graphs for combinations of cell lines given a list of cell line names."""
+    """ Plots bar graphs for combinations of cell lines given a list of cell line names."""
 
     ncols = 3
     nplots = len(cell_lines) * (len(cell_lines) - 1) / 2
@@ -40,7 +41,7 @@ def plot_norm_graph(cell_lines):
 
 
 def plot_corr_graphs(cell_lines):
-    """Plot all combinations of two w matrices against each other (still using factorizeEstimate instead of runOptim)"""
+    """ Plot all combinations of two w matrices against each other using factorizeEstimate. """
 
     ncols = 3
     nplots = len(cell_lines) * (len(cell_lines) - 1) / 2

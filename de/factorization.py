@@ -2,33 +2,12 @@
 
 import numpy as np
 import pandas as pd
-from scipy.stats import gmean
-from scipy.special import expit, logit
+from scipy.special import expit
+from .modelParams import calcW, calcEta
 from .importData import importLINCS
 
 
 alpha = 0.1
-
-
-def calcW(data, eta, alphaIn):
-    """Directly calculate w."""
-    U = np.copy(data)
-    np.fill_diagonal(U, 0.0)
-
-    B = (data * alphaIn) / eta[:, np.newaxis]
-    assert np.all(np.isfinite(B))
-    B = logit(np.clip(B, 0.0001, 0.9999))
-    assert np.all(np.isfinite(B))
-    return np.linalg.lstsq(U.T, B.T, rcond=None)[0].T
-
-
-def calcEta(data, w, alphaIn):
-    """Directly calculate eta."""
-    eta = (alphaIn * data) / expit(w @ data)
-    eta = np.nan_to_num(eta, nan=1.0, posinf=1e9)
-    eta = np.clip(eta, 1e-9, 1e9)
-    return gmean(eta, axis=1)
-
 
 def factorizeEstimate(data, tol=1e-9, maxiter=10000):
     """ Initialize the parameters based on the data. """
@@ -46,9 +25,7 @@ def factorizeEstimate(data, tol=1e-9, maxiter=10000):
         assert eta.shape == (data.shape[0], )
         w = calcW(data, eta, alpha)
         assert np.all(np.isfinite(w))
-
         assert w.shape == (data.shape[0], data.shape[0])
-
         cost = np.linalg.norm(eta[:, np.newaxis] * expit(w @ U) - alpha * data)
 
         if ii > 10 and (costLast - cost) < tol:

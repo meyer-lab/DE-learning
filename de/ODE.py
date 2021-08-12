@@ -1,15 +1,12 @@
-"""
-This file contains ODE equation solvers
-"""
+""" Contains ODE equation solvers. """
+
 import numpy as np
 from scipy.special import expit
 from scipy.integrate import odeint
 
 
 def solver(ps, ts):
-    '''Function receives time series and a set of parameters,
-       then return the simulation of ODE.
-    '''
+    """ Receives time series and a set of parameters, then return the simulation of ODE. """
     w = np.reshape(ps[:6889], (83, 83))
     alpha = ps[6889:6972]
     eps = ps[6972:]
@@ -24,9 +21,6 @@ def solver(ps, ts):
 
 
 def ODE(y, _, eps, w, alpha):
-    '''The ODE system:
-    Parameters = eps: Value that bound the saturation effect
-                 w: Interaction between components
-                 alpha: Degradation rate
-    '''
+    """ Returns ODE equation. """
+    # Parameters- eps: bounds the saturation effect, w: interaction between components, alpha: degradation rate
     return eps * expit(np.dot(w, y)) - alpha * y
