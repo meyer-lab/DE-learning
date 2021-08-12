@@ -80,6 +80,6 @@ def test_crossval():
     """ Tests the cross val function that creates the train and test data. """
     data = ImportMelanoma()
     train_X, test_X = cross_val(data)
-    full_X = impute(train_X)
+    full_X = impute(train_X, data)
 
     print(ma.corrcoef(ma.masked_invalid(full_X.flatten()), ma.masked_invalid(test_X.flatten())))
