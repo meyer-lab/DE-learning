@@ -90,7 +90,7 @@ def cellLineFactorization(cellLine):
     return w, eta, annotation[0].tolist()
 
 
-def cellLineComparison(annotation1, annotation2):
+def commonGenes(annotation1, annotation2):
     """Uses annotation list to generate an array of common genes between two cell lines"""
 
     annotation1 = annotation1[0].tolist()
@@ -114,7 +114,7 @@ def MatrixSubtraction(cellLine1, cellLine2):
     _, annotation2 = importLINCS(cellLine2)
     w1, _, _ = cellLineFactorization(cellLine1)
     w2, _, _ = cellLineFactorization(cellLine2)
-    index_list1, index_list2 = cellLineComparison(annotation1, annotation2)
+    index_list1, index_list2 = commonGenes(annotation1, annotation2)
 
     w1, _, _ = cellLineFactorization(cellLine1)
     w2, _, _ = cellLineFactorization(cellLine2)
@@ -139,7 +139,9 @@ def MatrixSubtraction(cellLine1, cellLine2):
 
 def mergedFitting(cellLine1, cellLine2):
     """Given two cell lines, compute the cost of fitting each of them individually and the cost of fitting a shared w matrix."""
-    index_list1, index_list2 = cellLineComparison(cellLine1, cellLine2)
+    _, annotation1 = importLINCS(cellLine1)
+    _, annotation2 = importLINCS(cellLine2)
+    index_list1, index_list2 = commonGenes(annotation1, annotation2)
 
     data1, _ = importLINCS(cellLine1)
     data2, _ = importLINCS(cellLine2)
@@ -154,16 +156,3 @@ def mergedFitting(cellLine1, cellLine2):
     w_shared, eta_list = factorizeEstimate(shared_data)
 
     return w_shared, eta_list
-
-
-def split_data(X, n=20):
-    """ Prepare the test and train data. """
-    row = np.random.choice(X.shape[0], n, replace=False)
-    col = np.random.choice(X.shape[1], n, replace=False)
-    train_X = np.copy(X)
-    test_X = np.full_like(X, np.nan)
-    train_X[row, col] = np.nan
-    test_X[row, col] = X[row, col]
-    assert np.sum(np.isnan(train_X)) == n
-    assert np.sum(np.isfinite(test_X)) == n
-    return train_X, test_X

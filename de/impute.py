@@ -3,6 +3,19 @@ import numpy as np
 from scipy.special import expit
 from .factorization import alpha, factorizeEstimate
 
+def split_data(X, n=20):
+    """ Prepare the test and train data. """
+    row = np.random.choice(X.shape[0], n, replace=False)
+    col = np.random.choice(X.shape[1], n, replace=False)
+    train_X = np.copy(X)
+    test_X = np.full_like(X, np.nan)
+    train_X[row, col] = np.nan
+    test_X[row, col] = X[row, col]
+    assert np.sum(np.isnan(train_X)) == n
+    assert np.sum(np.isfinite(test_X)) == n
+    return train_X, test_X
+
+
 def impute(data):
     """ Impute by repeated fitting. """
     missing = np.isnan(data)
