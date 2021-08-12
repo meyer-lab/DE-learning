@@ -6,9 +6,8 @@ import numpy as np
 import networkx as nx
 import random
 from .figureCommon import subplotLabel, getSetup
-from ..graph import Network, load_w, normalize, remove, bar_graph, , add_nodes, add_edges, remove_isolates
+from ..graph import Network, load_w, normalize, remove, bar_graph, add_nodes, add_edges, remove_isolates
 from ..grndb_network import load_w_GRNdb, Network_GRNdb
-
 
 def makeFigure():
     """ Get a list of the axis objects and create a figure. """
