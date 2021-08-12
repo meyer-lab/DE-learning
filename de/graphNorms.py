@@ -40,7 +40,7 @@ def plot_norm_graph(cell_lines):
 
 
 def plot_corr_graphs(cell_lines):
-    """Plot all combinations of two w matrices against each other (still using factorizeEstimate instead of runOptim)"""
+    """Plot all combinations of two w matrices against each other. """
 
     ncols = 3
     nplots = len(cell_lines) * (len(cell_lines) - 1) / 2
