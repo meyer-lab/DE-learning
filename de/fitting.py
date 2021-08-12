@@ -85,6 +85,6 @@ def impute(data, fitting=False):
         predictt = eta[:, jnp.newaxis] * expit(w @ U) / alpha
         data[missing] = predictt[missing]
 
-        print(np.linalg.norm(data - data_last))
+        # print(np.linalg.norm(data - data_last))
 
     return data
