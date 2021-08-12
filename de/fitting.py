@@ -26,13 +26,12 @@ def mergedFitting(cellLine1, cellLine2):
 
     return w_shared, eta_list
 
-def impute(data, test_data=None, linear=False):
+def impute(data, orig_data, linear=False):
     """ Impute by repeated fitting. """
     missing = np.isnan(data)
     data = np.nan_to_num(data)
-    test_data = np.nan_to_num(test_data)
 
-    for ii in range(10):
+    for _ in range(10):
         U = np.copy(data)
         np.fill_diagonal(U, 0.0)
         data_last = np.copy(data)
@@ -45,16 +44,13 @@ def impute(data, test_data=None, linear=False):
 
         # Fill-in with model prediction
         if linear:
-            predictt = model.predict(test_data)
-            #cost
-            diff = np.absolute(data - predictt)
-            square = np.power(diff,2)
-            sum_errors = np.sum(square)
-            print(f"cost: {sum_errors}")
+            predictt = model.predict(U)
         else:
             predictt = eta[0][:, np.newaxis] * expit(w @ U) / alpha
         data[missing] = predictt[missing]
 
+        # cost
         print(np.linalg.norm(data - data_last))
+    print(np.linalg.norm(orig_data - data))
 
     return data
