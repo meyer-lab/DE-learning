@@ -1,6 +1,7 @@
 """Contains functions to use a hypergeometric distribution to compare the GRNdb network with ours."""
 from scipy.stats import hypergeom
 import networkx as nx
+import numpy as np
 
 def setvars(G, G_GRNdb):
     """
@@ -45,14 +46,18 @@ def PMF(varlist):
     """
     Takes in a list of variables [k, M, n, N] and computes the result of their probability mass function.
     """
-    k, M, n, N = varlist[0], varlist[1], varlist[2], varlist[3]
-    prob = hypergeom.pmf(k, M, n, N, loc=0)
-    return prob
+    M, n, N = varlist[1], varlist[2], varlist[3]
+    rv = hypergeom(M, n, N)
+    x = np.arange(0, 50)
+    pmf_edges = rv.pmf(x)
+    return [x, pmf_edges]
 
 def CDF(varlist):
     """
     Takes in a list of variables [k, M, n, N] and computes the result of their cumulative distribution function.
     """
-    k, M, n, N = varlist[0], varlist[1], varlist[2], varlist[3]
-    prob = hypergeom.cdf(k, M, n, N, loc=0)
-    return prob
+    M, n, N = varlist[1], varlist[2], varlist[3]
+    rv = hypergeom(M, n, N)
+    x = np.arange(0, 50)
+    cdf_edges = rv.cdf(x)
+    return [x, cdf_edges]

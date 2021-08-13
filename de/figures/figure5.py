@@ -31,17 +31,32 @@ def makeFigure():
 
     # Get hypergeometric dist/ variables
     [k, M, n, N] = setvars(G, G_GRNdb)
-    k = [k, M, n, N][0]
-    pmf_edges = PMF([k, M, n, N])
-    cdf_edges = CDF([k, M, n, N])
+    kstr = str([k, M, n, N][0])
+    Mstr = str([k, M, n, N][1])
+    nstr = str([k, M, n, N][2])
+    Nstr = str([k, M, n, N][3])
+    [x, pmf_edges] = PMF([k, M, n, N])
+    [xx, cdf_edges] = CDF([k, M, n, N])
 
-    # Make distribution plots
-    ax[2].plot(k, pmf_edges, 'm-.')
+    # Set labels
+    curve_label = 'M = ' + Mstr + ', n = ' + nstr + ',  N = ' + Nstr
+    k_label = 'k = ' + kstr
+
+    # Plot PMF
+    ax[2].plot([x, pmf_edges][0], [x, pmf_edges][1], 'm-.', linewidth=6, label=curve_label)
+    ax[2].vlines([k, M, n, N][0], 0, 0.12, linestyles='dashed', linewidth=6, label=k_label)
+    ax[2].legend()
     ax[2].set_xlabel("k")
     ax[2].set_ylabel("hypergeom PMF")
-    ax[3].plot(k, cdf_edges, 'y-.')
+    ax[2].set_title("Probability Mass Function")
+
+    # Plot CDF
+    ax[3].plot([xx, cdf_edges][0], [xx, cdf_edges][1], 'g-.', linewidth=6, label=curve_label)
+    ax[3].vlines([k, M, n, N][0], 0, 1, linestyles='dashed', linewidth=6, label=k_label)
+    ax[3].legend()
     ax[3].set_xlabel("k")
     ax[3].set_ylabel("hypergeom CDF")
+    ax[3].set_title("Cumulative Distribution Function")
 
     # Add subplot labels
     subplotLabel(ax, fntsize=50)
