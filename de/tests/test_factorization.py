@@ -5,8 +5,8 @@ import pytest
 import numpy as np
 import numpy.ma as ma
 from scipy.special import expit
-from ..factorization import factorizeEstimate, alpha, cellLineComparison, MatrixSubtraction, cross_val
-from ..fitting import impute
+from ..factorization import factorizeEstimate, alpha, commonGenes, MatrixSubtraction
+from ..impute import impute, split_data
 from ..importData import ImportMelanoma, importLINCS
 
 
@@ -44,7 +44,7 @@ def test_cellLines():
     _, annotation2 = importLINCS(cellLine2)
 
     # assuming the function returns the list of shared genes between the two cell lines
-    shared_annotation, _ = cellLineComparison(cellLine1, cellLine2)
+    shared_annotation, _ = commonGenes(annotation1, annotation2)
     # make sure at least 50% of the genes in smaller cell line is shared between the two cell lines
     assert np.abs(len(shared_annotation)) >= 0.5 * np.min([len(annotation1), len(annotation2)])
 
@@ -76,10 +76,10 @@ def test_mergedFitting():
     assert np.linalg.norm(w1 - w2) < 0.0001
 
 
-def test_crossval():
+def test_split_data():
     """ Tests the cross val function that creates the train and test data. """
     data = ImportMelanoma()
-    train_X, test_X = cross_val(data)
-    full_X = impute(train_X, data)
+    train_X, test_X = split_data(data)
+    full_X = impute(train_X)
 
     print(ma.corrcoef(ma.masked_invalid(full_X.flatten()), ma.masked_invalid(test_X.flatten())))
