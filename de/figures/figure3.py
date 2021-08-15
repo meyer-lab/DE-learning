@@ -7,7 +7,11 @@ from ..graph import Network, load_w, normalize, remove, bar_graph
 
 
 def makeFigure():
-    """ Get a list of the axis objects and create a figure. """
+    """ Get a list of the axis objects and create a figure.
+
+    :output f: Figure 2 containing the network diargam, path bar graph, and upstream and downstream bar graphs
+    :type f: Figure
+    """
     # Get list of axis objects
     ax, f = getSetup((100, 100), (2, 2))
     # load w
