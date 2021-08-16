@@ -2,7 +2,6 @@
 
 import numpy as np
 import pandas as pd
-import random
 from scipy.stats import gmean
 from scipy.special import expit, logit
 from .importData import importLINCS
