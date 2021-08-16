@@ -47,7 +47,6 @@ def calcEta(data, w, alphaIn):
 def factorizeEstimate(data, tol=1e-9, maxiter=20):
     """ Initialize the parameters based on the data. """
     assert maxiter > 0
-    # TODO: Add tolerance for termination.
     if isinstance(data, np.ndarray):
         data = [data]
 

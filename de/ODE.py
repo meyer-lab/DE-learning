@@ -21,6 +21,13 @@ def solver(ps, ts):
 
 
 def ODE(y, _, eps, w, alpha):
-    """ Returns ODE equation. """
-    # Parameters- eps: bounds the saturation effect, w: interaction between components, alpha: degradation rate
+    """ Returns ODE equation. 
+
+    :param eps: Bounds the saturation effect
+    :type eps: Any
+    :param w: A matrix showing interaction between components
+    :type w: ndarray
+    :param alpha: Degradation rate
+    :type alpha: Any
+    """
     return eps * expit(np.dot(w, y)) - alpha * y
