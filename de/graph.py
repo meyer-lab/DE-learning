@@ -80,7 +80,7 @@ def add_edges(dir_graph, w, w_abs):
     Given a directed graph and w matrix, calculates a threshold for large w values. Then adds a directed edge from gene j to gene i representing the interaction with the w value as the edge's weight.
     """
     w = w.to_numpy()
-    threshold = np.mean(w_abs) + 0.2 * np.std(w_abs)  # lower threshold in order to find more possible loops
+    threshold = np.mean(w_abs) + 1.4 * np.std(w_abs)  # lower threshold in order to find more possible loops
     for i in range(w.shape[1]):
         for j in range(w.shape[1]):
             if w_abs[i, j] > threshold:
@@ -131,7 +131,7 @@ def set_edges(dir_graph, w_abs, w_max, pos, ax):
     """
     Given a directed graph, w_new and w_max, calculate edges color and thickness. Then draw the corresponding edge.
     """
-    threshold = np.mean(w_abs) + 0.2 * np.std(w_abs)
+    threshold = np.mean(w_abs) + 1.4 * np.std(w_abs)
     edges = dir_graph.edges()
     colors = [dir_graph[u][v]["color"] for u, v in edges]
     thickness = [np.exp((np.abs(dir_graph[u][v]["weight"]) - threshold) / (w_max - threshold)) for u, v in edges]

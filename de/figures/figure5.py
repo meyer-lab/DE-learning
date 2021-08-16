@@ -44,7 +44,7 @@ def makeFigure():
 
     # Plot PMF
     ax[2].plot([x, pmf_edges][0], [x, pmf_edges][1], 'm-.', linewidth=6, label=curve_label)
-    ax[2].vlines([k, M, n, N][0], 0, 0.12, linestyles='dashed', linewidth=6, label=k_label)
+    ax[2].vlines([k, M, n, N][0], 0, 0.2, linestyles='dashed', linewidth=6, label=k_label)
     ax[2].legend()
     ax[2].set_xlabel("k")
     ax[2].set_ylabel("hypergeom PMF")
