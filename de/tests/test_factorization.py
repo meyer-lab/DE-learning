@@ -81,21 +81,23 @@ def test_crossval_LINCS(cellLine):
     U = np.copy(data)
     np.fill_diagonal(U, 0.0)
     
-    data_corr_avg = 0
-    U_corr_avg = 0
-
-    x = range(0,9)
+    data_corr = []
+    U_corr = []
+    print('check1')
+    x = range(0,10)
 
     for j in x:
         train_X, test_X = cross_val(data)
         full_X = impute(train_X)
-        data_corr_avg += ma.corrcoef(ma.masked_invalid(full_X.flatten()), ma.masked_invalid(test_X.flatten()))[1,0]
+        data_corr.append(ma.corrcoef(ma.masked_invalid(full_X.flatten()), ma.masked_invalid(test_X.flatten()))[1,0])
         
         train_Y, test_Y = cross_val(U)
         full_Y = impute(train_Y)
-        U_corr_avg += ma.corrcoef(ma.masked_invalid(full_Y.flatten()), ma.masked_invalid(test_Y.flatten()))[1,0]
+        U_corr.append(ma.corrcoef(ma.masked_invalid(full_Y.flatten()), ma.masked_invalid(test_Y.flatten()))[1,0])
 
-    data_corr_avg = data_corr_avg / 10
-    U_corr_avg = U_corr_avg / 10
+    data_corr_avg = np.average(data_corr)
+    data_corr_std = np.std(data_corr)
+    U_corr_avg = np.average(U_corr)
+    U_corr_std = np.std(U_corr)
         
-    return data_corr_avg, U_corr_avg
+    return data_corr_avg, U_corr_avg, data_corr_std, U_corr_std
