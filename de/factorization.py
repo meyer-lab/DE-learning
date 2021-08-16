@@ -9,32 +9,78 @@ from .importData import importLINCS
 
 alpha = 0.1
 
-def factorizeEstimate(data, tol=1e-9, maxiter=10000):
+
+def calcW(data, eta, alphaIn):
+    """Directly calculate w."""
+    if isinstance(data, np.ndarray):
+        data = [data]
+
+    U = None
+    B = None
+
+    for i, x in enumerate(data):
+        U1 = np.copy(x)
+        np.fill_diagonal(U1, 0.0)
+        B1 = (x * alphaIn) / eta[i][:, np.newaxis]
+        assert np.all(np.isfinite(B1))
+        B1 = logit(np.clip(B1, 0.0001, 0.9999))
+        assert np.all(np.isfinite(B1))
+
+        if B is None:
+            U = U1
+            B = B1
+        else:
+            U = np.concatenate((U, U1), axis=1)
+            B = np.concatenate((B, B1), axis=1)
+
+    return np.linalg.lstsq(U.T, B.T, rcond=None)[0].T
+
+
+def calcEta(data, w, alphaIn):
+    """Directly calculate eta."""
+    eta = (alphaIn * data) / expit(w @ data)
+    eta = np.nan_to_num(eta, nan=1.0, posinf=1e9)
+    eta = np.clip(eta, 1e-9, 1e9)
+    return gmean(eta, axis=1)
+
+
+def factorizeEstimate(data, tol=1e-9, maxiter=20):
     """ Initialize the parameters based on the data. """
     assert maxiter > 0
     # TODO: Add tolerance for termination.
-    w = np.zeros((data.shape[0], data.shape[0]))
+    if isinstance(data, np.ndarray):
+        data = [data]
+
+    w = np.zeros((data[0].shape[0], data[0].shape[0]))
     # Make the U matrix
-    U = np.copy(data)
-    np.fill_diagonal(U, 0.0)
+    U = [np.copy(d) for d in data]
+    for ii in range(len(U)):
+        np.fill_diagonal(U[ii], 0.0)
+
+    costLast = np.inf
 
     # Use the data to try and initialize the parameters
     for ii in range(maxiter):
-        eta = calcEta(data, w, alpha)
-        assert np.all(np.isfinite(eta))
-        assert eta.shape == (data.shape[0], )
-        w = calcW(data, eta, alpha)
-        assert np.all(np.isfinite(w))
-        assert w.shape == (data.shape[0], data.shape[0])
-        cost = np.linalg.norm(eta[:, np.newaxis] * expit(w @ U) - alpha * data)
+        etas = [calcEta(x, w, alpha) for x in data]
+        for eta in etas:
+            assert np.all(np.isfinite(eta))
+            assert eta.shape == (data[0].shape[0], )
 
-        if ii > 10 and (costLast - cost) < tol:
+        w = calcW(data, etas, alpha)
+        assert np.all(np.isfinite(w))
+        assert w.shape == (data[0].shape[0], data[0].shape[0])
+
+        cost = 0
+        for jj in range(len(data)):
+            cost += np.linalg.norm(etas[jj][:, np.newaxis] * expit(w @ U[jj]) - alpha * data[jj])
+
+        if ii > 3 and (costLast - cost) < tol:
             # TODO: I believe the cost should be strictly decreasing, so look into this.
             break
 
         costLast = cost
 
-    return w, eta
+    return w, etas
 
 
 def cellLineFactorization(cellLine):
@@ -44,25 +90,17 @@ def cellLineFactorization(cellLine):
     return w, eta, annotation[0].tolist()
 
 
-def cellLineComparison(cellLine1, cellLine2):
+def commonGenes(annotation1, annotation2):
     """Uses annotation list to generate an array of common genes between two cell lines"""
-    _, _, annotation1 = cellLineFactorization(cellLine1)
-    _, _, annotation2 = cellLineFactorization(cellLine2)
 
-    line1_as_set = set(annotation1)
-    intersection = line1_as_set.intersection(annotation2)
+    annotation1 = annotation1[0].tolist()
+    annotation2 = annotation2[0].tolist()
+
+    intersection = set(annotation1).intersection(annotation2)
     intersection_annotation = list(intersection)
 
-    index_list1 = []
-    index_list2 = []
-
-    for x in intersection_annotation:
-        index_value1 = annotation1.index(x)
-        index_list1.append(index_value1)
-
-    for x in intersection_annotation:
-        index_value2 = annotation2.index(x)
-        index_list2.append(index_value2)
+    index_list1 = [annotation1.index(x) for x in intersection_annotation]
+    index_list2 = [annotation2.index(x) for x in intersection_annotation]
 
     index_list1.sort()
     index_list2.sort()
@@ -72,9 +110,11 @@ def cellLineComparison(cellLine1, cellLine2):
 def MatrixSubtraction(cellLine1, cellLine2):
     """Subtracts the w-matrices of two different cell lines and subtracts them.
     Then, it calculates the norm of the original matrices as well as difference matrix"""
+    _, annotation1 = importLINCS(cellLine1)
+    _, annotation2 = importLINCS(cellLine2)
     w1, _, _ = cellLineFactorization(cellLine1)
     w2, _, _ = cellLineFactorization(cellLine2)
-    index_list1, index_list2 = cellLineComparison(cellLine1, cellLine2)
+    index_list1, index_list2 = commonGenes(annotation1, annotation2)
 
     w1, _, _ = cellLineFactorization(cellLine1)
     w2, _, _ = cellLineFactorization(cellLine2)
@@ -95,3 +135,24 @@ def MatrixSubtraction(cellLine1, cellLine2):
     difference_matrix = w2_final - w1_final
     diff_norm = np.linalg.norm(difference_matrix)
     return norm1, norm2, diff_norm, w1_final, w2_final
+
+
+def mergedFitting(cellLine1, cellLine2):
+    """Given two cell lines, compute the cost of fitting each of them individually and the cost of fitting a shared w matrix."""
+    _, annotation1 = importLINCS(cellLine1)
+    _, annotation2 = importLINCS(cellLine2)
+    index_list1, index_list2 = commonGenes(annotation1, annotation2)
+
+    data1, _ = importLINCS(cellLine1)
+    data2, _ = importLINCS(cellLine2)
+    data1_df = pd.DataFrame(data1)
+    data2_df = pd.DataFrame(data2)
+    data1_edited = data1_df.iloc[index_list1, index_list1]
+    data2_edited = data2_df.iloc[index_list2, index_list2]
+    data1_final = data1_edited.values
+    data2_final = data2_edited.values
+    shared_data = [data1_final, data2_final]
+
+    w_shared, eta_list = factorizeEstimate(shared_data)
+
+    return w_shared, eta_list

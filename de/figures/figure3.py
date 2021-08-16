@@ -1,13 +1,13 @@
 """
 This creates Figure 2: w Network Graph
 """
-import numpy as np
-from .figureCommon import subplotLabel, getSetup
-import networkx as nx
 from networkx.exception import NetworkXNoPath, NetworkXUnbounded
+import numpy as np
+import networkx as nx
 import random
+from .figureCommon import subplotLabel, getSetup
 from ..graph import Network, load_w, normalize, remove, bar_graph, add_nodes, add_edges, remove_isolates
-
+from ..grndb_network import load_w_GRNdb, Network_GRNdb
 
 def makeFigure():
     """ Get a list of the axis objects and create a figure.
@@ -16,7 +16,7 @@ def makeFigure():
     :type f: Figure
     """
     # Get list of axis objects
-    ax, f = getSetup((100, 100), (2, 2))
+    ax, f = getSetup((100, 150), (3, 2))
     # load w
     w = load_w()
     w = normalize(w)
@@ -50,6 +50,18 @@ def makeFigure():
     # set title for the graph
     ax[3].set_title("Bar Graph (upstream)")
 
+    # Plot Mia's network (GRNdb) 
+    w_GRNdb = load_w_GRNdb()
+    Network_GRNdb(w_GRNdb, ax[4])
+    ax[4].set_title("w Network Graph - GRNdb")
+
+    # Plot nothing in the place of ax[5]
+    ax[5].axis("off")
+
+    # Add subplot labels
+    subplotLabel(ax, fntsize=50)
+    return f
+
 def cluster_dist():
     """ This function plots the distribution of distances between the full- and pre-resistant clusters, as well as random pairs for comparison.
     
@@ -60,6 +72,7 @@ def cluster_dist():
     :output dist_rand: list of path lengths between random pairs of one full- and one pre-resistant node
     :type dist_rand: List    
     """
+
     G = nx.Graph()
     w = load_w()
     w = normalize(w)
