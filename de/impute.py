@@ -1,7 +1,9 @@
 """ This file includes the functions for cross-validation based on data imputation. """
 import numpy as np
 from scipy.special import expit
+import numpy.ma as ma
 from .factorization import alpha, factorizeEstimate
+from .linearModel import runFitting
 
 def split_data(X, n=20):
     """ Prepare the test and train data. """
@@ -16,7 +18,7 @@ def split_data(X, n=20):
     return train_X, test_X
 
 
-def impute(data):
+def impute(data, linear=False):
     """ Impute by repeated fitting. """
     missing = np.isnan(data)
     data = np.nan_to_num(data)
@@ -27,12 +29,27 @@ def impute(data):
         data_last = np.copy(data)
 
         # Fit
-        w, eta = factorizeEstimate(data)
+        if linear:
+            model = runFitting(data)
+        else:
+            w, eta = factorizeEstimate(data)
 
         # Fill-in with model prediction
-        predictt = eta[0][:, np.newaxis] * expit(w @ U) / alpha
+        if linear:
+            predictt = model.predict(U)
+        else:
+            predictt = eta[0][:, np.newaxis] * expit(w @ U) / alpha
         data[missing] = predictt[missing]
 
         print(np.linalg.norm(data - data_last))
 
     return data
+
+def repeatImputation(data, linear=False, numIter=20):
+    coefs = []
+    for i in range(numIter):
+        train_X, test_X = split_data(data)
+        full_X = impute(train_X, linear)
+        corr_coef = ma.corrcoef(ma.masked_invalid(full_X.flatten()), ma.masked_invalid(test_X.flatten()))
+        coefs.append(corr_coef[0][1])
+    print(f"average corr coef: {sum(coefs)/len(coefs)}")
