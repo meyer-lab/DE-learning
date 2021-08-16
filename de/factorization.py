@@ -2,9 +2,9 @@
 
 import numpy as np
 import pandas as pd
-from scipy.special import expit
-from .modelParams import calcW, calcEta
-from .importData import importLINCS
+from scipy.stats import gmean
+from scipy.special import expit, logit
+from .importData import 
 
 
 alpha = 0.1
