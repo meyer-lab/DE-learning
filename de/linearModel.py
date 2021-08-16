@@ -10,16 +10,4 @@ def runFitting(data, U=None, max_iter=300000):
     model = Lasso(max_iter=max_iter)
     model.fit(U, data)
 
-    #print(f"cost: {SSE(data, U, model)}")
-
     return model
-
-def SSE(data, U, model):
-    """Calculates the SSE of the model"""
-
-    p = model.predict(U)
-    diff = np.absolute(data - p)
-    square = np.power(diff,2)
-    sum_errors = np.sum(square)
-    
-    return sum_errors
