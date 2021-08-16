@@ -81,5 +81,8 @@ def test_split_data():
     data = ImportMelanoma()
     train_X, test_X = split_data(data)
     full_X = impute(train_X)
+    full_X_lin = impute(train_X)
 
-    print(ma.corrcoef(ma.masked_invalid(full_X.flatten()), ma.masked_invalid(test_X.flatten())))
+    non_lin = ma.corrcoef(ma.masked_invalid(full_X.flatten()), ma.masked_invalid(test_X.flatten()))[0][1]
+    lin = ma.corrcoef(ma.masked_invalid(full_X_lin.flatten()), ma.masked_invalid(test_X.flatten()))[0][1]
+    assert non_lin > lin # assert the correlation coefficient for non-linear model is higher between the predicted and test data

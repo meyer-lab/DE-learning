@@ -23,10 +23,10 @@ def impute(data, linear=False):
     missing = np.isnan(data)
     data = np.nan_to_num(data)
 
-    for ii in range(10):
+    for _ in range(10):
         U = np.copy(data)
         np.fill_diagonal(U, 0.0)
-        data_last = np.copy(data)
+        # data_last = np.copy(data)
 
         # Fit
         if linear:
@@ -41,15 +41,17 @@ def impute(data, linear=False):
             predictt = eta[0][:, np.newaxis] * expit(w @ U) / alpha
         data[missing] = predictt[missing]
 
-        print(np.linalg.norm(data - data_last))
+        # print(np.linalg.norm(data - data_last))
 
     return data
 
 def repeatImputation(data, linear=False, numIter=20):
+    """ Repeat imputation and calculate the average of cost for 20 iterations. """
     coefs = []
-    for i in range(numIter):
+    for _ in range(numIter):
         train_X, test_X = split_data(data)
         full_X = impute(train_X, linear)
         corr_coef = ma.corrcoef(ma.masked_invalid(full_X.flatten()), ma.masked_invalid(test_X.flatten()))
         coefs.append(corr_coef[0][1])
     print(f"average corr coef: {sum(coefs)/len(coefs)}")
+    return coefs
