@@ -11,18 +11,7 @@ alpha = 0.1
 
 
 def calcW(data, eta, alphaIn):
-    """
-    Calculate an estimate for w based on data and current iteration of eta
-
-    :param data: matrix representing gene expression interactions with knockdowns
-    :type data: Array
-    param eta: vector representing overall perturbation effect of genes in cell line
-    :type eta: Array
-    param alphaIn: model parameter held constant due to steady-state approximation
-    :type alphaIn: double
-    :output np.linalg.lstsq(U.T, B.T, rcond=None)[0].T: matrix representing gene-to-gene pertubation effects for either a singular cell line or multiple cell lines
-    :type np.linalg.lstsq(U.T, B.T, rcond=None)[0].T: Array
-    """
+    """Directly calculate w."""
     if isinstance(data, np.ndarray):
         data = [data]
 
