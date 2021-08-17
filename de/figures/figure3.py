@@ -11,7 +11,6 @@ from ..grndb_network import load_w_GRNdb, Network_GRNdb
 
 def makeFigure():
     """ Get a list of the axis objects and create a figure.
-
     :output f: Figure 2 containing network diagram, path length bar graph, and upstream and downstream bar graphs
     :type f: Figure
     """
