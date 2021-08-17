@@ -1,4 +1,5 @@
-"""Contains function for importing and handling knockout RNAseq data"""
+""" Contains function for importing and handling knockout RNAseq data. """
+
 from os.path import join, dirname
 import numpy as np
 import pandas as pd
@@ -15,7 +16,7 @@ def importLINCS(cellLine):
 
 
 def importRNAseqKO():
-    """Imports knockout RNAseq data, sets index to Gene Symbol, and removes knockouts without measurements"""
+    """ Imports knockout RNAseq data, sets index to Gene Symbol, and removes knockouts without measurements. """
     path_here = dirname(dirname(__file__))
 
     data = pd.read_csv(join(path_here, "de/data/rpmCounts_allRuns_matrix.tsv.xz"), index_col="GeneSymbol", delim_whitespace=True)
@@ -29,8 +30,8 @@ def importRNAseqKO():
 
 
 def ImportMelanoma():
-    """Takes in parameter of dataframe read in by importRNAseqKO() and forms matrix: rows = gene, columns = knockout model.
-    There are 84 knockout models (including negative control) and 83 corresponding genes measured."""
+    """ Takes in dataframe from importRNAseqKO() and forms matrix: rows = gene, columns = knockout model.
+    There are 84 knockout models (including negative control) and 83 corresponding genes measured. """
     data_in = importRNAseqKO()
     # average knockout replicate values and remove duplicate gene rows
     data_combined = data_in.groupby(by=data_in.columns, axis=1).mean()  # knockout replicates
@@ -55,7 +56,7 @@ def ImportMelanoma():
 
 
 def prepData():
-    """ Load RNAseq data then average replicates and negative controls for PCA """
+    """ Load RNAseq data then average replicates and negative controls for PCA. """
     d = importRNAseqKO()
     data_prepped = d.groupby(by=d.columns, axis=1).mean()
     data_prepped["neg"] = data_prepped[["neg01", "neg10"]].mean(axis=1)
@@ -128,7 +129,7 @@ def cell_type_perturbations(data, inst_info, gene_info, cell_id):
     return out_celltype
 
 def importgenes():
-    """ Imports all Torre genes with Fig 5D data and merges into one matrix"""
+    """ Imports all Torre genes with meanlFC and Rcolonies data, merges into DataFrame. """
     path_here = dirname(dirname(__file__))
     x_data = pd.read_csv(join(path_here, "de/data/sumarizedResults.txt"), header=0, sep = "\t")
     xdata = pd.DataFrame(x_data, columns = ["target", "meanlFC"])
@@ -136,11 +137,11 @@ def importgenes():
     ydata = pd.DataFrame(y_data, columns = ["target", "Rcolonies_lFC"])
 
     #merges data for genes with both meanlFC_IF and Rcolonies_lFC values
-    data = pd.merge(xdata, ydata, on="target",how="inner")
+    data = pd.merge(xdata, ydata, on="target", how="inner")
     return data
 
 def splitnodes(data):
-    """Separates genes into resistant and preresistant"""
+    """ Separates Torre genes into resistant and preresistant. """
     above = []
     below = []
     for x in range(0,31):

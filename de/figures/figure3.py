@@ -10,7 +10,11 @@ from ..graph import Network, load_w, normalize, remove, bar_graph, add_nodes, ad
 from ..grndb_network import load_w_GRNdb, Network_GRNdb
 
 def makeFigure():
-    """ Get a list of the axis objects and create a figure. """
+    """ Get a list of the axis objects and create a figure.
+
+    :output f: Figure 2 containing network diagram, path length bar graph, and upstream and downstream bar graphs
+    :type f: Figure
+    """
     # Get list of axis objects
     ax, f = getSetup((100, 150), (3, 2))
     # load w
@@ -59,7 +63,16 @@ def makeFigure():
     return f
 
 def cluster_dist():
-    """ This function plots the distribution of distances betweek the two full- and pre-resistant clusters. """
+    """ This function plots the distribution of distances between the full- and pre-resistant clusters, as well as random pairs for comparison.
+    
+    :output dist_full: list of path lengths between random pairs of resistant nodes
+    :type dist_full: List
+    :output dist_pre: list of path lengths between random pairs of pre-resistant nodes
+    :type dist_pre: List
+    :output dist_rand: list of path lengths between random pairs of one full- and one pre-resistant node
+    :type dist_rand: List    
+    """
+
     G = nx.Graph()
     w = load_w()
     w = normalize(w)
