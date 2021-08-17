@@ -11,7 +11,21 @@ alpha = 0.1
 
 
 def calcW(data, eta, alphaIn):
-    """Directly calculate w."""
+    """
+    Directly calculate w.
+
+    Calculate an estimate for w based on data and current iteration of eta
+
+    :param data: matrix representing gene expression interactions with knockdowns
+    :type data: Array
+    param eta: vector representing overall pertubation effects of each gene of a cell line
+    :type eta: Array
+    param alphaIn: model parameter held constant due to steady-state approximation
+    :type alphaIn: double
+    :output gmean(eta, axis=1): vector representing overall perturbation effect of genes in each cell line
+    :type gmean(eta, axis=1): Array
+    
+    """
     if isinstance(data, np.ndarray):
         data = [data]
 
