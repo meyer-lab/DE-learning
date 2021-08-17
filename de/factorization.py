@@ -16,14 +16,14 @@ def calcW(data, eta, alphaIn):
 
     Calculate an estimate for w based on data and current iteration of eta
 
-    :param data: matrix representing gene expression interactions with knockdowns
-    :type data: Array
+    :param data: matrix or list of matrices representing a cell line's gene expression interactions with knockdowns
+    :type data: Array or Array List
     param eta: vector representing overall pertubation effects of each gene of a cell line
     :type eta: Array
     param alphaIn: model parameter held constant due to steady-state approximation
-    :type alphaIn: double
-    :output gmean(eta, axis=1): vector representing overall perturbation effect of genes in each cell line
-    :type gmean(eta, axis=1): Array
+    :type alphaIn: float
+    output w: matrix representing gene-to-gene pertubation effects for either a singular cell line or multiple cell lines
+    :type w: Array
     
     """
     if isinstance(data, np.ndarray):
@@ -47,7 +47,8 @@ def calcW(data, eta, alphaIn):
             U = np.concatenate((U, U1), axis=1)
             B = np.concatenate((B, B1), axis=1)
 
-    return np.linalg.lstsq(U.T, B.T, rcond=None)[0].T
+    w = np.linalg.lstsq(U.T, B.T, rcond=None)[0].T
+    return w
 
 
 def calcEta(data, w, alphaIn):
@@ -55,29 +56,30 @@ def calcEta(data, w, alphaIn):
     Calculate an estimate for eta based on data and current iteration of w
 
     :param data: matrix representing gene expression interactions with knockdowns
-    :type data: Array
+    :type data: Array or Array List
     param w: matrix representing gene-to-gene pertubation effects for either a singular cell line or multiple cell lines
     :type w: Array
     param alphaIn: model parameter held constant due to steady-state approximation
-    :type alphaIn: double
-    :output gmean(eta, axis=1): vector representing overall perturbation effect of genes in each cell line
-    :type gmean(eta, axis=1): Array
+    :type alphaIn: float
+    :output eta: vector representing overall perturbation effect of genes in each cell line
+    :type eta: Array
     """
 
     eta = (alphaIn * data) / expit(w @ data)
     eta = np.nan_to_num(eta, nan=1.0, posinf=1e9)
     eta = np.clip(eta, 1e-9, 1e9)
-    return gmean(eta, axis=1)
+    eta = gmean(eta, axis=1)
+    return eta
 
 
 def factorizeEstimate(data, tol=1e-9, maxiter=20):
     """ 
     Iteravely solve for w and eta list based on the data.
 
-    :param data: matrix representing gene expression interactions with knockdowns
-    :type data: Array
+    :param data: matrix or list of matrices representing a cell line's gene expression interactions with knockdowns
+    :type data: Array or Array List
     param tol: the minimum difference between two cost iteration values necessary to stop factorization process
-    :type tol: double
+    :type tol: float
     param maxiter: maximum amount of iterations for factorization process, given no tolerance break
     :type maxiter: int
     output w: finalized matrix representing gene-to-gene pertubation effects for either a singular cell line or multiple cell lines
@@ -128,7 +130,7 @@ def cellLineFactorization(cellLine):
 
     :param cellLine: name of the cell line for which we need to produce w and eta
     :type cellLine: string
-    :output w: finalized matrix representing gene-to-gene pertubation effects for either a singular cell line or multiple cell lines
+    :output w: finalized matrix representing gene-to-gene pertubation effects for the cell line
     :type w: Array
     :output eta: finalized list of vectors representing overall perturbation effect of genes in each cell line
     :type eta: Array list
@@ -171,19 +173,19 @@ def commonGenes(annotation1, annotation2):
 
 
 def MatrixSubtraction(cellLine1, cellLine2):
-    """Subtracts the w-matrices of two different cell lines and subtracts them.
-    Then, it calculates the norm of the original matrices as well as difference matrix
+    """Finds the w-matrices of two different cell lines and subtracts them.
+    Then, calculates the norm of the original matrices as well as difference matrix
     
     :param cellLine1: name of the cell line for which we need to produce w1
     :type cellLine1: string
     :param cellLine2: name of the cell line for which we need to produce w2
     :type cellLine2: string
-    :output norm1: norm of the w1-matrix with only common genes
-    :type norm1: double
-    :output norm2: norm of the w2-matrix with only common genes
-    :type norm2: double
+    :output norm1: norm of the w1-matrix produced using only common genes
+    :type norm1: float
+    :output norm2: norm of the w2-matrix produced using only common genes
+    :type norm2: float
     :output diff_norm: norm of the matrix produced by subtracting w2_final and w1_final
-    :type diff_norm: double
+    :type diff_norm: float
     :output w1_final: w1 matrix only accounting for common genes
     :type w1_final: Array
     :output w2_final: w2 matrix only accounting for common genes
@@ -225,7 +227,7 @@ def mergedFitting(cellLine1, cellLine2):
     :type cellLine1: string
     :param cellLine2: name of the second cell line for which we need to produce w_shared
     :type cellLine2: string
-    :output w_shared: a matrix representing the gene-to-gene perturbation effects of multiple cell lines
+    :output w_shared: a matrix representing the gene-to-gene perturbation effects of both cell lines
     :type w_shared: array
     :output eta_list: list of vectors representing overall perturbation of genes in each cell line
     :tyep eta_list: array list
