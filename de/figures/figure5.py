@@ -22,12 +22,12 @@ def makeFigure():
     w_max = np.max(w_abs)
     G = Network(w, w_abs, w_max, ax[0])
     # set title for the graph
-    ax[0].set_title("w Network Graph (downstream)")
+    ax[0].set_title("w Network Graph (downstream)", fontsize='large')
     
     # Plot GRNdb network
     w_GRNdb = load_w_GRNdb()
     G_GRNdb = Network_GRNdb(w_GRNdb, ax[1])
-    ax[1].set_title("w Network Graph - GRNdb")
+    ax[1].set_title("w Network Graph - GRNdb", fontsize='large')
 
     # Get hypergeometric dist/ variables
     [k, M, n, N] = setvars(G, G_GRNdb)
@@ -45,18 +45,20 @@ def makeFigure():
     # Plot PMF
     ax[2].plot([x, pmf_edges][0], [x, pmf_edges][1], 'm-.', linewidth=6, label=curve_label)
     ax[2].vlines([k, M, n, N][0], 0, 0.2, linestyles='dashed', linewidth=6, label=k_label)
-    ax[2].legend()
-    ax[2].set_xlabel("k")
-    ax[2].set_ylabel("hypergeom PMF")
-    ax[2].set_title("Probability Mass Function")
+    ax[2].legend(prop={"size":70})
+    ax[2].set_xlabel("k", fontsize='large')
+    ax[2].set_ylabel("hypergeom PMF", fontsize='large')
+    ax[2].tick_params(axis='both', which='major', labelsize=70)
+    ax[2].set_title("Probability Mass Function", fontsize='large')
 
     # Plot CDF
     ax[3].plot([xx, cdf_edges][0], [xx, cdf_edges][1], 'g-.', linewidth=6, label=curve_label)
     ax[3].vlines([k, M, n, N][0], 0, 1, linestyles='dashed', linewidth=6, label=k_label)
-    ax[3].legend()
-    ax[3].set_xlabel("k")
-    ax[3].set_ylabel("hypergeom CDF")
-    ax[3].set_title("Cumulative Distribution Function")
+    ax[3].legend(prop={"size":70})
+    ax[3].set_xlabel("k", fontsize='large')
+    ax[3].set_ylabel("hypergeom CDF", fontsize='large')
+    ax[3].tick_params(axis='both', which='major', labelsize=70)
+    ax[3].set_title("Cumulative Distribution Function", fontsize='large')
 
     # Add subplot labels
     subplotLabel(ax, fntsize=50)
