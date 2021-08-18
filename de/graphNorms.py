@@ -4,6 +4,8 @@ from math import ceil
 import matplotlib.pyplot as plt
 import numpy as np
 from .factorization import MatrixSubtraction
+from .importData import importLINCS
+from .impute import split_data, impute
 
 
 def plot_norm_graph(cell_lines):
@@ -72,3 +74,38 @@ def plot_corr_graphs(cell_lines):
         ax.set_ylabel(label_list[1])
 
     plt.savefig('corr_graphs.png')
+
+def plot_impute_graph(cellLine):
+    """ Tests the cross val function that creates the train and test data. """
+
+    data, _ = importLINCS(cellLine)
+    #U = np.copy(data)
+    #np.fill_diagonal(U, 0.0)
+        
+    train_Y, test_Y = split_data(data)
+    full_Y = impute(train_Y)
+
+    missing = np.isnan(train_Y)
+
+    keep_full = full_Y[missing]
+    keep_test = test_Y[missing]
+
+    print(keep_full)
+    print(keep_test)
+    
+    fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(7.5 * 1, 6 * 1), squeeze=0, sharex=False, sharey=True)
+    axes = np.array(axes)
+        
+    for i, ax in enumerate(axes.reshape(-1)):
+        ax.set_title('A375 Cross-Validation')
+        ax.scatter(keep_full, keep_test)
+        ax.set_xlabel('Predicted Data')
+        ax.set_ylabel('Test Data')
+
+        # trendline
+        z = np.polyfit(keep_full, keep_test, 1)
+        p = np.poly1d(z)
+        ax.plot(keep_full, p(keep_full), color='red')
+
+    plt.savefig('A375_imputation.png')
+    print(np.ma.corrcoef(np.ma.masked_invalid(keep_full), np.ma.masked_invalid(keep_test))[1,0])
