@@ -96,17 +96,22 @@ def cluster_dist():
         try:
             temp1 = random.sample(full, 2)
             dist_full.append(nx.bellman_ford_path_length(G, source=temp1[0], target=temp1[1], weight="weight")) # the first output of the function is the path length
-        except NetworkXUnbounded or NetworkXNoPath:
+        except NetworkXUnbounded:
+            pass
+        except NetworkXNoPath:
             pass
         try:
             temp2 = random.sample(pre, 2)
             dist_pre.append(nx.bellman_ford_path_length(G, source=temp2[0], target=temp2[1], weight="weight")) 
-        except NetworkXUnbounded or NetworkXNoPath:
+        except NetworkXUnbounded:
+            pass
+        except NetworkXNoPath:
             pass
         try:
             temp3 = np.concatenate([np.random.choice(full,1), np.random.choice(pre, 1)])
             dist_rand.append(nx.bellman_ford_path_length(G, source=temp3[0], target=temp3[1], weight="weight")) 
-        except NetworkXUnbounded or NetworkXNoPath:
+        except NetworkXUnbounded:
+            pass
+        except NetworkXNoPath:
             pass
     return dist_full, dist_pre, dist_rand
-
