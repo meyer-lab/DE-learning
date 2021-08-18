@@ -80,11 +80,11 @@ def test_crossval_LINCS(cellLine):
     x = range(0,10)
 
     for j in x:
-        train_X, test_X = cross_val(data)
+        train_X, test_X = split_data(data)
         full_X = impute(train_X)
         data_corr.append(ma.corrcoef(ma.masked_invalid(full_X.flatten()), ma.masked_invalid(test_X.flatten()))[1,0])
         
-        train_Y, test_Y = cross_val(U)
+        train_Y, test_Y = split_data(U)
         full_Y = impute(train_Y)
         U_corr.append(ma.corrcoef(ma.masked_invalid(full_Y.flatten()), ma.masked_invalid(test_Y.flatten()))[1,0])
 
