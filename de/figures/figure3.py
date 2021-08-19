@@ -81,7 +81,7 @@ def cluster_dist():
     # add nodes and edges
     add_nodes(G, w, w_abs)
     add_edges(G, w, w_abs)
-    # remove_isolates(G)
+    remove_isolates(G)
 
     for u,v in G.edges:
         G.edges[u, v]['weight'] = np.abs(1/G.edges[u, v]['weight'])
