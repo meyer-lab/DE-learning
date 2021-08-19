@@ -119,11 +119,12 @@ def add_edges(dir_graph, w, w_abs):
     threshold = np.mean(w_abs) + 1.4 * np.std(w_abs)  # lower threshold in order to find more possible loops
     for i in range(w.shape[1]):
         for j in range(w.shape[1]):
-            if w_abs[i, j] > threshold:
-                if w[i, j] > 0:
-                    dir_graph.add_edge(j, i, color="red", weight=w[i, j])
-                else:
-                    dir_graph.add_edge(j, i, color="blue", weight=w[i, j])
+            if not i == j:
+                if w_abs[i, j] > threshold:
+                    if w[i, j] > 0:
+                        dir_graph.add_edge(j, i, color="red", weight=w[i, j])
+                    else:
+                        dir_graph.add_edge(j, i, color="blue", weight=w[i, j])
     return dir_graph
 
 
