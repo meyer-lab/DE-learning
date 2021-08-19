@@ -116,7 +116,7 @@ def add_edges(dir_graph, w, w_abs):
     :type dir_graph: DiGraph
     """
     w = w.to_numpy()
-    threshold = np.mean(w_abs) + 1.4 * np.std(w_abs)  # lower threshold in order to find more possible loops
+    threshold = np.mean(w_abs) + 1.4 * np.std(w_abs)  # increase threshold in order to remove in-significant edges
     for i in range(w.shape[1]):
         for j in range(w.shape[1]):
             if not i == j:
