@@ -230,7 +230,7 @@ def mergedFitting(cellLine1, cellLine2):
     :output w_shared: a matrix representing the gene-to-gene perturbation effects of both cell lines
     :type w_shared: array
     :output eta_list: list of vectors representing overall perturbation of genes in each cell line
-    :tyep eta_list: array list
+    :type eta_list: array list
     """
     _, annotation1 = importLINCS(cellLine1)
     _, annotation2 = importLINCS(cellLine2)
