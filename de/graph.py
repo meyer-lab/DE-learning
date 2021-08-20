@@ -116,14 +116,15 @@ def add_edges(dir_graph, w, w_abs):
     :type dir_graph: DiGraph
     """
     w = w.to_numpy()
-    threshold = np.mean(w_abs) + 0.2 * np.std(w_abs)  # lower threshold in order to find more possible loops
+    threshold = np.mean(w_abs) + 1.4 * np.std(w_abs)  # increase threshold in order to remove in-significant edges
     for i in range(w.shape[1]):
         for j in range(w.shape[1]):
-            if w_abs[i, j] > threshold:
-                if w[i, j] > 0:
-                    dir_graph.add_edge(j, i, color="red", weight=w[i, j])
-                else:
-                    dir_graph.add_edge(j, i, color="blue", weight=w[i, j])
+            if not i == j:
+                if w_abs[i, j] > threshold:
+                    if w[i, j] > 0:
+                        dir_graph.add_edge(j, i, color="red", weight=w[i, j])
+                    else:
+                        dir_graph.add_edge(j, i, color="blue", weight=w[i, j])
     return dir_graph
 
 
@@ -187,7 +188,7 @@ def set_edges(dir_graph, w_abs, w_max, pos, ax):
     :output dir_graph: An edited directed graph with edges of specified color and thickness
     :type dir_graph: DiGraph
     """
-    threshold = np.mean(w_abs) + 0.2 * np.std(w_abs)
+    threshold = np.mean(w_abs) + 1.4 * np.std(w_abs)
     edges = dir_graph.edges()
     colors = [dir_graph[u][v]["color"] for u, v in edges]
     thickness = [np.exp((np.abs(dir_graph[u][v]["weight"]) - threshold) / (w_max - threshold)) for u, v in edges]
