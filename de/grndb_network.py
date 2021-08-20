@@ -18,40 +18,26 @@ def load_w_GRNdb():
     w_df = pd.DataFrame(columns=genes, index=genes)
     w_df = w_df.fillna(0)
 
-    interactions = pd.read_csv("de/data/grndb/SKCM_all_edited.csv")
+    interactions = pd.read_csv("de/data/grndb/SKCM_all.csv")
 
     # fill in 1's where there is a TF>gene interaction
     for row in interactions.index:
         TF = interactions['TF'][row]
         TG = interactions['gene'][row]
-        w_df.at[TG, TF] = 1
-
+        conf = interactions['Confidence'][row]
+        if not TF == TG: # exclude self-interacting loops
+            if conf == "High":
+                w_df.at[TG, TF] = 2
+            else:
+                w_df.at[TG, TF] = 1
     return w_df
-
-def pagerank_GRNdb(w, num_iterations: int = 100, d: float = 0.85):
-    """
-    Given an adjacency matrix, calculate the pagerank value.
-    """
-    w = np.absolute(w)  # PageRank only works with unsigned networks, so we'll take the absolute value.
-    N = w.shape[1]
-    for i in range(N):
-        if sum(w[:, i]) != 0: # avoid dividing by zero
-            w[:, i] /= sum(w[:, i])
-    v = np.random.rand(N, 1)
-    v = v / np.linalg.norm(v, 1)
-    w_hat = (d * w + (1 - d) / N)
-    for i in range(num_iterations):
-        v = w_hat @ v
-    return v
 
 def add_nodes_GRNdb(dir_graph, w):
     """
-    Given a directed graph and w matrix, adds a node to the directed graph for each gene.
+    Given a directed graph and w matrix, adds nodes to the graph for each gene, not yet with pagerank vals.
     """
-    w_np = np.copy(w.to_numpy(dtype=np.float64))
-    v = pagerank_GRNdb(w_np)
-    for i in range(len(v)):
-        dir_graph.add_node(i, gene=w.columns[i], pagerank=v[i])
+    for i in range(len(w)):
+        dir_graph.add_node(i, gene=w.columns[i])
     return dir_graph
 
 def add_edges_GRNdb(dir_graph, w):
@@ -60,18 +46,24 @@ def add_edges_GRNdb(dir_graph, w):
     """
     w = w.to_numpy()
     for i in range(w.shape[1]):
-        for j in range(w.shape[1]):
-            if w[i, j] > 0:
-                dir_graph.add_edge(j, i, color="green")
+        for j in range(w.shape[1]):    
+            if w[i, j] == 1: # low confidence interaction 
+                dir_graph.add_edge(j, i, color="green", weight=w[i, j])
+            if w[i, j] == 2: # high confidence interaction
+                dir_graph.add_edge(j, i, color="green", weight=w[i, j])
     return dir_graph
 
 def set_nodes_GRNdb(dir_graph, pos, ax):
     """
-    Given a directed graph and pos, then draw the corresponding node based on pagerank value.
+    Given a directed graph and pos, then draw the corresponding node based on networkx pagerank value.
     """
     nodes = dir_graph.nodes()
-    nodesize = [dir_graph.nodes[u]["pagerank"] * (14744338*260000) for u in nodes]
-
+    node_pageranks = nx.pagerank(dir_graph)
+    pr_vals = node_pageranks.values() 
+    pr_list = list(pr_vals)
+    pr_list = [i * 260000 for i in pr_list]
+    nodesize = np.array(pr_list)
+    
     pre_resistant_list = ["JUN", "BRD2", "STK11", "PKN2", "NFAT5", "KMT2D", "ADCK3", "FOSL1", "CSK", "BRD8", "CBFB", "TADA2B", "DSTYK", "JUNB", "LATS2", "FEZF2", "MITF", "RUNX3", "SUV420H1", "SOX10", "DOT1L", "PRKRIR", 'FEZF2', 'SOX10', 'ADCK3', 'BRD8', 'CBFB', 'CSK', 'DOT1L', 'DSTYK', 'FOSL1', 'JUN', 'JUNB', 'KMT2D', 'LATS2', 'MITF', 'NFAT5', 'PKN2', 'PRKRIR', 'RUNX3', 'STK11', 'SUV420H1']
     full_resistant_list = ["MAP3K1", "MAP2K7", "NSD1", "KDM1A", "EGFR", "EP300", "SRF", "PRKAA1", "GATA4", "MYBL1", "MTF1", 'EGFR', 'EP300', 'GATA4', 'KDM1A', 'MAP2K7', 'MAP3K1', 'MTF1', 'MYBL1', 'NSD1', 'PRKAA1', 'SRF']
     unknown = []
@@ -97,9 +89,11 @@ def set_edges_GRNdb(dir_graph, pos, ax):
     """
     edges = dir_graph.edges()
     colors = [dir_graph[u][v]["color"] for u, v in edges]
+    thickness = [dir_graph[u][v]["weight"] for u, v in edges]
 
+    normalized_thickness = ((thickness - np.min(thickness)) / np.ptp(thickness)) * 0.3 + 0.5 
     # draw the edges
-    nx.draw_networkx_edges(dir_graph, pos, edgelist=edges, edge_color=colors, arrowsize=65, ax=ax)
+    nx.draw_networkx_edges(dir_graph, pos, edgelist=edges, width=thickness, edge_color=colors, arrowsize=65, ax=ax, alpha=normalized_thickness)
     return dir_graph
 
 def make_legend_GRNdb(dir_graph, ax):
