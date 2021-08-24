@@ -14,7 +14,8 @@ def plot_norm_graph(cell_lines):
     ncols = 3
     nplots = len(cell_lines) * (len(cell_lines) - 1) / 2
     nrows = ceil(nplots / ncols)
-    _, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(7.5 * ncols, 6 * nrows), squeeze=0, sharex=False, sharey=True)
+    _, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(7.5 * ncols, 6 * nrows), 
+    squeeze=0, sharex=False, sharey=True)
     axes = np.array(axes)
 
     labels = []
@@ -47,7 +48,8 @@ def plot_corr_graphs(cell_lines):
     ncols = 3
     nplots = len(cell_lines) * (len(cell_lines) - 1) / 2
     nrows = ceil(nplots / ncols)
-    _, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(7.5 * ncols, 6 * nrows), squeeze=0, sharex=False, sharey=True)
+    _, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(7.5 * ncols, 6 * nrows), 
+    squeeze=0, sharex=False, sharey=True)
     axes = np.array(axes)
 
     labels = []
@@ -88,7 +90,8 @@ def plot_impute_graph(cellLine):
 
     print(keep_full)
     print(keep_test)
-    _, axes = plt.subplots(nrows=1, ncols=1, figsize=(7.5 * 1, 6 * 1), squeeze=0, sharex=False, sharey=True)
+    _, axes = plt.subplots(nrows=1, ncols=1, figsize=(7.5 * 1, 6 * 1), 
+    squeeze=0, sharex=False, sharey=True)
     axes = np.array(axes)
         
     for i, ax in enumerate(axes.reshape(-1)):
@@ -96,7 +99,6 @@ def plot_impute_graph(cellLine):
         ax.scatter(keep_full, keep_test)
         ax.set_xlabel('Predicted Data')
         ax.set_ylabel('Test Data')
-
         # trendline
         z = np.polyfit(keep_full, keep_test, 1)
         p = np.poly1d(z)
@@ -104,3 +106,4 @@ def plot_impute_graph(cellLine):
 
     plt.savefig('A375_imputation.png')
     print(np.ma.corrcoef(np.ma.masked_invalid(keep_full), np.ma.masked_invalid(keep_test))[1,0])
+    

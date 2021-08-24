@@ -1,7 +1,7 @@
 """ This file includes the functions for cross-validation based on data imputation. """
 import numpy as np
+from numpy import ma
 from scipy.special import expit
-import numpy.ma as ma
 from .factorization import alpha, factorizeEstimate
 from .linearModel import runFitting
 
@@ -17,12 +17,10 @@ def split_data(X, n=20):
     assert np.sum(np.isfinite(test_X)) == n
     return train_X, test_X
 
-
 def impute(data, linear=False):
     """ Impute by repeated fitting. """
     missing = np.isnan(data)
     data = np.nan_to_num(data)
-
     for _ in range(10):
         U = np.copy(data)
         np.fill_diagonal(U, 0.0)
@@ -39,8 +37,6 @@ def impute(data, linear=False):
         else:
             predictt = eta[0][:, np.newaxis] * expit(w @ U) / alpha
         data[missing] = predictt[missing]
-
-
     return data
 
 def repeatImputation(data, linear=False, numIter=20):
