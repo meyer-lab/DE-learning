@@ -48,15 +48,21 @@ def test_cellLines():
     # make sure at least 50% of the genes in smaller cell line is shared between the two cell lines
     assert np.abs(len(shared_annotation)) >= 0.5 * np.min([len(annotation1), len(annotation2)])
 
-def test_matrixSub():
-    """To test if the matrices subtract properly and if the norm has a reasonable value"""
-    cellLine1 = 'A375'
-    cellLine2 = 'HT29'
+def test_mergedFitting():
+    """ To test if the fitting works on multiple cell lines and the shared cost has a reasonable value. """
+    data = ImportMelanoma()
+    w1, eta_list1 = factorizeEstimate(data)
+    eta1 = eta_list1[0]
 
-    norm1, norm2, diff_norm, _, _ = MatrixSubtraction(cellLine1, cellLine2)
+    w2, eta_list2 = factorizeEstimate([data, data])
+    eta2 = eta_list2[0]
 
-    assert diff_norm != norm1
-    assert diff_norm != norm2
+    # Both etas should be the same
+    assert np.linalg.norm(eta_list2[0] - eta_list2[1]) < 0.0001
+    assert np.linalg.norm(eta1 - eta2) < 0.0001
+
+    # w should be identical
+    assert np.linalg.norm(w1 - w2) < 0.0001
 
 def test_crossval_Melanoma():
     """ Tests the cross val function that creates the train and test data. """
@@ -67,9 +73,10 @@ def test_crossval_Melanoma():
     print(ma.corrcoef(ma.masked_invalid(full_X.flatten()), ma.masked_invalid(test_X.flatten())))
 
 
-def test_crossval_LINCS(cellLine):
+def test_crossval_LINCS():
     """ Tests the cross val function that creates the train and test data. """
 
+    cellLine = "A375"
     data, _ = importLINCS(cellLine)
     U = np.copy(data)
     np.fill_diagonal(U, 0.0)
