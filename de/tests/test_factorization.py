@@ -3,9 +3,9 @@ Test the factorization model.
 '''
 import pytest
 import numpy as np
-import numpy.ma as ma
+from numpy import ma
 from scipy.special import expit
-from ..factorization import factorizeEstimate, alpha, commonGenes, MatrixSubtraction
+from ..factorization import factorizeEstimate, alpha, commonGenes
 from ..impute import impute, split_data
 from ..importData import ImportMelanoma, importLINCS
 
@@ -84,9 +84,8 @@ def test_crossval_LINCS():
     data_corr = []
     U_corr = []
     print('check1')
-    x = range(0,10)
 
-    for j in x:
+    for x in range(0,10):
         train_X, test_X = split_data(data)
         full_X = impute(train_X)
         data_corr.append(ma.corrcoef(ma.masked_invalid(full_X.flatten()), ma.masked_invalid(test_X.flatten()))[1,0])
