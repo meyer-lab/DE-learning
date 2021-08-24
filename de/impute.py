@@ -26,7 +26,6 @@ def impute(data, linear=False):
     for _ in range(10):
         U = np.copy(data)
         np.fill_diagonal(U, 0.0)
-        # data_last = np.copy(data)
 
         # Fit
         if linear:
@@ -41,7 +40,6 @@ def impute(data, linear=False):
             predictt = eta[0][:, np.newaxis] * expit(w @ U) / alpha
         data[missing] = predictt[missing]
 
-        # print(np.linalg.norm(data - data_last))
 
     return data
 

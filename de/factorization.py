@@ -71,7 +71,6 @@ def calcEta(data, w, alphaIn):
     eta = gmean(eta, axis=1)
     return eta
 
-
 def factorizeEstimate(data, tol=1e-9, maxiter=20):
     """ 
     Iteravely solve for w and eta list based on the data.
@@ -123,7 +122,6 @@ def factorizeEstimate(data, tol=1e-9, maxiter=20):
 
     return w, etas
 
-
 def cellLineFactorization(cellLine):
     """ 
     Import a cell line, fit the model, and return the result.
@@ -140,7 +138,6 @@ def cellLineFactorization(cellLine):
     data, annotation = importLINCS(cellLine)
     w, eta = factorizeEstimate(data)
     return w, eta, annotation[0].tolist()
-
 
 def commonGenes(annotation1, annotation2):
     """
@@ -170,7 +167,6 @@ def commonGenes(annotation1, annotation2):
     index_list1.sort()
     index_list2.sort()
     return index_list1, index_list2
-
 
 def MatrixSubtraction(cellLine1, cellLine2):
     """Finds the w-matrices of two different cell lines and subtracts them.
@@ -217,7 +213,6 @@ def MatrixSubtraction(cellLine1, cellLine2):
     difference_matrix = w2_final - w1_final
     diff_norm = np.linalg.norm(difference_matrix)
     return norm1, norm2, diff_norm, w1_final, w2_final
-
 
 def mergedFitting(cellLine1, cellLine2):
     """

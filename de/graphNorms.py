@@ -14,7 +14,7 @@ def plot_norm_graph(cell_lines):
     ncols = 3
     nplots = len(cell_lines) * (len(cell_lines) - 1) / 2
     nrows = ceil(nplots / ncols)
-    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(7.5 * ncols, 6 * nrows), squeeze=0, sharex=False, sharey=True)
+    _, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(7.5 * ncols, 6 * nrows), squeeze=0, sharex=False, sharey=True)
     axes = np.array(axes)
 
     labels = []
@@ -41,14 +41,13 @@ def plot_norm_graph(cell_lines):
 
     plt.savefig('norm_graphs.png')
 
-
 def plot_corr_graphs(cell_lines):
     """ Plot all combinations of two w matrices against each other using factorizeEstimate. """
 
     ncols = 3
     nplots = len(cell_lines) * (len(cell_lines) - 1) / 2
     nrows = ceil(nplots / ncols)
-    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(7.5 * ncols, 6 * nrows), squeeze=0, sharex=False, sharey=True)
+    _, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(7.5 * ncols, 6 * nrows), squeeze=0, sharex=False, sharey=True)
     axes = np.array(axes)
 
     labels = []
@@ -79,9 +78,6 @@ def plot_impute_graph(cellLine):
     """ Tests the cross val function that creates the train and test data. """
 
     data, _ = importLINCS(cellLine)
-    #U = np.copy(data)
-    #np.fill_diagonal(U, 0.0)
-        
     train_Y, test_Y = split_data(data)
     full_Y = impute(train_Y)
 
@@ -92,8 +88,7 @@ def plot_impute_graph(cellLine):
 
     print(keep_full)
     print(keep_test)
-    
-    fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(7.5 * 1, 6 * 1), squeeze=0, sharex=False, sharey=True)
+    _, axes = plt.subplots(nrows=1, ncols=1, figsize=(7.5 * 1, 6 * 1), squeeze=0, sharex=False, sharey=True)
     axes = np.array(axes)
         
     for i, ax in enumerate(axes.reshape(-1)):
