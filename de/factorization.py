@@ -71,7 +71,6 @@ def calcEta(data, w, alphaIn):
     eta = gmean(eta, axis=1)
     return eta
 
-
 def factorizeEstimate(data, tol=1e-9, maxiter=20):
     """ 
     Iteravely solve for w and eta list based on the data.
@@ -123,7 +122,6 @@ def factorizeEstimate(data, tol=1e-9, maxiter=20):
 
     return w, etas
 
-
 def cellLineFactorization(cellLine):
     """ 
     Import a cell line, fit the model, and return the result.
@@ -140,7 +138,6 @@ def cellLineFactorization(cellLine):
     data, annotation = importLINCS(cellLine)
     w, eta = factorizeEstimate(data)
     return w, eta, annotation[0].tolist()
-
 
 def commonGenes(annotation1, annotation2):
     """
@@ -170,7 +167,6 @@ def commonGenes(annotation1, annotation2):
     index_list1.sort()
     index_list2.sort()
     return index_list1, index_list2
-
 
 def MatrixSubtraction(cellLine1, cellLine2):
     """Finds the w-matrices of two different cell lines and subtracts them.
@@ -218,7 +214,6 @@ def MatrixSubtraction(cellLine1, cellLine2):
     diff_norm = np.linalg.norm(difference_matrix)
     return norm1, norm2, diff_norm, w1_final, w2_final
 
-
 def mergedFitting(cellLine1, cellLine2):
     """
     Given two cell lines, compute the cost of fitting each of them individually and the cost of fitting a shared w matrix.
@@ -230,7 +225,7 @@ def mergedFitting(cellLine1, cellLine2):
     :output w_shared: a matrix representing the gene-to-gene perturbation effects of both cell lines
     :type w_shared: array
     :output eta_list: list of vectors representing overall perturbation of genes in each cell line
-    :tyep eta_list: array list
+    :type eta_list: array list
     """
     _, annotation1 = importLINCS(cellLine1)
     _, annotation2 = importLINCS(cellLine2)
