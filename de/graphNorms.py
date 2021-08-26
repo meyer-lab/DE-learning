@@ -76,8 +76,8 @@ def plot_corr_graphs(cell_lines):
     plt.savefig('corr_graphs.png')
 
 def plot_impute_graph(cellLine):
-    """ Tests the cross val function that creates the train and test data. """
-
+    """ Tests imputation function and plots imputed data against test data. """
+    
     data, _ = importLINCS(cellLine)
     #U = np.copy(data)
     #np.fill_diagonal(U, 0.0)
@@ -97,7 +97,7 @@ def plot_impute_graph(cellLine):
     axes = np.array(axes)
         
     for i, ax in enumerate(axes.reshape(-1)):
-        ax.set_title('A375 Cross-Validation')
+        ax.set_title(cellLine +  ' Cross-Validation')
         ax.scatter(keep_full, keep_test)
         ax.set_xlabel('Predicted Data')
         ax.set_ylabel('Test Data')
@@ -107,5 +107,5 @@ def plot_impute_graph(cellLine):
         p = np.poly1d(z)
         ax.plot(keep_full, p(keep_full), color='red')
 
-    plt.savefig('A375_imputation.png')
+    plt.savefig(cellLine + '_imputation.png')
     print(np.ma.corrcoef(np.ma.masked_invalid(keep_full), np.ma.masked_invalid(keep_test))[1,0])
