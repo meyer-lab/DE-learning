@@ -13,7 +13,7 @@ def makeFigure():
     :output f: Figure 5 containing network diagrams for the w matrix and the GRNdb dataset, along with 
     the probability mass and cumulative distribution function plots for the significance of their overlapping edges.
     :type f: Figure
-    """    
+    """
     # Get list of axis objects
     ax, f = getSetup((100, 100), (2,2))
     # load w
@@ -26,7 +26,7 @@ def makeFigure():
     G = Network(w, w_abs, w_max, ax[0])
     # set title for the graph
     ax[0].set_title("w Network Graph (downstream)", fontsize='large')
-    
+
     # Plot GRNdb network
     w_GRNdb = load_w_GRNdb()
     G_GRNdb = Network_GRNdb(w_GRNdb, ax[1])
