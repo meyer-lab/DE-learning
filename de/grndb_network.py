@@ -8,7 +8,10 @@ from .graph import remove_isolates, set_labels
 
 def load_w_GRNdb():
     """
-    Loads node labels and creates w matrix as a dataframe.
+    Loads node labels and returns w matrix as a dataframe.
+
+    :output w_df: A matrix representing perturbation interactions with genes as columns and gene names as indices
+    :type w_df: DataFrame
     """
     path_here = dirname(dirname(__file__))
 
@@ -34,7 +37,14 @@ def load_w_GRNdb():
 
 def add_nodes_GRNdb(dir_graph, w):
     """
-    Given a directed graph and w matrix, adds nodes to the graph for each gene, not yet with pagerank vals.
+    Given a directed graph and w matrix, adds nodes to the graph for each gene in w. Returns the graph.
+
+    :param dir_graph: A directed graph of gene interactions
+    :type dir_graph: DiGraph
+    :param w: A matrix representing perturbation interactions with genes as columns and gene names as indices
+    :type w: DataFrame
+    :output dir_graph: A directed graph of gene interactions with nodes to represent each gene in w
+    :type dir_graph: DiGraph
     """
     for i in range(len(w)):
         dir_graph.add_node(i, gene=w.columns[i])
@@ -42,7 +52,16 @@ def add_nodes_GRNdb(dir_graph, w):
 
 def add_edges_GRNdb(dir_graph, w):
     """
-    Given a directed graph and w matrix, adds an unweighted, directed edge from gene j to gene i representing an interaction, if it exists.
+    Given a directed graph and w matrix, adds a directed edge from gene j to gene i representing the interaction at
+    w[i,j], if it exists. Edges are weighted based on confidence values in GRNdb; 0 marks no interaction, 1 marks a low
+    confidence interaction, 2 marks a high confidence interaction. Returns the graph.
+    
+    :param dir_graph: A directed graph of gene interactions
+    :type dir_graph: DiGraph
+    :param w: A matrix representing perturbation interactions with genes as columns and gene names as indices
+    :type w: DataFrame
+    :output dir_graph: A directed graph of gene interactions with edges to represent interactions between genes
+    :type dir_graph: DiGraph
     """
     w = w.to_numpy()
     for i in range(w.shape[1]):
@@ -55,7 +74,18 @@ def add_edges_GRNdb(dir_graph, w):
 
 def set_nodes_GRNdb(dir_graph, pos, ax):
     """
-    Given a directed graph and pos, then draw the corresponding node based on networkx pagerank value.
+    Given a directed graph, a node:position dictionary, and an axes object, draws each node on the graph.
+    Node size is based on networkx pagerank value, and node color is based on the gene's resistant or pre-resistant status.
+    Returns the graph.
+
+    :param dir_graph: A directed graph of gene interactions
+    :type dir_graph: DiGraph
+    :param pos: a node:position dictionary for nodes in the directed graph
+    :type pos: dict
+    :param ax: an axes object to determine where to plot in the figure
+    :type ax: Axes
+    :output dir_graph: A directed graph of gene interactions with nodes of different sizes and colors
+    :type dir_graph: DiGraph
     """
     nodes = dir_graph.nodes()
     node_pageranks = nx.pagerank(dir_graph)
@@ -63,7 +93,7 @@ def set_nodes_GRNdb(dir_graph, pos, ax):
     pr_list = list(pr_vals)
     pr_list = [i * 260000 for i in pr_list]
     nodesize = np.array(pr_list)
-    
+
     pre_resistant_list = ["JUN", "BRD2", "STK11", "PKN2", "NFAT5", "KMT2D", "ADCK3", "FOSL1", "CSK", "BRD8", "CBFB", "TADA2B", "DSTYK", "JUNB", "LATS2", "FEZF2", "MITF", "RUNX3", "SUV420H1", "SOX10", "DOT1L", "PRKRIR", 'FEZF2', 'SOX10', 'ADCK3', 'BRD8', 'CBFB', 'CSK', 'DOT1L', 'DSTYK', 'FOSL1', 'JUN', 'JUNB', 'KMT2D', 'LATS2', 'MITF', 'NFAT5', 'PKN2', 'PRKRIR', 'RUNX3', 'STK11', 'SUV420H1']
     full_resistant_list = ["MAP3K1", "MAP2K7", "NSD1", "KDM1A", "EGFR", "EP300", "SRF", "PRKAA1", "GATA4", "MYBL1", "MTF1", 'EGFR', 'EP300', 'GATA4', 'KDM1A', 'MAP2K7', 'MAP3K1', 'MTF1', 'MYBL1', 'NSD1', 'PRKAA1', 'SRF']
     unknown = []
@@ -85,7 +115,17 @@ def set_nodes_GRNdb(dir_graph, pos, ax):
 
 def set_edges_GRNdb(dir_graph, pos, ax):
     """
-    Given a directed graph, draws singly colored, unweighted, directed edges to represent interactions.
+    Given a directed graph, a node:position dictionary, and an axes object, draws singly colored, weighted, directed edges to represent interactions.
+    Returns the graph.
+
+    :param dir_graph: A directed graph of gene interactions
+    :type dir_graph: DiGraph
+    :param pos: a node:position dictionary for nodes in the directed graph
+    :type pos: dict
+    :param ax: an axes object to determine where to plot in the figure
+    :type ax: Axes
+    :output dir_graph: A directed graph of gene interactions with edges of different thicknesses and opacity to represent high and low confidence interactions
+    :type dir_graph: DiGraph
     """
     edges = dir_graph.edges()
     colors = [dir_graph[u][v]["color"] for u, v in edges]
@@ -98,7 +138,14 @@ def set_edges_GRNdb(dir_graph, pos, ax):
 
 def make_legend_GRNdb(dir_graph, ax):
     """
-    Given a directed graph, creates legend for node and edge colors.
+    Given a directed graph and an axes object, creates legend for node colors and returns the graph.
+
+    :param dir_graph: A directed graph of gene interactions
+    :type dir_graph: DiGraph
+    :param ax: an axes object to determine where to plot in the figure
+    :type ax: Axes
+    :output dir_graph: An directed graph with a legend
+    :type dir_graph: DiGraph
     """
     purple_patch = mpatches.Patch(color="darkorchid", label="Pre-resistant")
     green_patch = mpatches.Patch(color="mediumturquoise", label="Resistant")
@@ -108,7 +155,14 @@ def make_legend_GRNdb(dir_graph, ax):
 
 def Network_GRNdb(w, ax):
     """
-    Given w and ax, draw the corresponding Networkx graph.
+    Given a w gene-gene interaction matrix and an axes object, draw and return the corresponding Networkx graph.
+    
+    :param w: A matrix representing perturbation interactions with genes as columns and gene names as indices
+    :type w: DataFrame
+    :param ax: an axes object to determine where to plot in the figure
+    :type ax: Axes
+    :output G: Networkx weighted directed graph
+    :type G: DiGraph
     """
     G = nx.DiGraph()
 
@@ -132,6 +186,5 @@ def Network_GRNdb(w, ax):
     for l in m:
         if len(l) == 1:
             G.remove_edges_from([(l[0], l[0])])
-    
-    return G
 
+    return G
