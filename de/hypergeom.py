@@ -24,12 +24,12 @@ def setvars(G, G_GRNdb):
     M = 83**2
     N = G_GRNdb.number_of_edges()
     n = G.number_of_edges()
-    
+
     # k = # interactions overlapping our and GRNdb networks
     # create dictionaries for each graph with key : value = node index : gene id
     G_nodes = dict(G.nodes(data='gene'))
     G_GRNdb_nodes = dict(G_GRNdb.nodes(data='gene'))
-    
+
     # iterate through edges of G, get the gene ids from the indices, fill edge array with gene ids
     G_edge_ids = []
     for edge in list(G.edges()):
@@ -50,13 +50,13 @@ def setvars(G, G_GRNdb):
         if pair in G_GRNdb_edge_ids:
             matches.append(pair)
     k = len(matches)
-    
+
     return [k, M, n, N]
 
 def PMF(varlist):
     """
     Takes in a list of variables [k, M, n, N] and computes the result of their probability mass function.
-    
+
     :param varlist: A list of variables needed to compute the probability mass function
     :type varlist: list
     :output [x, pmf_edges]: Variables for plotting the PMF
@@ -73,7 +73,7 @@ def PMF(varlist):
 def CDF(varlist):
     """
     Takes in a list of variables [k, M, n, N] and computes the result of their cumulative distribution function.
-    
+
     :param varlist: A list of variables needed to compute the cumulative distribution function
     :type varlist: list
     :output [x, cdf_edges]: Variables for plotting the CDF
