@@ -79,7 +79,7 @@ def cluster_dist():
     w_abs = np.absolute(w.to_numpy())
 
     # add nodes and edges
-    add_nodes(G, w, w_abs)
+    add_nodes(G, w)
     add_edges(G, w, w_abs)
     remove_isolates(G)
 

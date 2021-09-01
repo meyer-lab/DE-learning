@@ -57,8 +57,7 @@ def set_nodes_GRNdb(dir_graph, pos, ax):
     """
     Given a directed graph and pos, then draw the corresponding node based on networkx pagerank value.
     """
-    nodes = dir_graph.nodes()
-    node_pageranks = nx.pagerank(dir_graph)
+    node_pageranks = nx.pagerank(dir_graph, max_iter=1000)
     pr_vals = node_pageranks.values() 
     pr_list = list(pr_vals)
     pr_list = [i * 260000 for i in pr_list]

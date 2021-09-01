@@ -82,7 +82,7 @@ def pagerank(w, num_iterations: int = 100, d: float = 0.85):
     return v
 
 
-def add_nodes(dir_graph, w, w_abs):
+def add_nodes(dir_graph, w):
     """
     Given a directed graph and w matrix, adds a node to the directed graph for each gene.
 
@@ -90,15 +90,11 @@ def add_nodes(dir_graph, w, w_abs):
     :type dir_graph: DiGraph
     :param w: A matrix representing perturbation interactions with genes as columns and indices as gene names
     :type w: Array
-    :param w_abs: A matrix of absolute values representing perturbation interactions with genes as columns and indices as gene names
-    :type w_abs: Array
     :output dir_graph: An edited directed graph with genes added as nodes
     :type dir_graph: DiGraph
     """
-    w_abs = np.copy(w_abs)
-    v = pagerank(w_abs)
-    for i in range(len(v)):
-        dir_graph.add_node(i, gene=w.columns[i], pagerank=v[i])
+    for i in range(len(w)):
+        dir_graph.add_node(i, gene=w.columns[i])
     return dir_graph
 
 
@@ -152,8 +148,11 @@ def set_nodes(dir_graph, pos, ax):
     :output dir_graph: An edited directed graph with nodes of specified size and color
     :type dir_graph: DiGraph
     """
-    nodes = dir_graph.nodes()
-    nodesize = [dir_graph.nodes[u]["pagerank"] * 260000 for u in nodes]
+    node_pageranks = nx.pagerank(dir_graph, alpha=0.75, max_iter=100000, tol=1.0e-3)
+    pr_vals = node_pageranks.values() 
+    pr_list = list(pr_vals)
+    pr_list = [i * 260000 for i in pr_list]
+    nodesize = np.array(pr_list)
 
     full_resistant_list = ["JUN", "BRD2", "STK11", "PKN2", "NFAT5", "KMT2D", "ADCK3", "FOSL1", "CSK", "BRD8", "CBFB", "TADA2B", "DSTYK", "JUNB", "LATS2", "FEZF2", "MITF", "RUNX3", "SUV420H1", "SOX10", "DOT1L", "PRKRIR"]
     pre_resistant_list = ["MAP3K1", "MAP2K7", "NSD1", "KDM1A", "EGFR", "EP300", "SRF", "PRKAA1", "GATA4", "MYBL1", "MTF1"]
@@ -246,7 +245,7 @@ def Network(w, w_abs, w_max, ax):
     """
     G = nx.DiGraph()
     # add nodes and edges
-    add_nodes(G, w, w_abs)
+    add_nodes(G, w)
     add_edges(G, w, w_abs)
     remove_isolates(G)
 
