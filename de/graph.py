@@ -2,9 +2,11 @@
 from os.path import join, dirname
 import numpy as np
 import pandas as pd
+from scipy import sparse
 import matplotlib.patches as mpatches
 import matplotlib.lines as mlines
 import networkx as nx
+from fast_pagerank import pagerank_power
 from .importData import ImportMelanoma
 from .factorization import factorizeEstimate
 
@@ -28,7 +30,6 @@ def load_w():
 def normalize(w):
     """
     Given w matrix, then return normalized w matrix according to gene expression under control conditions.
-
     :param w: A matrix representing perturbation interactions with genes as columns and indices as gene names
     :type w: DataFrame
     :output w: A normalized matrix
@@ -43,7 +44,6 @@ def normalize(w):
 def remove(w):
     """
     Removes POLR2A and genes whose expression level equals zero under control condition from w matrix.
-
     :param w: A matrix representing perturbation interactions with genes as columns and indices as gene names
     :type w: DataFrame
     :output w: An edited matrix without POLR2A and negatively expressed genes
@@ -60,7 +60,7 @@ def remove(w):
     return w
 
 
-def pagerank(w, num_iterations: int = 100, d: float = 0.85):
+# def pagerank(w, num_iterations: int = 100, d: float = 0.85):
     """
     Given an adjecency matrix, calculate the pagerank value.
     Notice: All the elements in w should be no less than zeros; Also, the elements of each column should sum up to 1.
@@ -82,19 +82,28 @@ def pagerank(w, num_iterations: int = 100, d: float = 0.85):
     return v
 
 
-def add_nodes(dir_graph, w):
+def add_nodes(dir_graph, w, w_abs):
     """
     Given a directed graph and w matrix, adds a node to the directed graph for each gene.
-
     :param dir_graph: A directed graph of gene interactions
     :type dir_graph: DiGraph
     :param w: A matrix representing perturbation interactions with genes as columns and indices as gene names
     :type w: Array
+    :param w_abs: A matrix of absolute values representing perturbation interactions with genes as columns and indices as gene names
+    :type w_abs: Array
     :output dir_graph: An edited directed graph with genes added as nodes
     :type dir_graph: DiGraph
     """
-    for i in range(len(w)):
-        dir_graph.add_node(i, gene=w.columns[i])
+    # w_abs = np.copy(w_abs)
+    w_sparse = sparse.csr_matrix(w_abs, shape=(w.shape[0], w.shape[1]))
+    v = pagerank_power(w_sparse)
+    v_norm = (v - np.min(v)) / np.max(v) # normalize to be between 0 and 1
+
+    assert np.min(v_norm) == 0.0
+    assert np.max(v_norm) == 1.0
+
+    for i in range(len(v)):
+        dir_graph.add_node(i, gene=w.columns[i], pagerank=v[i])
     return dir_graph
 
 
@@ -127,7 +136,6 @@ def add_edges(dir_graph, w, w_abs):
 def remove_isolates(dir_graph):
     """
     Given a directed graph, remove nodes with no edges.
-
     :param dir_graph: A directed graph of gene interactions
     :type dir_graph: DiGraph
     :output dir_graph: An edited directed graph without isolated nodes
@@ -142,17 +150,13 @@ def remove_isolates(dir_graph):
 def set_nodes(dir_graph, pos, ax):
     """
     Given a directed graph and pos, then draw the corresponding node based on pagerank value, color coded by gene type.
-
     :param dir_graph: A directed graph of gene interactions
     :type dir_graph: DiGraph
     :output dir_graph: An edited directed graph with nodes of specified size and color
     :type dir_graph: DiGraph
     """
-    node_pageranks = nx.pagerank(dir_graph, alpha=0.75, max_iter=100000, tol=1.0e-3)
-    pr_vals = node_pageranks.values() 
-    pr_list = list(pr_vals)
-    pr_list = [i * 260000 for i in pr_list]
-    nodesize = np.array(pr_list)
+    nodes = dir_graph.nodes()
+    nodesize = [dir_graph.nodes[u]["pagerank"] * 26000 for u in nodes]
 
     full_resistant_list = ["JUN", "BRD2", "STK11", "PKN2", "NFAT5", "KMT2D", "ADCK3", "FOSL1", "CSK", "BRD8", "CBFB", "TADA2B", "DSTYK", "JUNB", "LATS2", "FEZF2", "MITF", "RUNX3", "SUV420H1", "SOX10", "DOT1L", "PRKRIR"]
     pre_resistant_list = ["MAP3K1", "MAP2K7", "NSD1", "KDM1A", "EGFR", "EP300", "SRF", "PRKAA1", "GATA4", "MYBL1", "MTF1"]
@@ -202,7 +206,6 @@ def set_edges(dir_graph, w_abs, w_max, pos, ax):
 def set_labels(dir_graph, pos, ax):
     """
     Given a directed graph and pos, then draw the corresponding label based on index.
-
     :param dir_graph: A directed graph of gene interactions
     :type dir_graph: DiGraph
     :output dir_graph: An edited directed graph with nodes labeled with gene names
@@ -216,7 +219,6 @@ def set_labels(dir_graph, pos, ax):
 
 def make_legend(dir_graph, ax):
     """ Creates a legend for node and edge colors in Network.
-
     :param dir_graph: A directed graph of gene interactions
     :type dir_graph: DiGraph
     :output dir_graph: An edited directed graph with a legend
@@ -233,7 +235,6 @@ def make_legend(dir_graph, ax):
 def Network(w, w_abs, w_max, ax):
     """
     Given w, w_abs, w_max and ax, then draw the corresponding Networkx graph.
-
     :param w: A matrix representing perturbation interactions with genes as columns and indices as gene names
     :type w: Array
     :param w_abs: A matrix of absolute values representing perturbation interactions with genes as columns and indices as gene names
@@ -245,7 +246,7 @@ def Network(w, w_abs, w_max, ax):
     """
     G = nx.DiGraph()
     # add nodes and edges
-    add_nodes(G, w)
+    add_nodes(G, w, w_abs)
     add_edges(G, w, w_abs)
     remove_isolates(G)
 
@@ -263,7 +264,6 @@ def Network(w, w_abs, w_max, ax):
 def bar_graph(w, color, ax, label):
     """
     Given w, color, ax and label, then draw the corresponding bar graph based on pagerank value.
-
     :param w: A matrix representing perturbation interactions with genes as columns and indices as gene names
     :type w: Array
     :param color: color
@@ -286,7 +286,6 @@ def bar_graph(w, color, ax, label):
 def loop():
     """
     Return positive-feedback loops involved in network. 
-
     :output positive: List of positive-feedback loops
     :type positive: List
     :output G_1: Copy of network graph with positive-feedback loops removed
@@ -323,7 +322,6 @@ def loop():
 def loop_figure(loop, G_1):
     """
     Given certain loop number(eg.[37, 74, 26, 60]) and network graph, return loop graph.
-
     :parameter loop: List of loop numbers
     :type loop: List
     :parameter G_1: Copy of network graph with positive-feedback loops removed
