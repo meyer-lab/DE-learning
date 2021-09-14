@@ -119,6 +119,7 @@ def factorizeEstimate(data, tol=1e-3, maxiter=200):
             return w, etas
 
         costLast = cost
+        print(cost)
 
     return w, etas
 

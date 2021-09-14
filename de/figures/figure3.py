@@ -16,7 +16,7 @@ def makeFigure():
     """
     # Get list of axis objects
     ax, f = getSetup((150, 100), (2, 3))
-    # load w
+    # load w for the Melanoma dataset from Torre paper
     w = load_w()
     w = normalize(w)
     w = remove(w)
