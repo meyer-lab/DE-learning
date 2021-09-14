@@ -2,8 +2,8 @@
 
 import numpy as np
 import pandas as pd
-from scipy.stats import gmean
 from scipy.special import expit, logit
+from scipy.optimize import least_squares
 from .importData import importLINCS
 
 
@@ -64,14 +64,15 @@ def calcEta(data, w, alphaIn):
     :output eta: vector representing overall perturbation effect of genes in each cell line
     :type eta: Array
     """
+    U = np.copy(data)
+    np.fill_diagonal(U, 0.0)
+    costt = lambda x: np.linalg.norm(x[:, np.newaxis] * expit(w @ U) - alphaIn * data, axis=1)
 
-    eta = (alphaIn * data) / expit(w @ data)
-    eta = np.nan_to_num(eta, nan=1.0, posinf=1e9)
-    eta = np.clip(eta, 1e-9, 1e9)
-    eta = gmean(eta, axis=1)
-    return eta
+    x0 = np.ones(w.shape[0])
+    outt = least_squares(costt, x0, bounds=(0.0, np.inf), jac_sparsity=np.eye(w.shape[0]))
+    return outt.x
 
-def factorizeEstimate(data, tol=1e-9, maxiter=20):
+def factorizeEstimate(data, tol=1e-3, maxiter=200):
     """ 
     Iteravely solve for w and eta list based on the data.
 
@@ -114,9 +115,8 @@ def factorizeEstimate(data, tol=1e-9, maxiter=20):
             cost += np.linalg.norm(etas[jj][:, np.newaxis]
                                    * expit(w @ U[jj]) - alpha * data[jj])
 
-        if ii > 3 and (costLast - cost) < tol:
-            # TODO: I believe the cost should be strictly decreasing, so look into this.
-            break
+        if (costLast - cost) < tol:
+            return w, etas
 
         costLast = cost
 
