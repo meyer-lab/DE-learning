@@ -66,11 +66,16 @@ def calcEta(data, w, alphaIn):
     """
     U = np.copy(data)
     np.fill_diagonal(U, 0.0)
-    costt = lambda x: np.linalg.norm(x[:, np.newaxis] * expit(w @ U) - alphaIn * data, axis=1)
+    expM = expit(w @ U)
+    aData = alphaIn * data
 
-    x0 = np.ones(w.shape[0])
+    costt = lambda x: np.linalg.norm(x[:, np.newaxis] * expM - aData, axis=1)
+
+    x0 = 0.2 * np.mean(data, axis=1)
     outt = least_squares(costt, x0, bounds=(0.0, np.inf), jac_sparsity=np.eye(w.shape[0]))
+    assert outt.success
     return outt.x
+
 
 def factorizeEstimate(data, tol=1e-3, maxiter=200):
     """ 
