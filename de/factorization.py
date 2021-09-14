@@ -116,7 +116,6 @@ def factorizeEstimate(data, tol=1e-3, maxiter=200):
                                    * expit(w @ U[jj]) - alpha * data[jj])
 
         print(cost)
-        assert cost <= costLast
         if (costLast - cost) < tol:
             return w, etas
 
