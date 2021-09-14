@@ -115,7 +115,6 @@ def factorizeEstimate(data, tol=1e-3, maxiter=200):
             cost += np.linalg.norm(etas[jj][:, np.newaxis]
                                    * expit(w @ U[jj]) - alpha * data[jj])
 
-        print(cost)
         if (costLast - cost) < tol:
             return w, etas
 
