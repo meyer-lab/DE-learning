@@ -69,15 +69,20 @@ def calcEta(data, w, alphaIn):
     expM = expit(w @ U)
     aData = alphaIn * data
 
-    costt = lambda x: np.linalg.norm(x[:, np.newaxis] * expM - aData, axis=1)
+    # Least squares with one coefficient and no intercept
+    xy = expM * aData
+    xx = expM * expM
 
-    x0 = 0.2 * np.mean(data, axis=1)
-    outt = least_squares(costt, x0, bounds=(0.0, np.inf), jac_sparsity=np.eye(w.shape[0]))
-    assert outt.success
-    return outt.x
+    xy = np.sum(xy, axis=1)
+    xx = np.sum(xx, axis=1)
+
+    etta = xy / xx
+    assert np.min(etta) >= 0.0
+    assert np.max(etta) < 1e10
+    return etta
 
 
-def factorizeEstimate(data, tol=1e-3, maxiter=200):
+def factorizeEstimate(data, tol=1e-3, maxiter=400):
     """ 
     Iteravely solve for w and eta list based on the data.
 
