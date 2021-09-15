@@ -4,7 +4,6 @@ Test the factorization model.
 import pytest
 import numpy as np
 from numpy import ma
-from scipy.special import expit
 from ..factorization import factorizeEstimate, alpha, commonGenes
 from ..impute import impute, split_data
 from ..importData import ImportMelanoma, importLINCS
@@ -13,16 +12,12 @@ from ..importData import ImportMelanoma, importLINCS
 def test_factorizeEstimate():
     """ Test that this runs successfully with reasonable input. """
     data = ImportMelanoma()
-    U = np.copy(data)
-    np.fill_diagonal(U, 0.0)
 
-    w, eta = factorizeEstimate(data)
+    w, eta, costOne = factorizeEstimate(data, returnCost=True)
     assert w.shape == (data.shape[0], data.shape[0])
     assert eta[0].shape == (data.shape[0], )
 
-    wLess, etaLess = factorizeEstimate(data, maxiter=1)
-    costOne = np.linalg.norm(eta[0][:, np.newaxis] * expit(w @ U) - alpha * data)
-    costTwo = np.linalg.norm(etaLess[0][:, np.newaxis] * expit(wLess @ U) - alpha * data)
+    _, _, costTwo = factorizeEstimate(data, maxiter=1, returnCost=True)
     assert costOne < costTwo
 
 
@@ -47,6 +42,7 @@ def test_cellLines():
     shared_annotation, _ = commonGenes(annotation1, annotation2)
     # make sure at least 50% of the genes in smaller cell line is shared between the two cell lines
     assert np.abs(len(shared_annotation)) >= 0.5 * np.min([len(annotation1), len(annotation2)])
+
 
 def test_mergedFitting():
     """ To test if the fitting works on multiple cell lines and the shared cost has a reasonable value. """

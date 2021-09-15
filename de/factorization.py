@@ -85,7 +85,7 @@ def calcEta(data, w, alphaIn):
     return etta
 
 
-def factorizeEstimate(data, tol=1e-3, maxiter=400):
+def factorizeEstimate(data, tol=1e-3, maxiter=400, returnCost=False):
     """ 
     Iteravely solve for w and eta list based on the data.
 
@@ -130,9 +130,12 @@ def factorizeEstimate(data, tol=1e-3, maxiter=400):
                                    * expit(w @ U[jj]) - alpha * data[jj])
 
         if (costLast - cost) < tol:
-            return w, etas
+            break
 
         costLast = cost
+
+    if returnCost:
+        w, etas, cost
 
     return w, etas
 
