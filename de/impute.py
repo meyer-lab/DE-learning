@@ -21,7 +21,8 @@ def impute(data, linear=False):
     """ Impute by repeated fitting. """
     missing = np.isnan(data)
     data = np.nan_to_num(data)
-    for _ in range(10):
+
+    for _ in range(100):
         U = np.copy(data)
         np.fill_diagonal(U, 0.0)
 
@@ -36,7 +37,11 @@ def impute(data, linear=False):
             predictt = model.predict(U)
         else:
             predictt = eta[0][:, np.newaxis] * expit(w @ U) / alpha
+        
+        dataLast = np.copy(data)
         data[missing] = predictt[missing]
+        change = np.linalg.norm(data - dataLast)
+
     return data
 
 def repeatImputation(data, linear=False, numIter=20):
