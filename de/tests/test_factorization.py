@@ -58,11 +58,12 @@ def test_mergedFitting():
     eta2 = eta_list2[0]
 
     # Both etas should be the same
-    # assert np.linalg.norm(eta_list2[0] - eta_list2[1]) < 0.0001
-    # assert np.linalg.norm(eta1 - eta2) < 0.0001
+    np.testing.assert_allclose(eta_list2[0], eta_list2[1], rtol=0.1)
+    np.testing.assert_allclose(eta1, eta2, rtol=0.1)
 
     # w should be identical
-    # assert np.linalg.norm(w1 - w2) < 0.0001
+    np.testing.assert_allclose(w1, w2, atol=1.5)
+
 
 def test_crossval_Melanoma():
     """ Tests the cross val function that creates the train and test data. """
@@ -71,32 +72,3 @@ def test_crossval_Melanoma():
     full_X = impute(train_X)
 
     print(ma.corrcoef(ma.masked_invalid(full_X.flatten()), ma.masked_invalid(test_X.flatten())))
-
-
-def test_crossval_LINCS():
-    """ Tests the cross val function that creates the train and test data. """
-
-    cellLine = "A375"
-    data, _ = importLINCS(cellLine)
-    U = np.copy(data)
-    np.fill_diagonal(U, 0.0)
-    
-    data_corr = []
-    U_corr = []
-    print('check1')
-
-    for x in range(0,10):
-        train_X, test_X = split_data(data)
-        full_X = impute(train_X)
-        data_corr.append(ma.corrcoef(ma.masked_invalid(full_X.flatten()), ma.masked_invalid(test_X.flatten()))[1,0])
-        
-        train_Y, test_Y = split_data(U)
-        full_Y = impute(train_Y)
-        U_corr.append(ma.corrcoef(ma.masked_invalid(full_Y.flatten()), ma.masked_invalid(test_Y.flatten()))[1,0])
-
-    data_corr_avg = np.average(data_corr)
-    data_corr_std = np.std(data_corr)
-    U_corr_avg = np.average(U_corr)
-    U_corr_std = np.std(U_corr)
-        
-    return data_corr_avg, U_corr_avg, data_corr_std, U_corr_std
