@@ -3,7 +3,7 @@ This creates Figure 3
 """
 import numpy as np
 from .figureCommon import subplotLabel, getSetup
-from ..graph import Network, load_w, normalize, remove
+from ..graph import Network, load_w, remove
 from ..grndb_network import load_w_GRNdb, Network_GRNdb
 
 def makeFigure():
@@ -32,7 +32,7 @@ def selected_genes(ax):
 
     # Load melanoma W matrix
     w = load_w()
-    w = normalize(w)
+    # w = normalize(w)
     w = remove(w)
     # select genes and create a new dataframe for it
     w_mel = w.loc[w_2.index, list(w_2.columns)]

@@ -6,7 +6,7 @@ import numpy as np
 import networkx as nx
 import random
 from .figureCommon import subplotLabel, getSetup
-from ..graph import Network, load_w, normalize, remove, bar_graph, add_nodes, add_edges, remove_isolates
+from ..graph import Network, load_w, remove, bar_graph, add_nodes, add_edges, remove_isolates
 from ..grndb_network import load_w_GRNdb, Network_GRNdb
 
 def makeFigure():
@@ -18,7 +18,7 @@ def makeFigure():
     ax, f = getSetup((150, 100), (2, 3))
     # load w for the Melanoma dataset from Torre paper
     w = load_w()
-    w = normalize(w)
+    # w = normalize(w)
     w = remove(w)
     # Plot downstream graph
     w_abs = np.absolute(w.to_numpy())
@@ -74,7 +74,7 @@ def cluster_dist():
 
     G = nx.Graph()
     w = load_w()
-    w = normalize(w)
+    # w = normalize(w)
     w = remove(w)
     w_abs = np.absolute(w.to_numpy())
 
