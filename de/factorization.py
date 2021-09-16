@@ -38,16 +38,13 @@ def calcW(data: list, eta: list, alphaIn: float, pinvv=None) -> Tuple[np.ndarray
 
     Calculate an estimate for w based on data and current iteration of eta
     """
-    U = np.array([])
-    B = np.array([])
-
     for i, x in enumerate(data):
         U1 = np.copy(x)
         np.fill_diagonal(U1, 0.0)
         B1 = (x * alphaIn) / eta[i][:, np.newaxis]
         B1 = logit(np.clip(B1, 0.0001, 0.9999))
 
-        if B is None:
+        if i == 0:
             U = U1
             B = B1
         else:
