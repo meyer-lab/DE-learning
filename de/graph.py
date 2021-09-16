@@ -250,12 +250,14 @@ def Network(w, w_abs, w_max, ax):
     add_edges(G, w, w_abs)
     remove_isolates(G)
 
+    ### to make the graph look better we find the optimal distance between nodes
     df = pd.DataFrame(index=G.nodes(), columns=G.nodes())
     for row, data in nx.shortest_path_length(G):
         for col, dist in data.items():
             df.loc[row,col] = dist
 
     df = df.fillna(df.max().max())
+    ### end
 
     pos = nx.kamada_kawai_layout(G, dist=df.to_dict())
 
