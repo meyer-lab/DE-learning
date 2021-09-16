@@ -1,5 +1,4 @@
 """This creates hypergeometric distribution graphs for comparing our w Network Graph with the GRNdb Network Graph."""
-import matplotlib.pyplot as plt
 import numpy as np
 from ..hypergeom import setvars, PMF, CDF
 from ..graph import load_w, remove, Network, normalize

@@ -35,38 +35,31 @@ def makeFigure():
 
 def figureMaker(ax, pca_object, df, KO_genes_unique):
     """ Makes 3 panels: (A) R2X, (B) PC2 vs PC1, (C) ? """
-
     # Plot R2X
-    i = 0
-    total_variance = np.array([])
-    tot = 0.0
-    for j in range(0, 25):
-        tot += pca_object.explained_variance_ratio_[j] * 100
-        total_variance = np.append(total_variance, tot)
-    ax[i].set_xlabel("Number of Components")
-    ax[i].set_ylabel("% Variance")
-    ax[i].set_xticks(np.arange(1, 26, 2))
-    ax[i].plot(list(range(1, 26)), total_variance, lw=3)
-    ax[i].set_title("R2X")
+    ax[0].set_xlabel("Number of Components")
+    ax[0].set_ylabel("Exp. Variance Ratio")
+    ax[0].set_xticks(np.arange(1, 26, 2))
+    ax[0].plot(list(range(1, 26)), pca_object.explained_variance_ratio_, lw=3)
+    ax[0].set_title("R2X")
 
     # Plot PC2 vs PC1
     KO_genes = df.loc[:, "KO Gene"]
     for j, gene in enumerate(KO_genes_unique):
         indx = df["KO Gene"] == gene
-        ax[i].scatter(df.iloc[:, 0][indx], df.iloc[:, 1][indx], s=400)
+        ax[1].scatter(df.iloc[:, 0][indx], df.iloc[:, 1][indx], s=400)
     for j, txt in enumerate(KO_genes):
-        ax[i].annotate(txt, (df.iloc[j, 0], df.iloc[j, 1]), fontsize=24)
-    ax[i].set_xlabel("PC1 (" + str(round(pca_object.explained_variance_ratio_[0] * 100, 2)) + "%)")
-    ax[i].set_ylabel("PC2 (" + str(round(pca_object.explained_variance_ratio_[1] * 100, 2)) + "%)")
-    ax[i].set_title("PC2 vs PC1")
+        ax[1].annotate(txt, (df.iloc[j, 0], df.iloc[j, 1]), fontsize=24)
+    ax[1].set_xlabel("PC1 (" + str(round(pca_object.explained_variance_ratio_[0] * 100, 2)) + "%)")
+    ax[1].set_ylabel("PC2 (" + str(round(pca_object.explained_variance_ratio_[1] * 100, 2)) + "%)")
+    ax[1].set_title("PC2 vs PC1")
 
     # Plot PC3 vs PC1
     KO_genes = df.loc[:, "KO Gene"]
     for j, gene in enumerate(KO_genes_unique):
         indx = df["KO Gene"] == gene
-        ax[i].scatter(df.iloc[:, 0][indx], df.iloc[:, 2][indx], s=400)
+        ax[2].scatter(df.iloc[:, 0][indx], df.iloc[:, 2][indx], s=400)
     for j, txt in enumerate(KO_genes):
-        ax[i].annotate(txt, (df.iloc[j, 0], df.iloc[j, 2]), fontsize=24)
-    ax[i].set_xlabel("PC1 (" + str(round(pca_object.explained_variance_ratio_[0] * 100, 2)) + "%)")
-    ax[i].set_ylabel("PC3 (" + str(round(pca_object.explained_variance_ratio_[2] * 100, 2)) + "%)")
-    ax[i].set_title("PC3 vs PC1")
+        ax[2].annotate(txt, (df.iloc[j, 0], df.iloc[j, 2]), fontsize=24)
+    ax[2].set_xlabel("PC1 (" + str(round(pca_object.explained_variance_ratio_[0] * 100, 2)) + "%)")
+    ax[2].set_ylabel("PC3 (" + str(round(pca_object.explained_variance_ratio_[2] * 100, 2)) + "%)")
+    ax[2].set_title("PC3 vs PC1")
