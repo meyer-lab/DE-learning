@@ -12,7 +12,7 @@ def makeFigure():
 
     selected_genes(ax)
     # Add subplot labels
-    subplotLabel(ax, fntsize=50)
+    subplotLabel(ax)
 
     return f
 
