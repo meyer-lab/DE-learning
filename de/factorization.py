@@ -3,14 +3,13 @@
 import numpy as np
 import pandas as pd
 from scipy.special import expit, logit
-from scipy.optimize import least_squares
 from .importData import importLINCS
 
 
 alpha = 0.1
 
 
-def calcW(data, eta, alphaIn):
+def calcW(data, eta, alphaIn, pinvv=None):
     """
     Directly calculate w.
 
@@ -47,8 +46,12 @@ def calcW(data, eta, alphaIn):
             U = np.concatenate((U, U1), axis=1)
             B = np.concatenate((B, B1), axis=1)
 
-    w = np.linalg.lstsq(U.T, B.T, rcond=None)[0].T
-    return w
+    # Use the precalculated inverse if we're given it
+    if pinvv is None:
+        pinvv = np.linalg.pinv(U.T)
+
+    w = (pinvv @ B.T).T
+    return w, pinvv
 
 
 def calcEta(data, w, alphaIn):
@@ -82,7 +85,7 @@ def calcEta(data, w, alphaIn):
     return etta
 
 
-def factorizeEstimate(data, tol=1e-3, maxiter=400):
+def factorizeEstimate(data, tol=1e-3, maxiter=400, returnCost=False):
     """ 
     Iteravely solve for w and eta list based on the data.
 
@@ -108,6 +111,7 @@ def factorizeEstimate(data, tol=1e-3, maxiter=400):
         np.fill_diagonal(U[ii], 0.0)
 
     costLast = np.inf
+    pinvv = None
 
     # Use the data to try and initialize the parameters
     for ii in range(maxiter):
@@ -116,7 +120,7 @@ def factorizeEstimate(data, tol=1e-3, maxiter=400):
             assert np.all(np.isfinite(eta))
             assert eta.shape == (data[0].shape[0], )
 
-        w = calcW(data, etas, alpha)
+        w, pinvv = calcW(data, etas, alpha, pinvv=pinvv)
         assert np.all(np.isfinite(w))
         assert w.shape == (data[0].shape[0], data[0].shape[0])
 
@@ -126,9 +130,12 @@ def factorizeEstimate(data, tol=1e-3, maxiter=400):
                                    * expit(w @ U[jj]) - alpha * data[jj])
 
         if (costLast - cost) < tol:
-            return w, etas
+            break
 
         costLast = cost
+
+    if returnCost:
+        return w, etas, cost
 
     return w, etas
 

@@ -3,8 +3,9 @@ This creates Figure 1: PCA plots
 """
 import numpy as np
 import pandas as pd
+from sklearn.preprocessing import normalize
+from sklearn.decomposition import PCA
 from .figureCommon import subplotLabel, getSetup
-from ..PCA_helpers import performPCA
 from ..importData import prepData
 
 
@@ -15,7 +16,8 @@ def makeFigure():
 
     # Perform PCA
     data = prepData()
-    pca_object, X_r = performPCA(data.T, 25)
+    pca_object = PCA(n_components=25)
+    X_r = pca_object.fit_transform(normalize(data.T))
 
     # Create dataframe for plotting
     KO_genes_unique = list(set(data.columns))
@@ -48,7 +50,6 @@ def figureMaker(ax, pca_object, df, KO_genes_unique):
     ax[i].set_title("R2X")
 
     # Plot PC2 vs PC1
-    i += 1
     KO_genes = df.loc[:, "KO Gene"]
     for j, gene in enumerate(KO_genes_unique):
         indx = df["KO Gene"] == gene
@@ -60,7 +61,6 @@ def figureMaker(ax, pca_object, df, KO_genes_unique):
     ax[i].set_title("PC2 vs PC1")
 
     # Plot PC3 vs PC1
-    i += 1
     KO_genes = df.loc[:, "KO Gene"]
     for j, gene in enumerate(KO_genes_unique):
         indx = df["KO Gene"] == gene
