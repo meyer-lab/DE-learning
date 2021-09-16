@@ -1,7 +1,7 @@
 """ Methods to implement the factorization/fitting process. """
 
+from typing import Tuple
 import numpy as np
-import pandas as pd
 from tqdm import tqdm
 from scipy.special import expit, logit
 from .importData import importLINCS
@@ -32,27 +32,14 @@ def costF(data: list, w, etas: list, alphaIn):
     return cost
 
 
-def calcW(data, eta, alphaIn, pinvv=None):
+def calcW(data: list, eta: list, alphaIn: float, pinvv=None) -> Tuple[np.ndarray, np.ndarray]:
     """
     Directly calculate w.
 
     Calculate an estimate for w based on data and current iteration of eta
-
-    :param data: matrix or list of matrices representing a cell line's gene expression interactions with knockdowns
-    :type data: Array or Array List
-    param eta: vector representing overall pertubation effects of each gene of a cell line
-    :type eta: Array
-    param alphaIn: model parameter held constant due to steady-state approximation
-    :type alphaIn: float
-    output w: matrix representing gene-to-gene pertubation effects for either a singular cell line or multiple cell lines
-    :type w: Array
-    
     """
-    if isinstance(data, np.ndarray):
-        data = [data]
-
-    U = None
-    B = None
+    U = np.array([])
+    B = np.array([])
 
     for i, x in enumerate(data):
         U1 = np.copy(x)
@@ -75,18 +62,9 @@ def calcW(data, eta, alphaIn, pinvv=None):
     return w, pinvv
 
 
-def calcEta(data, w, alphaIn):
+def calcEta(data: np.ndarray, w: np.ndarray, alphaIn: float) -> np.ndarray:
     """
-    Calculate an estimate for eta based on data and current iteration of w
-
-    :param data: matrix representing gene expression interactions with knockdowns
-    :type data: Array or Array List
-    param w: matrix representing gene-to-gene pertubation effects for either a singular cell line or multiple cell lines
-    :type w: Array
-    param alphaIn: model parameter held constant due to steady-state approximation
-    :type alphaIn: float
-    :output eta: vector representing overall perturbation effect of genes in each cell line
-    :type eta: Array
+    Calculate an estimate for eta based on data and current iteration of w.
     """
     U = np.copy(data)
     np.fill_diagonal(U, 0.0)
