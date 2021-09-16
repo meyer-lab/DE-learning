@@ -19,14 +19,16 @@ def makeFigure():
 
 def selected_genes(ax):
     """
-    In this function we plot a handful of genes from both GRNdb and melanoma dataset to compare.
+    Plot the network of a set of genes with high confidence in GRNbd network, and the same genes in melanoma dataset.
     """
 
+    # Load GRNdb W matrix
     w_GRNdb = load_w_GRNdb()
     # select genes with high confidence
     filter_row = (w_GRNdb == 2).any(axis=1)
     # filter the w matrix based on the filter
     w_2 = w_GRNdb.loc[filter_row, filter_row]
+
     Network_GRNdb(w_2, ax[0])
     ax[0].set_title("w Network Graph GRNdb dataset")
 
@@ -38,5 +40,6 @@ def selected_genes(ax):
     w_mel = w.loc[w_2.index, list(w_2.columns)]
     w_mel_abs = np.absolute(w_mel.to_numpy())
     w_mel_max = np.max(w_mel_abs)
+
     Network(w_mel, w_mel_abs, w_mel_max, ax[1])
     ax[1].set_title("w Network Graph Melanoma dataset")
