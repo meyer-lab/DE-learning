@@ -231,19 +231,18 @@ def make_legend(dir_graph, ax):
     ax.legend(handles=[purple_patch, green_patch, grey_patch, red_line, blue_line], prop=dict(size=50))
     return dir_graph
 
-def Network(w, w_abs, w_max, ax):
+def Network(w, ax):
     """
-    Given w, w_abs, w_max and ax, then draw the corresponding Networkx graph.
+    Given w and ax, then draw the corresponding Networkx graph.
 
     :param w: A matrix representing perturbation interactions with genes as columns and indices as gene names
     :type w: Array
-    :param w_abs: A matrix of absolute values representing perturbation interactions with genes as columns and indices as gene names
-    :type w_abs: Array
-    :param w_max: The maximum value of all absolute values in w 
-    :type w_abs: NDArray
     :output G: Networkx weighted directed graph
     :type G: DiGraph
     """
+    w_abs = np.absolute(w.to_numpy())
+    w_max = np.max(w_abs)
+
     G = nx.DiGraph()
     # add nodes and edges
     add_nodes(G, w, w_abs)
@@ -304,10 +303,8 @@ def loop():
     """
     w = load_w()
     w = remove(w)
-    w_abs = np.absolute(w.to_numpy())
-    w_max = np.max(w_abs)
 
-    G = Network(w, w_abs, w_max, ax=None)
+    G = Network(w, ax=None)
     G_1 = G.copy()
     m = list(nx.simple_cycles(G_1))
     positive = []

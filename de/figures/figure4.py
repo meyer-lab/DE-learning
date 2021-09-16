@@ -1,7 +1,6 @@
 """
 This creates Figure 3
 """
-import numpy as np
 from .figureCommon import subplotLabel, getSetup
 from ..graph import Network, load_w, remove, normalize
 from ..grndb_network import load_w_GRNdb, Network_GRNdb
@@ -38,8 +37,6 @@ def selected_genes(ax):
     w = remove(w)
     # select genes and create a new dataframe for it
     w_mel = w.loc[w_2.index, list(w_2.columns)]
-    w_mel_abs = np.absolute(w_mel.to_numpy())
-    w_mel_max = np.max(w_mel_abs)
 
-    Network(w_mel, w_mel_abs, w_mel_max, ax[1])
+    Network(w_mel, ax[1])
     ax[1].set_title("w Network Graph Melanoma dataset")

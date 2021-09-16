@@ -1,5 +1,4 @@
 """This creates hypergeometric distribution graphs for comparing our w Network Graph with the GRNdb Network Graph."""
-import numpy as np
 from ..hypergeom import setvars, PMF, CDF
 from ..graph import load_w, remove, Network, normalize
 from ..grndb_network import load_w_GRNdb, Network_GRNdb
@@ -20,9 +19,7 @@ def makeFigure():
     w = normalize(w)
     w = remove(w)
     # Plot downstream graph
-    w_abs = np.absolute(w.to_numpy())
-    w_max = np.max(w_abs)
-    G = Network(w, w_abs, w_max, ax[0])
+    G = Network(w, ax[0])
     # set title for the graph
     ax[0].set_title("w Network Graph (downstream)", fontsize='large')
 
