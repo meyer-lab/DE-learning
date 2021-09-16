@@ -18,7 +18,7 @@ def makeFigure():
     w = normalize(w)
     w = remove(w)
     # Plot downstream graph
-    Network(w, w_abs, w_max, ax[0])
+    Network(w, ax[0])
     # set title for the graph
     ax[0].set_title("w Network Graph (downstream)")
     # create downstream bar graph
