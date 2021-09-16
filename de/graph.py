@@ -212,7 +212,7 @@ def set_labels(dir_graph, pos, ax):
     labels = nx.get_node_attributes(dir_graph, "gene")
 
     # draw the labels
-    nx.draw_networkx_labels(dir_graph, pos, labels=labels, font_size=48, ax=ax)
+    nx.draw_networkx_labels(dir_graph, pos, labels=labels, ax=ax)
     return dir_graph
 
 def make_legend(dir_graph, ax):

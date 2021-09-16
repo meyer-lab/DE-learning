@@ -1,7 +1,6 @@
 """
 This creates Figure 2: w Network Graph
 """
-import numpy as np
 from .figureCommon import subplotLabel, getSetup
 from ..graph import Network, load_w, remove, normalize, bar_graph
 from ..grndb_network import load_w_GRNdb, Network_GRNdb
@@ -12,27 +11,20 @@ def makeFigure():
     :type f: Figure
     """
     # Get list of axis objects
-    ax, f = getSetup((150, 100), (2, 3))
+    ax, f = getSetup((10, 8), (2, 3))
     # load w for the Melanoma dataset from Torre paper
     w = load_w()
     w = normalize(w)
     w = remove(w)
-    # Plot downstream graph
     Network(w, ax[0])
-    # set title for the graph
-    ax[0].set_title("w Network Graph (downstream)")
-    # create downstream bar graph
-    bar_graph(w, "green", ax[1], "downstream")
-    # set title for the graph
-    ax[1].set_title("Bar Graph (downstream)")
-    # Plot upstream graph
-    w_trans = np.transpose(w)
-    w_abs = np.absolute(w_trans.to_numpy())
-    w_max = np.max(w_abs)
 
-    # create upstream bar graph
-    bar_graph(w_trans, "orange", ax[2], "upstream")
-    # set title for the graph
+    # Plot downstream graph
+    ax[0].set_title("w Network Graph (downstream)")
+    bar_graph(w, "green", ax[1], "downstream")
+    ax[1].set_title("Bar Graph (downstream)")
+
+    # Plot upstream graph
+    bar_graph(w.T, "orange", ax[2], "upstream")
     ax[2].set_title("Bar Graph (upstream)")
 
     # Plot Mia's network (GRNdb) 
@@ -40,9 +32,6 @@ def makeFigure():
     Network_GRNdb(w_GRNdb, ax[3])
     ax[3].set_title("w Network Graph - GRNdb")
 
-    # Plot nothing in the place of ax[5]
-    ax[5].axis("off")
-
     # Add subplot labels
-    subplotLabel(ax, fntsize=50)
+    subplotLabel(ax)
     return f

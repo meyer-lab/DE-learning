@@ -13,7 +13,7 @@ def makeFigure():
     :type f: Figure
     """
     # Get list of axis objects
-    ax, f = getSetup((100, 100), (2,2))
+    ax, f = getSetup((8, 8), (2, 2))
     # load w
     w = load_w()
     w = normalize(w)
@@ -21,12 +21,12 @@ def makeFigure():
     # Plot downstream graph
     G = Network(w, ax[0])
     # set title for the graph
-    ax[0].set_title("w Network Graph (downstream)", fontsize='large')
+    ax[0].set_title("w Network Graph (downstream)")
 
     # Plot GRNdb network
     w_GRNdb = load_w_GRNdb()
     G_GRNdb = Network_GRNdb(w_GRNdb, ax[1])
-    ax[1].set_title("w Network Graph - GRNdb", fontsize='large')
+    ax[1].set_title("w Network Graph - GRNdb")
 
     # Get hypergeometric dist/ variables
     [k, M, n, N] = setvars(G, G_GRNdb)
@@ -42,23 +42,21 @@ def makeFigure():
     k_label = 'k = ' + kstr
 
     # Plot PMF
-    ax[2].plot([x, pmf_edges][0], [x, pmf_edges][1], 'm-.', linewidth=6, label=curve_label)
-    ax[2].vlines([k, M, n, N][0], 0, 0.2, linestyles='dashed', linewidth=6, label=k_label)
-    ax[2].legend(prop={"size":70})
-    ax[2].set_xlabel("k", fontsize='large')
-    ax[2].set_ylabel("hypergeom PMF", fontsize='large')
-    ax[2].tick_params(axis='both', which='major', labelsize=70)
-    ax[2].set_title("Probability Mass Function", fontsize='large')
+    ax[2].plot([x, pmf_edges][0], [x, pmf_edges][1], 'm-.', label=curve_label)
+    ax[2].vlines([k, M, n, N][0], 0, 0.2, linestyles='dashed', label=k_label)
+    ax[2].set_xlabel("k")
+    ax[2].set_ylabel("hypergeom PMF")
+    ax[2].tick_params(axis='both', which='major')
+    ax[2].set_title("Probability Mass Function")
 
     # Plot CDF
-    ax[3].plot([xx, cdf_edges][0], [xx, cdf_edges][1], 'g-.', linewidth=6, label=curve_label)
-    ax[3].vlines([k, M, n, N][0], 0, 1, linestyles='dashed', linewidth=6, label=k_label)
-    ax[3].legend(prop={"size":70})
-    ax[3].set_xlabel("k", fontsize='large')
-    ax[3].set_ylabel("hypergeom CDF", fontsize='large')
-    ax[3].tick_params(axis='both', which='major', labelsize=70)
-    ax[3].set_title("Cumulative Distribution Function", fontsize='large')
+    ax[3].plot([xx, cdf_edges][0], [xx, cdf_edges][1], 'g-.', label=curve_label)
+    ax[3].vlines([k, M, n, N][0], 0, 1, linestyles='dashed', label=k_label)
+    ax[3].set_xlabel("k")
+    ax[3].set_ylabel("hypergeom CDF")
+    ax[3].tick_params(axis='both', which='major')
+    ax[3].set_title("Cumulative Distribution Function")
 
     # Add subplot labels
-    subplotLabel(ax, fntsize=50)
+    subplotLabel(ax)
     return f

@@ -12,7 +12,7 @@ from ..importData import prepData
 def makeFigure():
     """ Get a list of the axis objects and create a figure. """
     # Get list of axis objects
-    ax, f = getSetup((45, 15), (1, 3))
+    ax, f = getSetup((8, 4), (1, 3))
 
     # Perform PCA
     data = prepData()
@@ -28,7 +28,7 @@ def makeFigure():
     figureMaker(ax, pca_object, df, KO_genes_unique)
 
     # Add subplot labels
-    subplotLabel(ax, fntsize=50)
+    subplotLabel(ax)
 
     return f
 
@@ -48,7 +48,7 @@ def figureMaker(ax, pca_object, df, KO_genes_unique):
         indx = df["KO Gene"] == gene
         ax[1].scatter(df.iloc[:, 0][indx], df.iloc[:, 1][indx], s=400)
     for j, txt in enumerate(KO_genes):
-        ax[1].annotate(txt, (df.iloc[j, 0], df.iloc[j, 1]), fontsize=24)
+        ax[1].annotate(txt, (df.iloc[j, 0], df.iloc[j, 1]))
     ax[1].set_xlabel("PC1 (" + str(round(pca_object.explained_variance_ratio_[0] * 100, 2)) + "%)")
     ax[1].set_ylabel("PC2 (" + str(round(pca_object.explained_variance_ratio_[1] * 100, 2)) + "%)")
     ax[1].set_title("PC2 vs PC1")
@@ -59,7 +59,7 @@ def figureMaker(ax, pca_object, df, KO_genes_unique):
         indx = df["KO Gene"] == gene
         ax[2].scatter(df.iloc[:, 0][indx], df.iloc[:, 2][indx], s=400)
     for j, txt in enumerate(KO_genes):
-        ax[2].annotate(txt, (df.iloc[j, 0], df.iloc[j, 2]), fontsize=24)
+        ax[2].annotate(txt, (df.iloc[j, 0], df.iloc[j, 2]))
     ax[2].set_xlabel("PC1 (" + str(round(pca_object.explained_variance_ratio_[0] * 100, 2)) + "%)")
     ax[2].set_ylabel("PC3 (" + str(round(pca_object.explained_variance_ratio_[2] * 100, 2)) + "%)")
     ax[2].set_title("PC3 vs PC1")

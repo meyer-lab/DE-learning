@@ -8,7 +8,7 @@ from ..grndb_network import load_w_GRNdb, Network_GRNdb
 def makeFigure():
     """ Get a list of the axis objects and create a figure. """
     # Get list of axis objects
-    ax, f = getSetup((50, 25), (1, 2))
+    ax, f = getSetup((8, 5), (1, 2))
 
     selected_genes(ax)
     # Add subplot labels
