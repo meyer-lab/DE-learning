@@ -1,6 +1,6 @@
 """ Methods to implement the factorization/fitting process. """
 
-from typing import Tuple
+from typing import Tuple, Union
 import numpy as np
 from tqdm import tqdm
 from scipy.special import expit, logit
@@ -81,7 +81,7 @@ def calcEta(data: np.ndarray, w: np.ndarray, alphaIn: float) -> np.ndarray:
     return etta
 
 
-def factorizeEstimate(data, tol=1e-3, maxiter=100, returnCost=False):
+def factorizeEstimate(data: Union[list, np.ndarray], tol=1e-3, maxiter=100, returnCost=False):
     """ 
     Iteravely solve for w and eta list based on the data.
 
