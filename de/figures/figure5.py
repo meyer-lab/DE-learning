@@ -2,7 +2,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from ..hypergeom import setvars, PMF, CDF
-from ..graph import load_w, remove, Network
+from ..graph import load_w, remove, Network, normalize
 from ..grndb_network import load_w_GRNdb, Network_GRNdb
 from .figureCommon import subplotLabel, getSetup
 
@@ -18,7 +18,7 @@ def makeFigure():
     ax, f = getSetup((100, 100), (2,2))
     # load w
     w = load_w()
-    # w = normalize(w)
+    w = normalize(w)
     w = remove(w)
     # Plot downstream graph
     w_abs = np.absolute(w.to_numpy())
