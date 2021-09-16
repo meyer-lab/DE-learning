@@ -4,8 +4,8 @@ Test the factorization model.
 import pytest
 import numpy as np
 from numpy import ma
-from ..factorization import factorizeEstimate, alpha, commonGenes
-from ..impute import impute, split_data
+from ..factorization import factorizeEstimate, alpha, commonGenes, mergedFitting
+from ..impute import impute, split_data, repeatImputation
 from ..importData import ImportMelanoma, importLINCS
 
 
@@ -37,6 +37,8 @@ def test_cellLines():
     cellLine2 = 'HT29'
     _, annotation1 = importLINCS(cellLine1)
     _, annotation2 = importLINCS(cellLine2)
+
+    mergedFitting(cellLine1, cellLine2)
 
     # assuming the function returns the list of shared genes between the two cell lines
     shared_annotation, _ = commonGenes(annotation1, annotation2)

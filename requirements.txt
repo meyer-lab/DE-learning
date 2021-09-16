@@ -13,3 +13,4 @@ svgutils==0.3.4
 scikit-learn==0.24.2
 NetworkX==2.6.3
 graphviz==0.17
+tqdm
