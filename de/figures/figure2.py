@@ -12,7 +12,7 @@ from ..importData import prepData
 def makeFigure():
     """ Get a list of the axis objects and create a figure. """
     # Get list of axis objects
-    ax, f = getSetup((15, 4), (1, 3))
+    ax, f = getSetup((45, 15), (1, 3))
 
     # Perform PCA
     data = prepData()
@@ -28,28 +28,27 @@ def makeFigure():
     figureMaker(ax, pca_object, df, KO_genes_unique)
 
     # Add subplot labels
-    subplotLabel(ax)
+    subplotLabel(ax, fntsize=50)
 
     return f
 
 
 def figureMaker(ax, pca_object, df, KO_genes_unique):
     """ Makes 3 panels: (A) R2X, (B) PC2 vs PC1, (C) ? """
-
     # Plot R2X
     ax[0].set_xlabel("Number of Components")
     ax[0].set_ylabel("Exp. Variance Ratio")
     ax[0].set_xticks(np.arange(1, 26, 2))
-    ax[0].plot(list(range(1, 26)), pca_object.explained_variance_ratio_)
+    ax[0].plot(list(range(1, 26)), pca_object.explained_variance_ratio_, lw=3)
     ax[0].set_title("R2X")
 
     # Plot PC2 vs PC1
     KO_genes = df.loc[:, "KO Gene"]
     for j, gene in enumerate(KO_genes_unique):
         indx = df["KO Gene"] == gene
-        ax[1].scatter(df.iloc[:, 0][indx], df.iloc[:, 1][indx], s=8)
+        ax[1].scatter(df.iloc[:, 0][indx], df.iloc[:, 1][indx], s=400)
     for j, txt in enumerate(KO_genes):
-        ax[1].annotate(txt, (df.iloc[j, 0], df.iloc[j, 1]), fontsize=6)
+        ax[1].annotate(txt, (df.iloc[j, 0], df.iloc[j, 1]), fontsize=24)
     ax[1].set_xlabel("PC1 (" + str(round(pca_object.explained_variance_ratio_[0] * 100, 2)) + "%)")
     ax[1].set_ylabel("PC2 (" + str(round(pca_object.explained_variance_ratio_[1] * 100, 2)) + "%)")
     ax[1].set_title("PC2 vs PC1")
@@ -58,9 +57,9 @@ def figureMaker(ax, pca_object, df, KO_genes_unique):
     KO_genes = df.loc[:, "KO Gene"]
     for j, gene in enumerate(KO_genes_unique):
         indx = df["KO Gene"] == gene
-        ax[2].scatter(df.iloc[:, 0][indx], df.iloc[:, 2][indx], s=8)
+        ax[2].scatter(df.iloc[:, 0][indx], df.iloc[:, 2][indx], s=400)
     for j, txt in enumerate(KO_genes):
-        ax[2].annotate(txt, (df.iloc[j, 0], df.iloc[j, 2]), fontsize=6)
+        ax[2].annotate(txt, (df.iloc[j, 0], df.iloc[j, 2]), fontsize=24)
     ax[2].set_xlabel("PC1 (" + str(round(pca_object.explained_variance_ratio_[0] * 100, 2)) + "%)")
     ax[2].set_ylabel("PC3 (" + str(round(pca_object.explained_variance_ratio_[2] * 100, 2)) + "%)")
     ax[2].set_title("PC3 vs PC1")

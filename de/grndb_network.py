@@ -173,7 +173,14 @@ def Network_GRNdb(w, ax):
     # remove unconnected nodes
     remove_isolates(G)
 
-    pos = nx.spring_layout(G, k=0.2)
+    df = pd.DataFrame(index=G.nodes(), columns=G.nodes())
+    for row, data in nx.shortest_path_length(G):
+        for col, dist in data.items():
+            df.loc[row,col] = dist
+
+    df = df.fillna(df.max().max())
+
+    pos = nx.kamada_kawai_layout(G, dist=df.to_dict())
 
     # draw the nodes, edges, labels and legend
     set_nodes_GRNdb(G, pos, ax)

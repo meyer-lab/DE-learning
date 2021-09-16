@@ -6,7 +6,7 @@ import numpy as np
 import networkx as nx
 import random
 from .figureCommon import subplotLabel, getSetup
-from ..graph import Network, load_w, normalize, remove, bar_graph, add_nodes, add_edges, remove_isolates
+from ..graph import Network, load_w, remove, normalize, bar_graph, add_nodes, add_edges, remove_isolates
 from ..grndb_network import load_w_GRNdb, Network_GRNdb
 
 def makeFigure():
@@ -16,7 +16,7 @@ def makeFigure():
     """
     # Get list of axis objects
     ax, f = getSetup((150, 100), (2, 3))
-    # load w
+    # load w for the Melanoma dataset from Torre paper
     w = load_w()
     w = normalize(w)
     w = remove(w)
@@ -90,8 +90,8 @@ def cluster_dist():
     dist_pre = []
     dist_rand = []
     
-    full = [24, 1, 65, 45, 40, 29, 0, 17, 9, 2, 4, 67, 13, 25, 30, 37, 57, 66, 60, 50]
-    pre = [34, 33, 43, 27, 15, 16, 64, 48, 18, 39, 38]
+    pre = [24, 1, 65, 45, 40, 29, 0, 17, 9, 2, 4, 67, 13, 25, 30, 37, 57, 66, 60, 50]
+    full = [34, 33, 43, 27, 15, 16, 64, 48, 18, 39, 38]
     for _ in range(70):
         try:
             temp1 = random.sample(full, 2)
