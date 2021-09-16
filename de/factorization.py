@@ -1,7 +1,8 @@
 """ Methods to implement the factorization/fitting process. """
 
+from typing import Tuple, Union
 import numpy as np
-import pandas as pd
+from tqdm import tqdm
 from scipy.special import expit, logit
 from .importData import importLINCS
 
@@ -9,37 +10,41 @@ from .importData import importLINCS
 alpha = 0.1
 
 
-def calcW(data, eta, alphaIn, pinvv=None):
+def costF(data: list, w, etas: list, alphaIn):
+    """ Calculate the fitting cost. """
+    assert len(data) == len(etas)
+    assert w.shape == (data[0].shape[0], data[0].shape[0])
+    assert np.all(np.isfinite(w))
+    for eta in etas:
+        assert np.all(np.isfinite(eta))
+        assert eta.shape == (data[0].shape[0], )
+
+    # Make the U matrix
+    U = [np.copy(d) for d in data]
+    for ii in range(len(U)):
+        np.fill_diagonal(U[ii], 0.0)
+
+    cost = 0.0
+    for jj in range(len(data)):
+        cost += np.linalg.norm(etas[jj][:, np.newaxis]
+                               * expit(w @ U[jj]) - alphaIn * data[jj])
+
+    return cost
+
+
+def calcW(data: list, eta: list, alphaIn: float, pinvv=None) -> Tuple[np.ndarray, np.ndarray]:
     """
     Directly calculate w.
 
     Calculate an estimate for w based on data and current iteration of eta
-
-    :param data: matrix or list of matrices representing a cell line's gene expression interactions with knockdowns
-    :type data: Array or Array List
-    param eta: vector representing overall pertubation effects of each gene of a cell line
-    :type eta: Array
-    param alphaIn: model parameter held constant due to steady-state approximation
-    :type alphaIn: float
-    output w: matrix representing gene-to-gene pertubation effects for either a singular cell line or multiple cell lines
-    :type w: Array
-    
     """
-    if isinstance(data, np.ndarray):
-        data = [data]
-
-    U = None
-    B = None
-
     for i, x in enumerate(data):
         U1 = np.copy(x)
         np.fill_diagonal(U1, 0.0)
         B1 = (x * alphaIn) / eta[i][:, np.newaxis]
-        assert np.all(np.isfinite(B1))
         B1 = logit(np.clip(B1, 0.0001, 0.9999))
-        assert np.all(np.isfinite(B1))
 
-        if B is None:
+        if i == 0:
             U = U1
             B = B1
         else:
@@ -54,18 +59,9 @@ def calcW(data, eta, alphaIn, pinvv=None):
     return w, pinvv
 
 
-def calcEta(data, w, alphaIn):
+def calcEta(data: np.ndarray, w: np.ndarray, alphaIn: float) -> np.ndarray:
     """
-    Calculate an estimate for eta based on data and current iteration of w
-
-    :param data: matrix representing gene expression interactions with knockdowns
-    :type data: Array or Array List
-    param w: matrix representing gene-to-gene pertubation effects for either a singular cell line or multiple cell lines
-    :type w: Array
-    param alphaIn: model parameter held constant due to steady-state approximation
-    :type alphaIn: float
-    :output eta: vector representing overall perturbation effect of genes in each cell line
-    :type eta: Array
+    Calculate an estimate for eta based on data and current iteration of w.
     """
     U = np.copy(data)
     np.fill_diagonal(U, 0.0)
@@ -73,11 +69,8 @@ def calcEta(data, w, alphaIn):
     aData = alphaIn * data
 
     # Least squares with one coefficient and no intercept
-    xy = expM * aData
-    xx = expM * expM
-
-    xy = np.sum(xy, axis=1)
-    xx = np.sum(xx, axis=1)
+    xy = np.sum(expM * aData, axis=1)
+    xx = np.sum(expM * expM, axis=1)
 
     etta = xy / xx
     assert np.min(etta) >= 0.0
@@ -85,7 +78,7 @@ def calcEta(data, w, alphaIn):
     return etta
 
 
-def factorizeEstimate(data, tol=1e-3, maxiter=400, returnCost=False):
+def factorizeEstimate(data: Union[list, np.ndarray], tol=1e-3, maxiter=100, returnCost=False):
     """ 
     Iteravely solve for w and eta list based on the data.
 
@@ -105,144 +98,78 @@ def factorizeEstimate(data, tol=1e-3, maxiter=400, returnCost=False):
         data = [data]
 
     w = np.zeros((data[0].shape[0], data[0].shape[0]))
-    # Make the U matrix
-    U = [np.copy(d) for d in data]
-    for ii in range(len(U)):
-        np.fill_diagonal(U[ii], 0.0)
 
-    costLast = np.inf
+    cost = np.inf
     pinvv = None
 
     # Use the data to try and initialize the parameters
-    for ii in range(maxiter):
+    for _ in tqdm(range(maxiter), delay=1.0):
         etas = [calcEta(x, w, alpha) for x in data]
-        for eta in etas:
-            assert np.all(np.isfinite(eta))
-            assert eta.shape == (data[0].shape[0], )
-
         w, pinvv = calcW(data, etas, alpha, pinvv=pinvv)
-        assert np.all(np.isfinite(w))
-        assert w.shape == (data[0].shape[0], data[0].shape[0])
-
-        cost = 0
-        for jj in range(len(data)):
-            cost += np.linalg.norm(etas[jj][:, np.newaxis]
-                                   * expit(w @ U[jj]) - alpha * data[jj])
+        costLast = cost
+        cost = costF(data, w, etas, alpha)
 
         if (costLast - cost) < tol:
             break
-
-        costLast = cost
 
     if returnCost:
         return w, etas, cost
 
     return w, etas
 
-def cellLineFactorization(cellLine):
-    """ 
-    Import a cell line, fit the model, and return the result.
-
-    :param cellLine: name of the cell line for which we need to produce w and eta
-    :type cellLine: string
-    :output w: finalized matrix representing gene-to-gene pertubation effects for the cell line
-    :type w: Array
-    :output eta: finalized list of vectors representing overall perturbation effect of genes in each cell line
-    :type eta: Array list
-    :output annotation[0].tolist():
-    :type annotation[0].tolist(): list
-    """
-    data, annotation = importLINCS(cellLine)
-    w, eta = factorizeEstimate(data)
-    return w, eta, annotation[0].tolist()
 
 def commonGenes(annotation1, annotation2):
     """
     Uses annotation list to generate an array of common genes between two cell lines
     output
-
-    :param annotation1: list of gene names from first cell line
-    :type annotation1: list
-    :param annotation2: list of gene names from second cell line
-    :type annotation2: list
-    :output indexlist_1: list of indices of the common genes for the first cell line
-    :type indexlist_1: list
-    :output indexlist_2: list of indices of the common genes for the first cell line
-    :type indexlist_2: list
-
     """
-
     annotation1 = annotation1[0].tolist()
     annotation2 = annotation2[0].tolist()
 
     intersection = set(annotation1).intersection(annotation2)
     intersection_annotation = list(intersection)
 
-    index_list1 = [annotation1.index(x) for x in intersection_annotation]
-    index_list2 = [annotation2.index(x) for x in intersection_annotation]
+    index_list1 = np.array([annotation1.index(x) for x in intersection_annotation], dtype=int)
+    index_list2 = np.array([annotation2.index(x) for x in intersection_annotation], dtype=int)
+    return np.sort(index_list1), np.sort(index_list2)
 
-    index_list1.sort()
-    index_list2.sort()
-    return index_list1, index_list2
 
 def MatrixSubtraction(cellLine1, cellLine2):
-    """Finds the w-matrices of two different cell lines and subtracts them.
-    Then, calculates the norm of the original matrices as well as difference matrix
-    
-    :param cellLine1: name of the cell line for which we need to produce w1
-    :type cellLine1: string
-    :param cellLine2: name of the cell line for which we need to produce w2
-    :type cellLine2: string
-    :output norm1: norm of the w1-matrix produced using only common genes
-    :type norm1: float
-    :output norm2: norm of the w2-matrix produced using only common genes
-    :type norm2: float
-    :output diff_norm: norm of the matrix produced by subtracting w2_final and w1_final
-    :type diff_norm: float
-    :output w1_final: w1 matrix only accounting for common genes
-    :type w1_final: Array
-    :output w2_final: w2 matrix only accounting for common genes
-    :type w2_final: Array
-
+    """Finds the w-matrices of two different cell lines.
+    Calculates the norm of the original matrices and their difference.
     """
-    _, annotation1 = importLINCS(cellLine1)
-    _, annotation2 = importLINCS(cellLine2)
-    w1, _, _ = cellLineFactorization(cellLine1)
-    w2, _, _ = cellLineFactorization(cellLine2)
+    data1, annotation1 = importLINCS(cellLine1)
+    data2, annotation2 = importLINCS(cellLine2)
     index_list1, index_list2 = commonGenes(annotation1, annotation2)
+    w1, _ = factorizeEstimate(data1)
+    w2, _ = factorizeEstimate(data2)
 
-    w1, _, _ = cellLineFactorization(cellLine1)
-    w2, _, _ = cellLineFactorization(cellLine2)
-    np.random.shuffle(w1)
-    np.random.shuffle(w2)
+    w1 = w1[index_list1, :]
+    w2 = w2[index_list2, :]
+    w1 = w1[:, index_list1]
+    w2 = w2[:, index_list2]
+    assert w1.shape == w2.shape
+    assert w1.shape == (index_list1.size, index_list1.size)
+
     norm1 = np.linalg.norm(w1)
+    print(f"Norm1: {norm1}")
     norm2 = np.linalg.norm(w2)
+    print(f"Norm2: {norm2}")
+    diff_norm = np.linalg.norm(w2 - w1)
+    print(f"Difference norm: {diff_norm}")
 
-    w1_df = pd.DataFrame(w1)
-    w2_df = pd.DataFrame(w2)
+    w1shuff = w1.copy()
+    w2shuff = w2.copy()
+    np.random.shuffle(w1shuff)
+    np.random.shuffle(w2shuff)
+    shufnorm = np.linalg.norm(w2shuff - w1shuff)
+    print(f"Shuffled norm: {shufnorm}")
+    return norm1, norm2, diff_norm, shufnorm, w1, w2
 
-    w1_edited = w1_df.iloc[index_list1, index_list1]
-    w2_edited = w2_df.iloc[index_list2, index_list2]
-
-    w1_final = w1_edited.values
-    w2_final = w2_edited.values
-
-    difference_matrix = w2_final - w1_final
-    diff_norm = np.linalg.norm(difference_matrix)
-    return norm1, norm2, diff_norm, w1_final, w2_final
 
 def mergedFitting(cellLine1, cellLine2):
     """
     Given two cell lines, compute the cost of fitting each of them individually and the cost of fitting a shared w matrix.
-    
-    :param cellLine1: name of the first cell line for which we need to produce w_shared
-    :type cellLine1: string
-    :param cellLine2: name of the second cell line for which we need to produce w_shared
-    :type cellLine2: string
-    :output w_shared: a matrix representing the gene-to-gene perturbation effects of both cell lines
-    :type w_shared: array
-    :output eta_list: list of vectors representing overall perturbation of genes in each cell line
-    :type eta_list: array list
     """
     _, annotation1 = importLINCS(cellLine1)
     _, annotation2 = importLINCS(cellLine2)
@@ -250,14 +177,13 @@ def mergedFitting(cellLine1, cellLine2):
 
     data1, _ = importLINCS(cellLine1)
     data2, _ = importLINCS(cellLine2)
-    data1_df = pd.DataFrame(data1)
-    data2_df = pd.DataFrame(data2)
-    data1_edited = data1_df.iloc[index_list1, index_list1]
-    data2_edited = data2_df.iloc[index_list2, index_list2]
-    data1_final = data1_edited.values
-    data2_final = data2_edited.values
-    shared_data = [data1_final, data2_final]
+    print(data1.shape)
 
-    w_shared, eta_list = factorizeEstimate(shared_data)
+    # Make shared
+    data1 = data1[index_list1, :]
+    data2 = data2[index_list2, :]
+    data1 = data1[:, index_list1]
+    data2 = data2[:, index_list2]
+    shared_data = [data1, data2]
 
-    return w_shared, eta_list
+    return factorizeEstimate(shared_data)
