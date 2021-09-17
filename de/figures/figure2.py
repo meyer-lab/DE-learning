@@ -46,7 +46,7 @@ def figureMaker(ax, pca_object, df, KO_genes_unique):
     KO_genes = df.loc[:, "KO Gene"]
     for j, gene in enumerate(KO_genes_unique):
         indx = df["KO Gene"] == gene
-        ax[1].scatter(df.iloc[:, 0][indx], df.iloc[:, 1][indx], s=400)
+        ax[1].scatter(df.iloc[:, 0][indx], df.iloc[:, 1][indx])
     for j, txt in enumerate(KO_genes):
         ax[1].annotate(txt, (df.iloc[j, 0], df.iloc[j, 1]))
     ax[1].set_xlabel("PC1 (" + str(round(pca_object.explained_variance_ratio_[0] * 100, 2)) + "%)")
@@ -57,7 +57,7 @@ def figureMaker(ax, pca_object, df, KO_genes_unique):
     KO_genes = df.loc[:, "KO Gene"]
     for j, gene in enumerate(KO_genes_unique):
         indx = df["KO Gene"] == gene
-        ax[2].scatter(df.iloc[:, 0][indx], df.iloc[:, 2][indx], s=400)
+        ax[2].scatter(df.iloc[:, 0][indx], df.iloc[:, 2][indx])
     for j, txt in enumerate(KO_genes):
         ax[2].annotate(txt, (df.iloc[j, 0], df.iloc[j, 2]))
     ax[2].set_xlabel("PC1 (" + str(round(pca_object.explained_variance_ratio_[0] * 100, 2)) + "%)")

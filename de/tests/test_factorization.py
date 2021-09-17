@@ -5,7 +5,7 @@ import pytest
 import numpy as np
 from numpy import ma
 from ..factorization import factorizeEstimate, alpha, commonGenes, mergedFitting
-from ..impute import impute, split_data, repeatImputation
+from ..impute import impute, split_data
 from ..importData import ImportMelanoma, importLINCS
 
 

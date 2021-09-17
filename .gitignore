@@ -141,3 +141,5 @@ cython_debug/
 **.DS_Store
 .vscode/settings.json
 de/data/GSE*
+
+output

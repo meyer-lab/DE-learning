@@ -24,7 +24,7 @@ matplotlib.rcParams['legend.borderpad'] = 0.35
 def getSetup(figsize, gridd, multz=None, empts=None):
     """ Establish figure set-up with subplots. """
     sns.set(style="whitegrid",
-            font_scale=5,
+            font_scale=0.7,
             color_codes=True,
             palette="colorblind",
             rc={'grid.linestyle': 'dotted',
