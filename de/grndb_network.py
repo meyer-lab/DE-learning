@@ -3,8 +3,7 @@ from os.path import join, dirname
 import networkx as nx
 import pandas as pd
 import numpy as np
-import matplotlib.patches as mpatches
-from .graph import remove_isolates, set_labels
+from .graph import set_labels, make_legend
 
 def load_w_GRNdb():
     """
@@ -34,21 +33,6 @@ def load_w_GRNdb():
             else:
                 w_df.at[TG, TF] = 1
     return w_df
-
-def add_nodes_GRNdb(dir_graph, w):
-    """
-    Given a directed graph and w matrix, adds nodes to the graph for each gene in w. Returns the graph.
-
-    :param dir_graph: A directed graph of gene interactions
-    :type dir_graph: DiGraph
-    :param w: A matrix representing perturbation interactions with genes as columns and gene names as indices
-    :type w: DataFrame
-    :output dir_graph: A directed graph of gene interactions with nodes to represent each gene in w
-    :type dir_graph: DiGraph
-    """
-    for i in range(len(w)):
-        dir_graph.add_node(i, gene=w.columns[i])
-    return dir_graph
 
 def add_edges_GRNdb(dir_graph, w):
     """
@@ -87,11 +71,10 @@ def set_nodes_GRNdb(dir_graph, pos, ax):
     :output dir_graph: A directed graph of gene interactions with nodes of different sizes and colors
     :type dir_graph: DiGraph
     """
-    nodes = dir_graph.nodes()
     node_pageranks = nx.pagerank(dir_graph)
     pr_vals = node_pageranks.values() 
     pr_list = list(pr_vals)
-    pr_list = [i * 260000 for i in pr_list]
+    pr_list = [i * 2600 for i in pr_list]
     nodesize = np.array(pr_list)
 
     pre_resistant_list = ["JUN", "BRD2", "STK11", "PKN2", "NFAT5", "KMT2D", "ADCK3", "FOSL1", "CSK", "BRD8", "CBFB", "TADA2B", "DSTYK", "JUNB", "LATS2", "FEZF2", "MITF", "RUNX3", "SUV420H1", "SOX10", "DOT1L", "PRKRIR", 'FEZF2', 'SOX10', 'ADCK3', 'BRD8', 'CBFB', 'CSK', 'DOT1L', 'DSTYK', 'FOSL1', 'JUN', 'JUNB', 'KMT2D', 'LATS2', 'MITF', 'NFAT5', 'PKN2', 'PRKRIR', 'RUNX3', 'STK11', 'SUV420H1']
@@ -133,25 +116,9 @@ def set_edges_GRNdb(dir_graph, pos, ax):
 
     normalized_thickness = ((thickness - np.min(thickness)) / np.ptp(thickness)) * 0.3 + 0.5 
     # draw the edges
-    nx.draw_networkx_edges(dir_graph, pos, edgelist=edges, width=thickness, edge_color=colors, arrowsize=65, ax=ax, alpha=normalized_thickness)
+    nx.draw_networkx_edges(dir_graph, pos, edgelist=edges, width=thickness, edge_color=colors, arrowsize=6, ax=ax, alpha=normalized_thickness)
     return dir_graph
 
-def make_legend_GRNdb(dir_graph, ax):
-    """
-    Given a directed graph and an axes object, creates legend for node colors and returns the graph.
-
-    :param dir_graph: A directed graph of gene interactions
-    :type dir_graph: DiGraph
-    :param ax: an axes object to determine where to plot in the figure
-    :type ax: Axes
-    :output dir_graph: An directed graph with a legend
-    :type dir_graph: DiGraph
-    """
-    purple_patch = mpatches.Patch(color="darkorchid", label="Pre-resistant")
-    green_patch = mpatches.Patch(color="mediumturquoise", label="Resistant")
-    grey_patch = mpatches.Patch(color="grey", label="Undetermined")
-    ax.legend(handles=[purple_patch, green_patch, grey_patch], prop=dict(size=50))
-    return dir_graph
 
 def Network_GRNdb(w, ax):
     """
@@ -167,11 +134,12 @@ def Network_GRNdb(w, ax):
     G = nx.DiGraph()
 
     # add nodes and edges
-    add_nodes_GRNdb(G, w)
+    for i in range(len(w)):
+        G.add_node(i, gene=w.columns[i])
     add_edges_GRNdb(G, w)
 
-    # remove unconnected nodes
-    remove_isolates(G)
+    # Remove isolated nodes
+    G.remove_nodes_from(list(nx.isolates(G)))
 
     df = pd.DataFrame(index=G.nodes(), columns=G.nodes())
     for row, data in nx.shortest_path_length(G):
@@ -186,7 +154,7 @@ def Network_GRNdb(w, ax):
     set_nodes_GRNdb(G, pos, ax)
     set_edges_GRNdb(G, pos, ax)
     set_labels(G, pos, ax)
-    make_legend_GRNdb(G, ax)
+    make_legend(G, ax)
 
     # remove self-interacting loops
     m = list(nx.simple_cycles(G))
