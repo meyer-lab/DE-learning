@@ -3,12 +3,8 @@
 from typing import Tuple, Union
 import numpy as np
 from tqdm import tqdm
-from scipy.special import expit
-from jax.scipy.special import expit as jexpit
+from scipy.special import expit, logit
 from .importData import importLINCS
-from scipy.optimize import minimize
-import jax.numpy as jnp
-from jax import jacrev
 
 
 alpha = 0.1
@@ -36,32 +32,31 @@ def costF(data: list, w, etas: list, alphaIn):
     return cost
 
 
-def calcW(data: list, eta: list, alphaIn: float, x0=None) -> Tuple[np.ndarray, np.ndarray]:
+def calcW(data: list, eta: list, alphaIn: float, pinvv=None) -> Tuple[np.ndarray, np.ndarray]:
     """
     Directly calculate w.
 
     Calculate an estimate for w based on data and current iteration of eta
     """
-    Us = [np.copy(x) for x in data]
-    Ds = [alphaIn * np.copy(x) for x in data]
-    for U in Us:
-        np.fill_diagonal(U, 0.0)
+    for i, x in enumerate(data):
+        U1 = np.copy(x)
+        np.fill_diagonal(U1, 0.0)
+        B1 = (x * alphaIn) / eta[i][:, np.newaxis]
+        B1 = logit(np.clip(B1, 0.0001, 0.9999))
 
-    if x0 is None:
-        x0 = np.zeros((data[0].shape[0], data[0].shape[0]))
+        if i == 0:
+            U = U1
+            B = B1
+        else:
+            U = np.concatenate((U, U1), axis=1)
+            B = np.concatenate((B, B1), axis=1)
 
-    def cost(x):
-        w = x.reshape(data[0].shape[0], data[0].shape[0])
-        costt = 0.0
-        for ii in range(len(Ds)):
-            costt += jnp.linalg.norm(eta[ii][:, jnp.newaxis] * jexpit(w @ Us[ii]) - Ds[ii])
-        return costt + 0.0001 * jnp.linalg.norm(x, ord=1)
+    # Use the precalculated inverse if we're given it
+    if pinvv is None:
+        pinvv = np.linalg.pinv(U.T)
 
-    grd = jacrev(cost)
-    optt = minimize(cost, x0, jac=grd, method="CG", options={"maxiter": 10})
-
-    w = optt.x.reshape(data[0].shape[0], data[0].shape[0])
-    return w
+    w = (pinvv @ B.T).T
+    return w, pinvv
 
 
 def calcEta(data: np.ndarray, w: np.ndarray, alphaIn: float) -> np.ndarray:
@@ -105,11 +100,12 @@ def factorizeEstimate(data: Union[list, np.ndarray], tol=1e-3, maxiter=100, retu
     w = np.zeros((data[0].shape[0], data[0].shape[0]))
 
     cost = np.inf
+    pinvv = None
 
     # Use the data to try and initialize the parameters
     for _ in tqdm(range(maxiter), delay=1.0):
         etas = [calcEta(x, w, alpha) for x in data]
-        w = calcW(data, etas, alpha, x0=w.flatten())
+        w, pinvv = calcW(data, etas, alpha, pinvv=pinvv)
         costLast = cost
         cost = costF(data, w, etas, alpha)
 
