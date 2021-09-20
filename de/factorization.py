@@ -103,11 +103,13 @@ def factorizeEstimate(data: Union[list, np.ndarray], tol=1e-3, maxiter=100, retu
     pinvv = None
 
     # Use the data to try and initialize the parameters
-    for _ in tqdm(range(maxiter), delay=1.0):
+    tq = tqdm(range(maxiter), delay=0.5)
+    for _ in tq:
         etas = [calcEta(x, w, alpha) for x in data]
         w, pinvv = calcW(data, etas, alpha, pinvv=pinvv)
         costLast = cost
         cost = costF(data, w, etas, alpha)
+        tq.set_postfix(cost=cost, refresh=False)
 
         if (costLast - cost) < tol:
             break
