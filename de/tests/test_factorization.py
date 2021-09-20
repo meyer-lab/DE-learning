@@ -49,18 +49,18 @@ def test_cellLines():
 def test_mergedFitting():
     """ To test if the fitting works on multiple cell lines and the shared cost has a reasonable value. """
     data = ImportMelanoma()
-    w1, eta_list1 = factorizeEstimate(data)
+    w1, eta_list1 = factorizeEstimate(data, maxiter=3)
     eta1 = eta_list1[0]
 
-    w2, eta_list2 = factorizeEstimate([data, data])
+    w2, eta_list2 = factorizeEstimate([data, data], maxiter=3)
     eta2 = eta_list2[0]
 
     # Both etas should be the same
-    np.testing.assert_allclose(eta_list2[0], eta_list2[1], rtol=0.1)
-    np.testing.assert_allclose(eta1, eta2, rtol=0.1)
+    np.testing.assert_allclose(eta_list2[0], eta_list2[1])
+    np.testing.assert_allclose(eta1, eta2)
 
     # w should be identical
-    np.testing.assert_allclose(w1, w2, atol=1.5)
+    np.testing.assert_allclose(w1, w2)
 
 
 def test_crossval_Melanoma():
