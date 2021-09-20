@@ -34,7 +34,7 @@ def test_factorizeBlank(level):
 def test_cellLines():
     """ To test and confirm most genes are overlapping between cell lines. """
     cellLine1 = 'A375'
-    cellLine2 = 'HT29'
+    cellLine2 = 'PC3'
     _, annotation1 = importLINCS(cellLine1)
     _, annotation2 = importLINCS(cellLine2)
 

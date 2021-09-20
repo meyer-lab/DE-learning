@@ -116,20 +116,16 @@ def factorizeEstimate(data: Union[list, np.ndarray], tol=1e-3, maxiter=100, retu
     return w, etas
 
 
-def commonGenes(annotation1, annotation2):
+def commonGenes(ann1, ann2):
     """
     Uses annotation list to generate an array of common genes between two cell lines
     output
     """
-    annotation1 = annotation1[0].tolist()
-    annotation2 = annotation2[0].tolist()
+    intersection = list(set(ann1) & set(ann2))
 
-    intersection = set(annotation1).intersection(annotation2)
-    intersection_annotation = list(intersection)
-
-    index_list1 = np.array([annotation1.index(x) for x in intersection_annotation], dtype=int)
-    index_list2 = np.array([annotation2.index(x) for x in intersection_annotation], dtype=int)
-    return np.sort(index_list1), np.sort(index_list2)
+    idx1 = np.array([ann1.index(x) for x in intersection], dtype=int)
+    idx2 = np.array([ann2.index(x) for x in intersection], dtype=int)
+    return idx1, idx2
 
 
 def MatrixSubtraction(cellLine1, cellLine2):
