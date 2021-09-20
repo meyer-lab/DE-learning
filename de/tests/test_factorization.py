@@ -24,7 +24,7 @@ def test_factorizeEstimate():
 @pytest.mark.parametrize("level", [1.0, 2.0, 3.0])
 def test_factorizeBlank(level):
     """ Test that if gene expression is flat we get a blank w. """
-    data = np.ones((12, 12)) * level
+    data = np.ones((120, 120)) * level
     w, eta = factorizeEstimate(data, maxiter=2)
 
     np.testing.assert_allclose(w, 0.0, atol=1e-9)

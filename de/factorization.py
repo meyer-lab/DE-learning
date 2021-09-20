@@ -1,10 +1,11 @@
 """ Methods to implement the factorization/fitting process. """
 
-from typing import Tuple, Union
+from typing import Union
 import numpy as np
 from tqdm import tqdm
 from scipy.special import expit, logit
 from .importData import importLINCS
+from sklearn.linear_model import orthogonal_mp
 
 
 alpha = 0.1
@@ -32,7 +33,7 @@ def costF(data: list, w, etas: list, alphaIn):
     return cost
 
 
-def calcW(data: list, eta: list, alphaIn: float, pinvv=None) -> Tuple[np.ndarray, np.ndarray]:
+def calcW(data: list, eta: list, alphaIn: float) -> np.ndarray:
     """
     Directly calculate w.
 
@@ -51,12 +52,8 @@ def calcW(data: list, eta: list, alphaIn: float, pinvv=None) -> Tuple[np.ndarray
             U = np.concatenate((U, U1), axis=1)
             B = np.concatenate((B, B1), axis=1)
 
-    # Use the precalculated inverse if we're given it
-    if pinvv is None:
-        pinvv = np.linalg.pinv(U.T)
-
-    w = (pinvv @ B.T).T
-    return w, pinvv
+    # orthogonal_mp(U.T, B.T, n_nonzero_coefs=40).T
+    return np.linalg.lstsq(U.T, B.T, rcond=None)[0].T
 
 
 def calcEta(data: np.ndarray, w: np.ndarray, alphaIn: float) -> np.ndarray:
@@ -79,7 +76,7 @@ def calcEta(data: np.ndarray, w: np.ndarray, alphaIn: float) -> np.ndarray:
 
 
 def factorizeEstimate(data: Union[list, np.ndarray], tol=1e-3, maxiter=100, returnCost=False):
-    """ 
+    """
     Iteravely solve for w and eta list based on the data.
 
     :param data: matrix or list of matrices representing a cell line's gene expression interactions with knockdowns
@@ -100,13 +97,12 @@ def factorizeEstimate(data: Union[list, np.ndarray], tol=1e-3, maxiter=100, retu
     w = np.zeros((data[0].shape[0], data[0].shape[0]))
 
     cost = np.inf
-    pinvv = None
 
     # Use the data to try and initialize the parameters
     tq = tqdm(range(maxiter), delay=0.5)
     for _ in tq:
         etas = [calcEta(x, w, alpha) for x in data]
-        w, pinvv = calcW(data, etas, alpha, pinvv=pinvv)
+        w = calcW(data, etas, alpha)
         costLast = cost
         cost = costF(data, w, etas, alpha)
         tq.set_postfix(cost=cost, refresh=False)
