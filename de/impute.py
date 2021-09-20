@@ -5,6 +5,7 @@ from scipy.special import expit
 from .factorization import alpha, factorizeEstimate
 from .linearModel import runFitting
 
+
 def split_data(X, n=20):
     """ Prepare the test and train data. """
     row = np.random.choice(X.shape[0], n, replace=False)
@@ -16,6 +17,7 @@ def split_data(X, n=20):
     assert np.sum(np.isnan(train_X)) == n
     assert np.sum(np.isfinite(test_X)) == n
     return train_X, test_X
+
 
 def impute(data, linear=False):
     """ Impute by repeated fitting. """
@@ -37,12 +39,13 @@ def impute(data, linear=False):
             predictt = model.predict(U)
         else:
             predictt = eta[0][:, np.newaxis] * expit(w @ U) / alpha
-        
+
         dataLast = np.copy(data)
         data[missing] = predictt[missing]
         change = np.linalg.norm(data - dataLast)
 
     return data
+
 
 def repeatImputation(data, linear=False, numIter=20):
     """ Repeat imputation and calculate the average of cost for 20 iterations. """

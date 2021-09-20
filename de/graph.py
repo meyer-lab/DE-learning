@@ -12,7 +12,7 @@ from .factorization import factorizeEstimate
 def load_w():
     """
     Loads w from csv file and returns dataframe with gene symbols attached to w values.
-    
+
     :output w: A matrix representing perturbation interactions with genes as columns and indices as gene names
     :type: DataFrame
     """
@@ -64,7 +64,7 @@ def pagerank(w, num_iterations: int = 100, d: float = 0.85):
     """
     Given an adjecency matrix, calculate the pagerank value.
     Notice: All the elements in w should be no less than zeros; Also, the elements of each column should sum up to 1.
-    
+
     :param w: A matrix representing perturbation interactions with genes as columns and indices as gene names
     :type w: Array
     :output v: pagerank value representing the likelihood of ending up at each node from any other node
@@ -97,7 +97,7 @@ def set_nodes(dir_graph, pos, ax):
     pre_resistant_list = ["JUN", "BRD2", "STK11", "PKN2", "NFAT5", "KMT2D", "ADCK3", "FOSL1", "CSK", "BRD8", "CBFB", "TADA2B", "DSTYK", "JUNB", "LATS2", "FEZF2", "MITF", "RUNX3", "SUV420H1", "SOX10", "DOT1L", "PRKRIR"]
     full_resistant_list = ["MAP3K1", "MAP2K7", "NSD1", "KDM1A", "EGFR", "EP300", "SRF", "PRKAA1", "GATA4", "MYBL1", "MTF1"]
     unknown = []
-    #color nodes based on pre/resistance
+    # color nodes based on pre/resistance
     color_list = []
     labels = nx.get_node_attributes(dir_graph, "gene")
     for _, gene in labels.items():
@@ -117,12 +117,12 @@ def set_nodes(dir_graph, pos, ax):
 def set_edges(dir_graph, w_abs, w_max, pos, ax):
     """
     Given a directed graph, w_new and w_max, calculate edges color and thickness. Then draw the corresponding edge.
-    
+
     :param dir_graph: A directed graph of gene interactions
     :type dir_graph: DiGraph
     :param w_abs: A matrix of absolute values representing perturbation interactions with genes as columns and indices as gene names
     :type w_abs: Array
-    :param w_max: The maximum value of all absolute values in w 
+    :param w_max: The maximum value of all absolute values in w
     :type w_abs: NDArray
     :output dir_graph: An edited directed graph with edges of specified color and thickness
     :type dir_graph: DiGraph
@@ -154,6 +154,7 @@ def set_labels(dir_graph, pos, ax):
     nx.draw_networkx_labels(dir_graph, pos, labels=labels, ax=ax, font_size=7)
     return dir_graph
 
+
 def make_legend(dir_graph, ax):
     """ Creates a legend for node and edge colors in Network.
 
@@ -174,6 +175,7 @@ def make_legend(dir_graph, ax):
         ax.legend(handles=[purple_patch, green_patch, grey_patch], prop=dict(size=5))
 
     return dir_graph
+
 
 def Network(w, ax):
     """
@@ -202,14 +204,14 @@ def Network(w, ax):
     # Remove isolated nodes
     G.remove_nodes_from(list(nx.isolates(G)))
 
-    ### to make the graph look better we find the optimal distance between nodes
+    # to make the graph look better we find the optimal distance between nodes
     df = pd.DataFrame(index=G.nodes(), columns=G.nodes())
     for row, data in nx.shortest_path_length(G):
         for col, dist in data.items():
-            df.loc[row,col] = dist
+            df.loc[row, col] = dist
 
     df = df.fillna(df.max().max())
-    ### end
+    # end
 
     pos = nx.kamada_kawai_layout(G, dist=df.to_dict())
 
@@ -247,7 +249,7 @@ def bar_graph(w, color, ax, label):
 
 def loop():
     """
-    Return positive-feedback loops involved in network. 
+    Return positive-feedback loops involved in network.
 
     :output positive: List of positive-feedback loops
     :type positive: List

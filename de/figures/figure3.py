@@ -5,6 +5,7 @@ from .figureCommon import subplotLabel, getSetup
 from ..graph import Network, load_w, remove, normalize, bar_graph
 from ..grndb_network import load_w_GRNdb, Network_GRNdb
 
+
 def makeFigure():
     """ Get a list of the axis objects and create a figure.
     :output f: Figure 2 containing network diagram, path length bar graph, and upstream and downstream bar graphs
@@ -27,7 +28,7 @@ def makeFigure():
     bar_graph(w.T, "orange", ax[2], "upstream")
     ax[2].set_title("Bar Graph (upstream)")
 
-    # Plot Mia's network (GRNdb) 
+    # Plot Mia's network (GRNdb)
     w_GRNdb = load_w_GRNdb()
     Network_GRNdb(w_GRNdb, ax[3])
     ax[3].set_title("w Network Graph - GRNdb")

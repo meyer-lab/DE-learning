@@ -21,7 +21,7 @@ def solver(ps, ts):
 
 
 def ODE(y, _, eps, w, alpha):
-    """ Returns ODE equation. 
+    """ Returns ODE equation.
 
     :param eps: Bounds the saturation effect
     :type eps: Any

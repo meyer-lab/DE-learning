@@ -13,8 +13,8 @@ def plot_norm_graph(cell_lines):
     ncols = 3
     nplots = len(cell_lines) * (len(cell_lines) - 1) / 2
     nrows = ceil(nplots / ncols)
-    _, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(7.5 * ncols, 6 * nrows), 
-    squeeze=0, sharex=False, sharey=True)
+    _, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(7.5 * ncols, 6 * nrows),
+                           squeeze=0, sharex=False, sharey=True)
     axes = np.array(axes)
 
     labels = []
@@ -41,9 +41,10 @@ def plot_norm_graph(cell_lines):
 
     plt.savefig('norm_graphs.png')
 
+
 def plot_impute_graph(data):
     """ Tests imputation function and plots imputed data against test data. """
-    
+
     train_Y, test_Y = split_data(data)
     full_Y = impute(train_Y)
 
@@ -54,10 +55,10 @@ def plot_impute_graph(data):
 
     print(keep_full)
     print(keep_test)
-    _, axes = plt.subplots(nrows=1, ncols=1, figsize=(7.5 * 1, 6 * 1), 
-    squeeze=0, sharex=False, sharey=True)
+    _, axes = plt.subplots(nrows=1, ncols=1, figsize=(7.5 * 1, 6 * 1),
+                           squeeze=0, sharex=False, sharey=True)
     axes = np.array(axes)
-        
+
     for i, ax in enumerate(axes.reshape(-1)):
         ax.set_title(' Cross-Validation')
         ax.scatter(keep_full, keep_test)
@@ -69,4 +70,4 @@ def plot_impute_graph(data):
         ax.plot(keep_full, p(keep_full), color='red')
 
     plt.savefig('A375_imputation.png')
-    print(np.ma.corrcoef(np.ma.masked_invalid(keep_full), np.ma.masked_invalid(keep_test))[1,0])
+    print(np.ma.corrcoef(np.ma.masked_invalid(keep_full), np.ma.masked_invalid(keep_test))[1, 0])

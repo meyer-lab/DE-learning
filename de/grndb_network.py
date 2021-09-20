@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 from .graph import set_labels, make_legend
 
+
 def load_w_GRNdb():
     """
     Loads node labels and returns w matrix as a dataframe.
@@ -27,19 +28,20 @@ def load_w_GRNdb():
         TF = interactions['TF'][row]
         TG = interactions['gene'][row]
         conf = interactions['Confidence'][row]
-        if not TF == TG: # exclude self-interacting loops
+        if not TF == TG:  # exclude self-interacting loops
             if conf == "High":
                 w_df.at[TG, TF] = 2
             else:
                 w_df.at[TG, TF] = 1
     return w_df
 
+
 def add_edges_GRNdb(dir_graph, w):
     """
     Given a directed graph and w matrix, adds a directed edge from gene j to gene i representing the interaction at
     w[i,j], if it exists. Edges are weighted based on confidence values in GRNdb; 0 marks no interaction, 1 marks a low
     confidence interaction, 2 marks a high confidence interaction. Returns the graph.
-    
+
     :param dir_graph: A directed graph of gene interactions
     :type dir_graph: DiGraph
     :param w: A matrix representing perturbation interactions with genes as columns and gene names as indices
@@ -49,12 +51,13 @@ def add_edges_GRNdb(dir_graph, w):
     """
     w = w.to_numpy()
     for i in range(w.shape[1]):
-        for j in range(w.shape[1]):    
-            if w[i, j] == 1: # low confidence interaction 
+        for j in range(w.shape[1]):
+            if w[i, j] == 1:  # low confidence interaction
                 dir_graph.add_edge(j, i, color="green", weight=w[i, j])
-            if w[i, j] == 2: # high confidence interaction
+            if w[i, j] == 2:  # high confidence interaction
                 dir_graph.add_edge(j, i, color="green", weight=w[i, j])
     return dir_graph
+
 
 def set_nodes_GRNdb(dir_graph, pos, ax):
     """
@@ -72,15 +75,16 @@ def set_nodes_GRNdb(dir_graph, pos, ax):
     :type dir_graph: DiGraph
     """
     node_pageranks = nx.pagerank(dir_graph)
-    pr_vals = node_pageranks.values() 
+    pr_vals = node_pageranks.values()
     pr_list = list(pr_vals)
     pr_list = [i * 2600 for i in pr_list]
     nodesize = np.array(pr_list)
 
-    pre_resistant_list = ["JUN", "BRD2", "STK11", "PKN2", "NFAT5", "KMT2D", "ADCK3", "FOSL1", "CSK", "BRD8", "CBFB", "TADA2B", "DSTYK", "JUNB", "LATS2", "FEZF2", "MITF", "RUNX3", "SUV420H1", "SOX10", "DOT1L", "PRKRIR", 'FEZF2', 'SOX10', 'ADCK3', 'BRD8', 'CBFB', 'CSK', 'DOT1L', 'DSTYK', 'FOSL1', 'JUN', 'JUNB', 'KMT2D', 'LATS2', 'MITF', 'NFAT5', 'PKN2', 'PRKRIR', 'RUNX3', 'STK11', 'SUV420H1']
+    pre_resistant_list = ["JUN", "BRD2", "STK11", "PKN2", "NFAT5", "KMT2D", "ADCK3", "FOSL1", "CSK", "BRD8", "CBFB", "TADA2B", "DSTYK", "JUNB", "LATS2", "FEZF2", "MITF", "RUNX3", "SUV420H1", "SOX10",
+                          "DOT1L", "PRKRIR", 'FEZF2', 'SOX10', 'ADCK3', 'BRD8', 'CBFB', 'CSK', 'DOT1L', 'DSTYK', 'FOSL1', 'JUN', 'JUNB', 'KMT2D', 'LATS2', 'MITF', 'NFAT5', 'PKN2', 'PRKRIR', 'RUNX3', 'STK11', 'SUV420H1']
     full_resistant_list = ["MAP3K1", "MAP2K7", "NSD1", "KDM1A", "EGFR", "EP300", "SRF", "PRKAA1", "GATA4", "MYBL1", "MTF1", 'EGFR', 'EP300', 'GATA4', 'KDM1A', 'MAP2K7', 'MAP3K1', 'MTF1', 'MYBL1', 'NSD1', 'PRKAA1', 'SRF']
     unknown = []
-    #color nodes based on pre/resistance
+    # color nodes based on pre/resistance
     color_list = []
     labels = nx.get_node_attributes(dir_graph, "gene")
     for _, gene in labels.items():
@@ -95,6 +99,7 @@ def set_nodes_GRNdb(dir_graph, pos, ax):
     # draw the nodes
     nx.draw_networkx_nodes(dir_graph, pos, ax=ax, node_size=nodesize, node_color=color_list, alpha=0.65)
     return dir_graph
+
 
 def set_edges_GRNdb(dir_graph, pos, ax):
     """
@@ -114,7 +119,7 @@ def set_edges_GRNdb(dir_graph, pos, ax):
     colors = [dir_graph[u][v]["color"] for u, v in edges]
     thickness = [dir_graph[u][v]["weight"] for u, v in edges]
 
-    normalized_thickness = ((thickness - np.min(thickness)) / np.ptp(thickness)) * 0.3 + 0.5 
+    normalized_thickness = ((thickness - np.min(thickness)) / np.ptp(thickness)) * 0.3 + 0.5
     # draw the edges
     nx.draw_networkx_edges(dir_graph, pos, edgelist=edges, width=thickness, edge_color=colors, arrowsize=6, ax=ax, alpha=normalized_thickness)
     return dir_graph
@@ -123,7 +128,7 @@ def set_edges_GRNdb(dir_graph, pos, ax):
 def Network_GRNdb(w, ax):
     """
     Given a w gene-gene interaction matrix and an axes object, draw and return the corresponding Networkx graph.
-    
+
     :param w: A matrix representing perturbation interactions with genes as columns and gene names as indices
     :type w: DataFrame
     :param ax: an axes object to determine where to plot in the figure
@@ -144,7 +149,7 @@ def Network_GRNdb(w, ax):
     df = pd.DataFrame(index=G.nodes(), columns=G.nodes())
     for row, data in nx.shortest_path_length(G):
         for col, dist in data.items():
-            df.loc[row,col] = dist
+            df.loc[row, col] = dist
 
     df = df.fillna(df.max().max())
 
