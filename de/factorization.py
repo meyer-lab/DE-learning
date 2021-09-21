@@ -118,20 +118,20 @@ def factorizeEstimate(data: Union[list, np.ndarray], tol=1e-3, maxiter=100, retu
     return w, etas
 
 
-def commonGenes(annotation1, annotation2):
+def commonGenes(cellLine1, cellLine2):
     """
     Uses annotation list to generate an array of common genes between two cell lines
     output
     """
-    annotation1 = annotation1[0].tolist()
-    annotation2 = annotation2[0].tolist()
+    data1, annot1 = importLINCS(cellLine1)
+    data2, annot2 = importLINCS(cellLine2)
 
-    intersection = set(annotation1).intersection(annotation2)
-    intersection_annotation = list(intersection)
+    # the list of common genes
+    common_genes = np.intersect1d(annot1, annot2)
 
-    index_list1 = np.array([annotation1.index(x) for x in intersection_annotation], dtype=int)
-    index_list2 = np.array([annotation2.index(x) for x in intersection_annotation], dtype=int)
-    return np.sort(index_list1), np.sort(index_list2)
+    # the index corresponding to common genes in the two data sets
+    idx1 = annot1 == common_genes.any()
+    idx2 = annot2 == common_genes.any()
 
 
 def MatrixSubtraction(cellLine1, cellLine2):
@@ -171,13 +171,9 @@ def mergedFitting(cellLine1, cellLine2):
     """
     Given two cell lines, compute the cost of fitting each of them individually and the cost of fitting a shared w matrix.
     """
-    _, annotation1 = importLINCS(cellLine1)
-    _, annotation2 = importLINCS(cellLine2)
+    data1, annotation1 = importLINCS(cellLine1)
+    data2, annotation2 = importLINCS(cellLine2)
     index_list1, index_list2 = commonGenes(annotation1, annotation2)
-
-    data1, _ = importLINCS(cellLine1)
-    data2, _ = importLINCS(cellLine2)
-    print(data1.shape)
 
     # Make shared
     data1 = data1[index_list1, :]
@@ -185,5 +181,13 @@ def mergedFitting(cellLine1, cellLine2):
     data1 = data1[:, index_list1]
     data2 = data2[:, index_list2]
     shared_data = [data1, data2]
+    w1,eta1,cost1 = factorizeEstimate(data1, returnCost=True)
+    w2,eta2,cost2 = factorizeEstimate(data2, returnCost=True)
+    w3,eta3,cost3 = factorizeEstimate(shared_data, returnCost=True)
+    print("cost1 ", cost1)
+    print("cost2", cost2)
+    print("cost shared ", cost3)
+    print("corr coef w1 and w3 ", np.corrcoef(w1.flatten(), w3.flatten())[1])
+    print("corr coef w2 and w3 ", np.corrcoef(w2.flatten(), w3.flatten())[1])
 
-    return factorizeEstimate(shared_data)
+    # return factorizeEstimate(shared_data)
