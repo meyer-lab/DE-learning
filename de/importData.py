@@ -3,6 +3,8 @@
 from os.path import join, dirname
 import numpy as np
 import pandas as pd
+import re
+import fileinput
 
 
 def importLINCS(cellLine):
@@ -13,6 +15,17 @@ def importLINCS(cellLine):
     annotation = pd.read_csv(join(path_here, "de/data/", cellLine + "_genes.txt"), header=None)
 
     return data, annotation
+
+def Remove_Duplicates(string):
+    Pattern = r"\b(\w+)(?:\W\1\b)+"
+    return re.sub(Pattern, r"\1", string, flags=re.IGNORECASE)
+
+
+def remove_deps(txtfile):
+    with fileinput.FileInput(txtfile +'.txt',
+                    inplace = True, backup ='.bak') as file:
+        for line in file:
+            line = Remove_Duplicates(line)
 
 
 def importRNAseqKO():
