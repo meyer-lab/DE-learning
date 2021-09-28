@@ -42,38 +42,6 @@ def plot_norm_graph(cell_lines):
 
     plt.savefig('norm_graphs.png')
 
-def plot_corr_graphs(cell_lines):
-    """ Plot all combinations of two w matrices against each other using factorizeEstimate. """
-
-    ncols = 3
-    nplots = len(cell_lines) * (len(cell_lines) - 1) / 2
-    nrows = ceil(nplots / ncols)
-    _, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(7.5 * ncols, 6 * nrows), 
-    squeeze=0, sharex=False, sharey=True)
-    axes = np.array(axes)
-
-    missing = np.isnan(train_Y)
-
-    keep_full = full_Y[missing]
-    keep_test = test_Y[missing]
-
-    print(keep_full)
-    print(keep_test)
-    _, axes = plt.subplots(nrows=1, ncols=1, figsize=(7.5 * 1, 6 * 1),
-                           squeeze=0, sharex=False, sharey=True)
-    axes = np.array(axes)
-
-    for i, ax in enumerate(axes.reshape(-1)):
-        label_list = labels[i]
-        values = data[i]
-        ax.set_title(label_list[1] + ' vs. ' + label_list[0])
-        ax.scatter(values[0], values[1])
-        ax.axhline(0, color="black")
-        ax.axvline(0, color="black")
-        ax.set_xlabel(label_list[0])
-        ax.set_ylabel(label_list[1])
-
-    plt.savefig('corr_graphs.png')
 
 def plot_impute_graph(cellLine):
     """ Tests the cross val function that creates the train and test data. """
@@ -104,9 +72,5 @@ def plot_impute_graph(cellLine):
         ax.plot(keep_full, p(keep_full), color='red')
 
     plt.savefig('A375_imputation.png')
-<<<<<<< HEAD
     print(np.ma.corrcoef(np.ma.masked_invalid(keep_full), np.ma.masked_invalid(keep_test))[1,0])
     
-=======
-    print(np.ma.corrcoef(np.ma.masked_invalid(keep_full), np.ma.masked_invalid(keep_test))[1, 0])
->>>>>>> bd1f86c1314c6746dad09054057497ef49ef66fc
