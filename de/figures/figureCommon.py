@@ -19,12 +19,13 @@ matplotlib.rcParams['legend.handlelength'] = 0.5
 matplotlib.rcParams['legend.framealpha'] = 0.5
 matplotlib.rcParams['legend.markerscale'] = 0.7
 matplotlib.rcParams['legend.borderpad'] = 0.35
+matplotlib.rcParams['svg.fonttype'] = 'none'
 
 
 def getSetup(figsize, gridd, multz=None, empts=None):
     """ Establish figure set-up with subplots. """
     sns.set(style="whitegrid",
-            font_scale=5,
+            font_scale=0.7,
             color_codes=True,
             palette="colorblind",
             rc={'grid.linestyle': 'dotted',
@@ -55,10 +56,10 @@ def getSetup(figsize, gridd, multz=None, empts=None):
     return (ax, f)
 
 
-def subplotLabel(axs, fntsize=16):
+def subplotLabel(axs):
     """ Place subplot labels on figure. """
     for ii, ax in enumerate(axs):
-        ax.text(-0.2, 1.2, ascii_lowercase[ii], transform=ax.transAxes, fontsize=fntsize, fontweight="bold", va="top")
+        ax.text(-0.2, 1.2, ascii_lowercase[ii], transform=ax.transAxes, fontweight="bold", va="top")
 
 
 def overlayCartoon(figFile, cartoonFile, x, y, scalee=1):

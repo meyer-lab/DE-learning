@@ -12,7 +12,7 @@ from .factorization import factorizeEstimate
 def load_w():
     """
     Loads w from csv file and returns dataframe with gene symbols attached to w values.
-    
+
     :output w: A matrix representing perturbation interactions with genes as columns and indices as gene names
     :type: DataFrame
     """
@@ -64,7 +64,7 @@ def pagerank(w, num_iterations: int = 100, d: float = 0.85):
     """
     Given an adjecency matrix, calculate the pagerank value.
     Notice: All the elements in w should be no less than zeros; Also, the elements of each column should sum up to 1.
-    
+
     :param w: A matrix representing perturbation interactions with genes as columns and indices as gene names
     :type w: Array
     :output v: pagerank value representing the likelihood of ending up at each node from any other node
@@ -82,67 +82,6 @@ def pagerank(w, num_iterations: int = 100, d: float = 0.85):
     return v
 
 
-def add_nodes(dir_graph, w, w_abs):
-    """
-    Given a directed graph and w matrix, adds a node to the directed graph for each gene.
-
-    :param dir_graph: A directed graph of gene interactions
-    :type dir_graph: DiGraph
-    :param w: A matrix representing perturbation interactions with genes as columns and indices as gene names
-    :type w: Array
-    :param w_abs: A matrix of absolute values representing perturbation interactions with genes as columns and indices as gene names
-    :type w_abs: Array
-    :output dir_graph: An edited directed graph with genes added as nodes
-    :type dir_graph: DiGraph
-    """
-    w_abs = np.copy(w_abs)
-    v = pagerank(w_abs)
-    for i in range(len(v)):
-        dir_graph.add_node(i, gene=w.columns[i], pagerank=v[i])
-    return dir_graph
-
-
-def add_edges(dir_graph, w, w_abs):
-    """
-    Given a directed graph and w matrix, calculates a threshold for large w values. Then adds a directed edge from gene j to gene i representing the interaction with the w value as the edge's weight.
-    
-    :param dir_graph: A directed graph of gene interactions
-    :type dir_graph: DiGraph
-    :param w: A matrix representing perturbation interactions with genes as columns and indices as gene names
-    :type w: Array
-    :param w_abs: A matrix of absolute values representing perturbation interactions with genes as columns and indices as gene names
-    :type w_abs: Array
-    :output dir_graph: An edited directed graph with edges added using w values as edge weight
-    :type dir_graph: DiGraph
-    """
-    w = w.to_numpy()
-    threshold = np.mean(w_abs) + 1.4 * np.std(w_abs)  # increase threshold in order to remove in-significant edges
-    for i in range(w.shape[1]):
-        for j in range(w.shape[1]):
-            if not i == j:
-                if w_abs[i, j] > threshold:
-                    if w[i, j] > 0:
-                        dir_graph.add_edge(j, i, color="red", weight=w[i, j])
-                    else:
-                        dir_graph.add_edge(j, i, color="blue", weight=w[i, j])
-    return dir_graph
-
-
-def remove_isolates(dir_graph):
-    """
-    Given a directed graph, remove nodes with no edges.
-
-    :param dir_graph: A directed graph of gene interactions
-    :type dir_graph: DiGraph
-    :output dir_graph: An edited directed graph without isolated nodes
-    :type dir_graph: DiGraph
-    """
-    isolates = list(nx.isolates(dir_graph))
-    dir_graph.remove_nodes_from(isolates)
-
-    return dir_graph
-
-
 def set_nodes(dir_graph, pos, ax):
     """
     Given a directed graph and pos, then draw the corresponding node based on pagerank value, color coded by gene type.
@@ -153,12 +92,12 @@ def set_nodes(dir_graph, pos, ax):
     :type dir_graph: DiGraph
     """
     nodes = dir_graph.nodes()
-    nodesize = [dir_graph.nodes[u]["pagerank"] * 260000 for u in nodes]
+    nodesize = [dir_graph.nodes[u]["pagerank"] * 2600 for u in nodes]
 
-    full_resistant_list = ["JUN", "BRD2", "STK11", "PKN2", "NFAT5", "KMT2D", "ADCK3", "FOSL1", "CSK", "BRD8", "CBFB", "TADA2B", "DSTYK", "JUNB", "LATS2", "FEZF2", "MITF", "RUNX3", "SUV420H1", "SOX10", "DOT1L", "PRKRIR"]
-    pre_resistant_list = ["MAP3K1", "MAP2K7", "NSD1", "KDM1A", "EGFR", "EP300", "SRF", "PRKAA1", "GATA4", "MYBL1", "MTF1"]
+    pre_resistant_list = ["JUN", "BRD2", "STK11", "PKN2", "NFAT5", "KMT2D", "ADCK3", "FOSL1", "CSK", "BRD8", "CBFB", "TADA2B", "DSTYK", "JUNB", "LATS2", "FEZF2", "MITF", "RUNX3", "SUV420H1", "SOX10", "DOT1L", "PRKRIR"]
+    full_resistant_list = ["MAP3K1", "MAP2K7", "NSD1", "KDM1A", "EGFR", "EP300", "SRF", "PRKAA1", "GATA4", "MYBL1", "MTF1"]
     unknown = []
-    #color nodes based on pre/resistance
+    # color nodes based on pre/resistance
     color_list = []
     labels = nx.get_node_attributes(dir_graph, "gene")
     for _, gene in labels.items():
@@ -178,12 +117,12 @@ def set_nodes(dir_graph, pos, ax):
 def set_edges(dir_graph, w_abs, w_max, pos, ax):
     """
     Given a directed graph, w_new and w_max, calculate edges color and thickness. Then draw the corresponding edge.
-    
+
     :param dir_graph: A directed graph of gene interactions
     :type dir_graph: DiGraph
     :param w_abs: A matrix of absolute values representing perturbation interactions with genes as columns and indices as gene names
     :type w_abs: Array
-    :param w_max: The maximum value of all absolute values in w 
+    :param w_max: The maximum value of all absolute values in w
     :type w_abs: NDArray
     :output dir_graph: An edited directed graph with edges of specified color and thickness
     :type dir_graph: DiGraph
@@ -196,7 +135,7 @@ def set_edges(dir_graph, w_abs, w_max, pos, ax):
     # to use this as alpha, normalize between 0.2, 1.0
     normalized_thickness = ((thickness - np.min(thickness)) / np.ptp(thickness)) * 0.8 + 0.2
     # draw the edges
-    nx.draw_networkx_edges(dir_graph, pos, edgelist=edges, width=thickness, edge_color=colors, arrowsize=65, ax=ax, alpha=normalized_thickness)
+    nx.draw_networkx_edges(dir_graph, pos, edgelist=edges, width=thickness, edge_color=colors, arrowsize=5, ax=ax, alpha=normalized_thickness)
     return dir_graph
 
 
@@ -212,8 +151,9 @@ def set_labels(dir_graph, pos, ax):
     labels = nx.get_node_attributes(dir_graph, "gene")
 
     # draw the labels
-    nx.draw_networkx_labels(dir_graph, pos, labels=labels, font_size=48, ax=ax)
+    nx.draw_networkx_labels(dir_graph, pos, labels=labels, ax=ax, font_size=7)
     return dir_graph
+
 
 def make_legend(dir_graph, ax):
     """ Creates a legend for node and edge colors in Network.
@@ -228,33 +168,56 @@ def make_legend(dir_graph, ax):
     grey_patch = mpatches.Patch(color="grey", label="Undetermined")
     blue_line = mlines.Line2D([], [], color="blue", label="Inhibition")
     red_line = mlines.Line2D([], [], color="red", label="Activation")
-    ax.legend(handles=[purple_patch, green_patch, grey_patch, red_line, blue_line], prop=dict(size=50))
+
+    if isinstance(dir_graph, nx.DiGraph):
+        ax.legend(handles=[purple_patch, green_patch, grey_patch, red_line, blue_line], prop=dict(size=5))
+    else:
+        ax.legend(handles=[purple_patch, green_patch, grey_patch], prop=dict(size=5))
+
     return dir_graph
 
-def Network(w, w_abs, w_max, ax):
+
+def Network(w, ax):
     """
-    Given w, w_abs, w_max and ax, then draw the corresponding Networkx graph.
+    Given w and ax, then draw the corresponding Networkx graph.
 
     :param w: A matrix representing perturbation interactions with genes as columns and indices as gene names
     :type w: Array
-    :param w_abs: A matrix of absolute values representing perturbation interactions with genes as columns and indices as gene names
-    :type w_abs: Array
-    :param w_max: The maximum value of all absolute values in w 
-    :type w_abs: NDArray
     :output G: Networkx weighted directed graph
     :type G: DiGraph
     """
-    G = nx.DiGraph()
-    # add nodes and edges
-    add_nodes(G, w, w_abs)
-    add_edges(G, w, w_abs)
-    remove_isolates(G)
+    w_abs = np.absolute(w.to_numpy())
 
-    pos = nx.spring_layout(G, k=0.2)
+    G = nx.DiGraph()
+    # add nodes
+    v = pagerank(np.copy(w_abs))
+    for i in range(len(v)):
+        G.add_node(i, gene=w.columns[i], pagerank=v[i])
+
+    # Add edges
+    w = w.to_numpy()
+    threshold = np.mean(w_abs) + 1.4 * np.std(w_abs)  # increase threshold in order to remove in-significant edges
+    for i, j in np.ndindex(w.shape):
+        if (i != j) and (w_abs[i, j] > threshold):
+            G.add_edge(j, i, color="red" if w[i, j] > 0 else "blue", weight=w[i, j])
+
+    # Remove isolated nodes
+    G.remove_nodes_from(list(nx.isolates(G)))
+
+    # to make the graph look better we find the optimal distance between nodes
+    df = pd.DataFrame(index=G.nodes(), columns=G.nodes())
+    for row, data in nx.shortest_path_length(G):
+        for col, dist in data.items():
+            df.loc[row, col] = dist
+
+    df = df.fillna(df.max().max())
+    # end
+
+    pos = nx.kamada_kawai_layout(G, dist=df.to_dict())
 
     # draw the nodes, edges and labels
     set_nodes(G, pos, ax)
-    set_edges(G, w_abs, w_max, pos, ax)
+    set_edges(G, w_abs, np.max(w_abs), pos, ax)
     set_labels(G, pos, ax)
     make_legend(G, ax)
 
@@ -286,7 +249,7 @@ def bar_graph(w, color, ax, label):
 
 def loop():
     """
-    Return positive-feedback loops involved in network. 
+    Return positive-feedback loops involved in network.
 
     :output positive: List of positive-feedback loops
     :type positive: List
@@ -295,10 +258,8 @@ def loop():
     """
     w = load_w()
     w = remove(w)
-    w_abs = np.absolute(w.to_numpy())
-    w_max = np.max(w_abs)
 
-    G = Network(w, w_abs, w_max, ax=None)
+    G = Network(w, ax=None)
     G_1 = G.copy()
     m = list(nx.simple_cycles(G_1))
     positive = []

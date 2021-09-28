@@ -1,10 +1,11 @@
 """ Methods to implement the factorization/fitting process. """
 
+from typing import Union
 import numpy as np
-import pandas as pd
-from scipy.stats import gmean
+from tqdm import tqdm
 from scipy.special import expit, logit
 from .importData import importLINCS
+from sklearn.linear_model import orthogonal_mp
 
 
 alpha = 0.1
@@ -29,18 +30,22 @@ def calcW(data, eta, alphaIn):
     if isinstance(data, np.ndarray):
         data = [data]
 
-    U = None
-    B = None
+    return cost
 
+
+def calcW(data: list, eta: list, alphaIn: float) -> np.ndarray:
+    """
+    Directly calculate w.
+
+    Calculate an estimate for w based on data and current iteration of eta
+    """
     for i, x in enumerate(data):
         U1 = np.copy(x)
         np.fill_diagonal(U1, 0.0)
         B1 = (x * alphaIn) / eta[i][:, np.newaxis]
-        assert np.all(np.isfinite(B1))
         B1 = logit(np.clip(B1, 0.0001, 0.9999))
-        assert np.all(np.isfinite(B1))
 
-        if B is None:
+        if i == 0:
             U = U1
             B = B1
         else:
@@ -91,20 +96,13 @@ def factorizeEstimate(data, tol=1e-9, maxiter=20):
         data = [data]
 
     w = np.zeros((data[0].shape[0], data[0].shape[0]))
-    # Make the U matrix
-    U = [np.copy(d) for d in data]
-    for ii in range(len(U)):
-        np.fill_diagonal(U[ii], 0.0)
 
-    costLast = np.inf
+    cost = np.inf
 
     # Use the data to try and initialize the parameters
-    for ii in range(maxiter):
+    tq = tqdm(range(maxiter), delay=0.5)
+    for _ in tq:
         etas = [calcEta(x, w, alpha) for x in data]
-        for eta in etas:
-            assert np.all(np.isfinite(eta))
-            assert eta.shape == (data[0].shape[0], )
-
         w = calcW(data, etas, alpha)
         assert np.all(np.isfinite(w))
         assert w.shape == (data[0].shape[0], data[0].shape[0])
@@ -114,11 +112,11 @@ def factorizeEstimate(data, tol=1e-9, maxiter=20):
             cost += np.linalg.norm(etas[jj][:, np.newaxis]
                                    * expit(w @ U[jj]) - alpha * data[jj])
 
-        if ii > 3 and (costLast - cost) < tol:
-            # TODO: I believe the cost should be strictly decreasing, so look into this.
+        if (costLast - cost) < tol:
             break
 
-        costLast = cost
+    if returnCost:
+        return w, etas, cost
 
     return w, etas
 
@@ -161,12 +159,9 @@ def commonGenes(annotation1, annotation2):
     intersection = set(annotation1).intersection(annotation2)
     intersection_annotation = list(intersection)
 
-    index_list1 = [annotation1.index(x) for x in intersection_annotation]
-    index_list2 = [annotation2.index(x) for x in intersection_annotation]
-
-    index_list1.sort()
-    index_list2.sort()
-    return index_list1, index_list2
+    idx1 = np.array([ann1.index(x) for x in intersection], dtype=int)
+    idx2 = np.array([ann2.index(x) for x in intersection], dtype=int)
+    return idx1, idx2
 
 def MatrixSubtraction(cellLine1, cellLine2):
     """Finds the w-matrices of two different cell lines and subtracts them.
@@ -193,26 +188,30 @@ def MatrixSubtraction(cellLine1, cellLine2):
     w1, _, _ = cellLineFactorization(cellLine1)
     w2, _, _ = cellLineFactorization(cellLine2)
     index_list1, index_list2 = commonGenes(annotation1, annotation2)
+    w1, _ = factorizeEstimate(data1)
+    w2, _ = factorizeEstimate(data2)
 
-    w1, _, _ = cellLineFactorization(cellLine1)
-    w2, _, _ = cellLineFactorization(cellLine2)
-    np.random.shuffle(w1)
-    np.random.shuffle(w2)
+    w1 = w1[index_list1, :]
+    w2 = w2[index_list2, :]
+    w1 = w1[:, index_list1]
+    w2 = w2[:, index_list2]
+    assert w1.shape == w2.shape
+    assert w1.shape == (index_list1.size, index_list1.size)
+
     norm1 = np.linalg.norm(w1)
+    print(f"Norm1: {norm1}")
     norm2 = np.linalg.norm(w2)
+    print(f"Norm2: {norm2}")
+    diff_norm = np.linalg.norm(w2 - w1)
+    print(f"Difference norm: {diff_norm}")
 
-    w1_df = pd.DataFrame(w1)
-    w2_df = pd.DataFrame(w2)
-
-    w1_edited = w1_df.iloc[index_list1, index_list1]
-    w2_edited = w2_df.iloc[index_list2, index_list2]
-
-    w1_final = w1_edited.values
-    w2_final = w2_edited.values
-
-    difference_matrix = w2_final - w1_final
-    diff_norm = np.linalg.norm(difference_matrix)
-    return norm1, norm2, diff_norm, w1_final, w2_final
+    w1shuff = w1.copy()
+    w2shuff = w2.copy()
+    np.random.shuffle(w1shuff)
+    np.random.shuffle(w2shuff)
+    shufnorm = np.linalg.norm(w2shuff - w1shuff)
+    print(f"Shuffled norm: {shufnorm}")
+    return norm1, norm2, diff_norm, shufnorm, w1, w2
 
 def mergedFitting(cellLine1, cellLine2):
     """
@@ -233,14 +232,13 @@ def mergedFitting(cellLine1, cellLine2):
 
     data1, _ = importLINCS(cellLine1)
     data2, _ = importLINCS(cellLine2)
-    data1_df = pd.DataFrame(data1)
-    data2_df = pd.DataFrame(data2)
-    data1_edited = data1_df.iloc[index_list1, index_list1]
-    data2_edited = data2_df.iloc[index_list2, index_list2]
-    data1_final = data1_edited.values
-    data2_final = data2_edited.values
-    shared_data = [data1_final, data2_final]
+    print(data1.shape)
 
-    w_shared, eta_list = factorizeEstimate(shared_data)
+    # Make shared
+    data1 = data1[index_list1, :]
+    data2 = data2[index_list2, :]
+    data1 = data1[:, index_list1]
+    data2 = data2[:, index_list2]
+    shared_data = [data1, data2]
 
-    return w_shared, eta_list
+    return factorizeEstimate(shared_data)

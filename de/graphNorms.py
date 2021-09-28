@@ -52,17 +52,16 @@ def plot_corr_graphs(cell_lines):
     squeeze=0, sharex=False, sharey=True)
     axes = np.array(axes)
 
-    labels = []
-    data = []
+    missing = np.isnan(train_Y)
 
-    for i in range(0, len(cell_lines) - 1):
-        for j in range(i + 1, len(cell_lines)):
-            cellLine1 = cell_lines[i]
-            cellLine2 = cell_lines[j]
-            label_list = [cellLine1, cellLine2]
-            labels.append(label_list)
-            _, _, _, w1, w2 = MatrixSubtraction(cellLine1, cellLine2)
-            data.append([w1.flatten(), w2.flatten()])
+    keep_full = full_Y[missing]
+    keep_test = test_Y[missing]
+
+    print(keep_full)
+    print(keep_test)
+    _, axes = plt.subplots(nrows=1, ncols=1, figsize=(7.5 * 1, 6 * 1),
+                           squeeze=0, sharex=False, sharey=True)
+    axes = np.array(axes)
 
     for i, ax in enumerate(axes.reshape(-1)):
         label_list = labels[i]
@@ -105,5 +104,9 @@ def plot_impute_graph(cellLine):
         ax.plot(keep_full, p(keep_full), color='red')
 
     plt.savefig('A375_imputation.png')
+<<<<<<< HEAD
     print(np.ma.corrcoef(np.ma.masked_invalid(keep_full), np.ma.masked_invalid(keep_test))[1,0])
     
+=======
+    print(np.ma.corrcoef(np.ma.masked_invalid(keep_full), np.ma.masked_invalid(keep_test))[1, 0])
+>>>>>>> bd1f86c1314c6746dad09054057497ef49ef66fc

@@ -13,23 +13,19 @@ from ..importData import ImportMelanoma, importLINCS
 def test_factorizeEstimate():
     """ Test that this runs successfully with reasonable input. """
     data = ImportMelanoma()
-    U = np.copy(data)
-    np.fill_diagonal(U, 0.0)
 
-    w, eta = factorizeEstimate(data)
+    w, eta, costOne = factorizeEstimate(data, returnCost=True)
     assert w.shape == (data.shape[0], data.shape[0])
     assert eta[0].shape == (data.shape[0], )
 
-    wLess, etaLess = factorizeEstimate(data, maxiter=1)
-    costOne = np.linalg.norm(eta[0][:, np.newaxis] * expit(w @ U) - alpha * data)
-    costTwo = np.linalg.norm(etaLess[0][:, np.newaxis] * expit(wLess @ U) - alpha * data)
+    _, _, costTwo = factorizeEstimate(data, maxiter=1, returnCost=True)
     assert costOne < costTwo
 
 
 @pytest.mark.parametrize("level", [1.0, 2.0, 3.0])
 def test_factorizeBlank(level):
     """ Test that if gene expression is flat we get a blank w. """
-    data = np.ones((12, 12)) * level
+    data = np.ones((120, 120)) * level
     w, eta = factorizeEstimate(data, maxiter=2)
 
     np.testing.assert_allclose(w, 0.0, atol=1e-9)
@@ -39,9 +35,11 @@ def test_factorizeBlank(level):
 def test_cellLines():
     """ To test and confirm most genes are overlapping between cell lines. """
     cellLine1 = 'A375'
-    cellLine2 = 'HT29'
+    cellLine2 = 'PC3'
     _, annotation1 = importLINCS(cellLine1)
     _, annotation2 = importLINCS(cellLine2)
+
+    mergedFitting(cellLine1, cellLine2)
 
     # assuming the function returns the list of shared genes between the two cell lines
     shared_annotation, _ = commonGenes(annotation1, annotation2)
@@ -51,18 +49,18 @@ def test_cellLines():
 def test_mergedFitting():
     """ To test if the fitting works on multiple cell lines and the shared cost has a reasonable value. """
     data = ImportMelanoma()
-    w1, eta_list1 = factorizeEstimate(data)
+    w1, eta_list1 = factorizeEstimate(data, maxiter=3)
     eta1 = eta_list1[0]
 
-    w2, eta_list2 = factorizeEstimate([data, data])
+    w2, eta_list2 = factorizeEstimate([data, data], maxiter=3)
     eta2 = eta_list2[0]
 
     # Both etas should be the same
-    assert np.linalg.norm(eta_list2[0] - eta_list2[1]) < 0.0001
-    assert np.linalg.norm(eta1 - eta2) < 0.0001
+    np.testing.assert_allclose(eta_list2[0], eta_list2[1])
+    np.testing.assert_allclose(eta1, eta2)
 
     # w should be identical
-    assert np.linalg.norm(w1 - w2) < 0.0001
+    np.testing.assert_allclose(w1, w2)
 
 def test_crossval_Melanoma():
     """ Tests the cross val function that creates the train and test data. """
