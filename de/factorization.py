@@ -171,10 +171,8 @@ def mergedFitting(cellLine1, cellLine2):
     data2, _ = importLINCS(cellLine2)
 
     # Make shared
-    data1 = data1[index_list1, :]
-    data2 = data2[index_list2, :]
-    data1 = data1[:, idx1]
-    data2 = data2[:, idx2]
+    data1 = data1[index_list1, idx1]
+    data2 = data2[index_list2, idx2]
     shared_data = [data1, data2]
 
     return factorizeEstimate(shared_data)
