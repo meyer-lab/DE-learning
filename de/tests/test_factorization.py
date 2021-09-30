@@ -63,6 +63,16 @@ def test_mergedFitting():
     np.testing.assert_allclose(w1, w2, atol=1.5)
 
 
+def test_fakeData():
+    """ Use fake constant data to see merged fitting works? """
+    data1 = 3 * np.ones((10, 11))
+    data2 = 5 * np.ones((10, 11))
+    w, etas = factorizeEstimate([data1, data2])
+    assert np.allclose(w, 0.0)
+    assert np.allclose(etas[0], 0.6)
+    assert np.allclose(etas[1], 1.)
+
+
 def test_crossval_Melanoma():
     """ Tests the cross val function that creates the train and test data. """
     data = ImportMelanoma()
