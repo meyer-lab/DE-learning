@@ -3,10 +3,11 @@ from scipy.stats import hypergeom
 import networkx as nx
 import numpy as np
 
+
 def setvars(G, G_GRNdb):
     """
     Takes in our w network graph and the GRNdb network graph, and returns the variables (k, M, n and N) for the hypergeometric distribution.
-    
+
     :param G: A Networkx weighted directed graph to represent all interactions in w
     :type G: DiGraph
     :param G_GRNdb: A Networkx weighted directed graoh to represent all relevant interactions in GRNdb
@@ -53,6 +54,7 @@ def setvars(G, G_GRNdb):
 
     return [k, M, n, N]
 
+
 def PMF(varlist):
     """
     Takes in a list of variables [k, M, n, N] and computes the result of their probability mass function.
@@ -69,6 +71,7 @@ def PMF(varlist):
     x = np.arange(0, 50)
     pmf_edges = rv.pmf(x)
     return [x, pmf_edges]
+
 
 def CDF(varlist):
     """

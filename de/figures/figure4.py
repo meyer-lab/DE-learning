@@ -5,6 +5,7 @@ from .figureCommon import subplotLabel, getSetup
 from ..graph import Network, load_w, remove, normalize
 from ..grndb_network import load_w_GRNdb, Network_GRNdb
 
+
 def makeFigure():
     """ Get a list of the axis objects and create a figure. """
     # Get list of axis objects
@@ -15,6 +16,7 @@ def makeFigure():
     subplotLabel(ax)
 
     return f
+
 
 def selected_genes(ax):
     """

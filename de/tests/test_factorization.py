@@ -5,7 +5,7 @@ import pytest
 import numpy as np
 from numpy import ma
 from ..factorization import factorizeEstimate, alpha, commonGenes, mergedFitting
-from ..impute import impute, split_data, repeatImputation
+from ..impute import impute, split_data
 from ..importData import ImportMelanoma, importLINCS
 
 
@@ -24,7 +24,7 @@ def test_factorizeEstimate():
 @pytest.mark.parametrize("level", [1.0, 2.0, 3.0])
 def test_factorizeBlank(level):
     """ Test that if gene expression is flat we get a blank w. """
-    data = np.ones((12, 12)) * level
+    data = np.ones((120, 120)) * level
     w, eta = factorizeEstimate(data, maxiter=2)
 
     np.testing.assert_allclose(w, 0.0, atol=1e-9)
@@ -34,7 +34,7 @@ def test_factorizeBlank(level):
 def test_cellLines():
     """ To test and confirm most genes are overlapping between cell lines. """
     cellLine1 = 'A375'
-    cellLine2 = 'HT29'
+    cellLine2 = 'PC3'
     _, annotation1 = importLINCS(cellLine1)
     _, annotation2 = importLINCS(cellLine2)
 
@@ -49,18 +49,18 @@ def test_cellLines():
 def test_mergedFitting():
     """ To test if the fitting works on multiple cell lines and the shared cost has a reasonable value. """
     data = ImportMelanoma()
-    w1, eta_list1 = factorizeEstimate(data)
+    w1, eta_list1 = factorizeEstimate(data, maxiter=3)
     eta1 = eta_list1[0]
 
-    w2, eta_list2 = factorizeEstimate([data, data])
+    w2, eta_list2 = factorizeEstimate([data, data], maxiter=3)
     eta2 = eta_list2[0]
 
     # Both etas should be the same
-    np.testing.assert_allclose(eta_list2[0], eta_list2[1], rtol=0.1)
-    np.testing.assert_allclose(eta1, eta2, rtol=0.1)
+    np.testing.assert_allclose(eta_list2[0], eta_list2[1])
+    np.testing.assert_allclose(eta1, eta2)
 
     # w should be identical
-    np.testing.assert_allclose(w1, w2, atol=1.5)
+    np.testing.assert_allclose(w1, w2)
 
 
 def test_fakeData():

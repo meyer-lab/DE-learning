@@ -1,6 +1,7 @@
 from sklearn.linear_model import Lasso
 import numpy as np
 
+
 def runFitting(data, U=None, alpha=1.0):
     """ Creates Lasso object, fits model to data. """
     if U is None:

@@ -96,7 +96,6 @@ def factorizeEstimate(data: Union[list, np.ndarray], tol=1e-3, maxiter=100, retu
 
     # Use the data to try and initialize the parameters
     tq = tqdm(range(maxiter), delay=0.5)
-    etas = [calcEta(x, w, alpha) for x in data]
     for _ in tq:
         etas = [calcEta(x, w, alpha) for x in data]
         w = calcW(data, etas, alpha)

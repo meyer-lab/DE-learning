@@ -11,8 +11,7 @@ def importLINCS(cellLine):
 
     data = np.load(join(path_here, "de/data/", cellLine + "_RNAi_matrix.npy"))
     annotation = pd.read_csv(join(path_here, "de/data/", cellLine + "_genes.txt"), header=None, sep=" ")[0]
-    # assert data.shape == (len(annotation), len(annotation) + 1)
-
+    assert data.shape == (len(annotation), len(annotation) + 1)
     return data, list(annotation)
 
 
@@ -129,23 +128,25 @@ def cell_type_perturbations(data, inst_info, gene_info, cell_id):
     out_celltype = out_celltype[[x for x in out_celltype if x not in ["LUCIFERASE"]] + ["LUCIFERASE"]]
     return out_celltype
 
+
 def importgenes():
     """ Imports all Torre genes with meanlFC and Rcolonies data, merges into DataFrame. """
     path_here = dirname(dirname(__file__))
-    x_data = pd.read_csv(join(path_here, "de/data/sumarizedResults.txt"), header=0, sep = "\t")
-    xdata = pd.DataFrame(x_data, columns = ["target", "meanlFC"])
-    y_data = pd.read_csv(join(path_here, "de/data/colonyGrowthResults_allhits.txt"), header=0,sep = "\t")
-    ydata = pd.DataFrame(y_data, columns = ["target", "Rcolonies_lFC"])
+    x_data = pd.read_csv(join(path_here, "de/data/sumarizedResults.txt"), header=0, sep="\t")
+    xdata = pd.DataFrame(x_data, columns=["target", "meanlFC"])
+    y_data = pd.read_csv(join(path_here, "de/data/colonyGrowthResults_allhits.txt"), header=0, sep="\t")
+    ydata = pd.DataFrame(y_data, columns=["target", "Rcolonies_lFC"])
 
-    #merges data for genes with both meanlFC_IF and Rcolonies_lFC values
+    # merges data for genes with both meanlFC_IF and Rcolonies_lFC values
     data = pd.merge(xdata, ydata, on="target", how="inner")
     return data
+
 
 def splitnodes(data):
     """ Separates Torre genes into resistant and preresistant. """
     above = []
     below = []
-    for x in range(0,31):
+    for x in range(0, 31):
         if data["meanlFC"][x] < data["Rcolonies_lFC"][x]:
             above.append(data["target"][x])
         elif data["meanlFC"][x] > data["Rcolonies_lFC"][x]:

@@ -4,11 +4,12 @@ from ..graph import load_w, remove, Network, normalize
 from ..grndb_network import load_w_GRNdb, Network_GRNdb
 from .figureCommon import subplotLabel, getSetup
 
+
 def makeFigure():
     """
     Gets a list of axes objects and creates the figure.
-    
-    :output f: Figure 5 containing network diagrams for the w matrix and the GRNdb dataset, along with 
+
+    :output f: Figure 5 containing network diagrams for the w matrix and the GRNdb dataset, along with
     the probability mass and cumulative distribution function plots for the significance of their overlapping edges.
     :type f: Figure
     """
