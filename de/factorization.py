@@ -26,7 +26,7 @@ def costF(data: list, w, etas: list, alphaIn):
     cost = 0.0
     for jj in range(len(data)):
         cost += np.linalg.norm(etas[jj][:, np.newaxis]
-                            * expit(w @ U[jj]) - alphaIn * data[jj])
+                                * expit(w @ U[jj]) - alphaIn * data[jj])
         print("this is cost", cost)
     return cost
 
