@@ -62,8 +62,8 @@ def test_mergedFitting():
     # w should be identical
     np.testing.assert_allclose(w1, w2)
 
-@pytest.mark.parametrize("level1", 3.0)
-@pytest.mark.parametrize("level2", 5.0)
+@pytest.mark.parametrize("level1", [2.0, 3.0])
+@pytest.mark.parametrize("level2", [1.0, 5.0])
 def test_mergedFittingBlank(level1, level2):
     """ Test that if gene expression is flat for two datasets we get a blank w and a correct eta for each. """
     data1 = np.ones((120, 120)) * level1
