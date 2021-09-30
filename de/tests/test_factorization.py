@@ -62,16 +62,17 @@ def test_mergedFitting():
     # w should be identical
     np.testing.assert_allclose(w1, w2)
 
+@pytest.mark.parametrize("level1", 3.0)
+@pytest.mark.parametrize("level2", 5.0)
+def test_mergedFittingBlank(level1, level2):
+    """ Test that if gene expression is flat for two datasets we get a blank w and a correct eta for each. """
+    data1 = np.ones((120, 120)) * level1
+    data2 = np.ones((120, 120)) * level2
+    w, etas = factorizeEstimate([data1, data2], maxiter=2)
 
-def test_fakeData():
-    """ Use synthetic data of constant values and make sure w and eta are estimated correctly. """
-    data1 = 3 * np.ones((10, 11))
-    data2 = 5 * np.ones((10, 11))
-    w, etas = factorizeEstimate([data1, data2])
-    assert np.allclose(w, 0.0)
-    assert np.allclose(etas[0], 0.6)
-    assert np.allclose(etas[1], 1.)
-
+    np.testing.assert_allclose(w, 0.0, atol=1e-9)
+    np.testing.assert_allclose(etas[0], 2 * level1 * alpha)
+    np.testing.assert_allclose(etas[1], 2 * level2 * alpha)
 
 def test_crossval_Melanoma():
     """ Tests the cross val function that creates the train and test data. """
