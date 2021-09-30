@@ -64,7 +64,7 @@ def test_mergedFitting():
 
 
 def test_fakeData():
-    """ Use fake constant data to see merged fitting works? """
+    """ Use synthetic data of constant values and make sure w and eta are estimated correctly. """
     data1 = 3 * np.ones((10, 11))
     data2 = 5 * np.ones((10, 11))
     w, etas = factorizeEstimate([data1, data2])
