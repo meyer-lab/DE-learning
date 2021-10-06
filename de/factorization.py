@@ -19,17 +19,14 @@ def costF(data: list, w, etas: list, alphaIn):
     for eta in etas:
         assert np.all(np.isfinite(eta))
         assert eta.shape == (data[0].shape[0], )
-
     # Make the U matrix
     U = [np.copy(d) for d in data]
     for ii in range(len(U)):
         np.fill_diagonal(U[ii], 0.0)
-
     cost = 0.0
     for jj in range(len(data)):
         cost += np.linalg.norm(etas[jj][:, np.newaxis]
                                * expit(w @ U[jj]) - alphaIn * data[jj])
-
     return cost
 
 
@@ -136,10 +133,8 @@ def MatrixSubtraction(cellLine1, cellLine2):
     w1, _ = factorizeEstimate(data1)
     w2, _ = factorizeEstimate(data2)
 
-    w1 = w1[index_list1, :]
-    w2 = w2[index_list2, :]
-    w1 = w1[:, index_list1]
-    w2 = w2[:, index_list2]
+    w1 = w1[index_list1, index_list1]
+    w2 = w2[index_list2, index_list2]
     assert w1.shape == w2.shape
     assert w1.shape == (index_list1.size, index_list1.size)
 
@@ -166,16 +161,19 @@ def mergedFitting(cellLine1, cellLine2):
     _, annotation1 = importLINCS(cellLine1)
     _, annotation2 = importLINCS(cellLine2)
     index_list1, index_list2 = commonGenes(annotation1, annotation2)
+    idx1 = index_list1.copy()
+    idx2 = index_list2.copy()
+    np.concatenate(idx1, (len(annotation1) + 1)) # include the control
+    np.concatenate(idx2, (len(annotation2) + 1)) # include the control
 
     data1, _ = importLINCS(cellLine1)
     data2, _ = importLINCS(cellLine2)
-    print(data1.shape)
 
     # Make shared
     data1 = data1[index_list1, :]
     data2 = data2[index_list2, :]
-    data1 = data1[:, index_list1]
-    data2 = data2[:, index_list2]
+    data1 = data1[:, idx1]
+    data2 = data2[:, idx2]
     shared_data = [data1, data2]
 
     return factorizeEstimate(shared_data)
