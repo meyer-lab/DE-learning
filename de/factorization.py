@@ -4,6 +4,7 @@ from typing import Union
 import numpy as np
 from tqdm import tqdm
 from scipy.special import expit, logit
+from scipy.sparse import csr_matrix, csc_matrix
 from .importData import importLINCS
 from sklearn.linear_model import orthogonal_mp
 
@@ -35,6 +36,9 @@ def calcW(data: list, eta: list, alphaIn: float) -> np.ndarray:
     Directly calculate w.
     Calculate an estimate for w based on data and current iteration of eta
     """
+
+    
+
     for i, x in enumerate(data):
         U1 = np.copy(x)
         np.fill_diagonal(U1, 0.0)
@@ -48,8 +52,16 @@ def calcW(data: list, eta: list, alphaIn: float) -> np.ndarray:
             U = np.concatenate((U, U1), axis=1)
             B = np.concatenate((B, B1), axis=1)
 
-    # orthogonal_mp(U.T, B.T, n_nonzero_coefs=40).T
-    return np.linalg.lstsq(U.T, B.T, rcond=None)[0].T
+    w = np.linalg.lstsq(U.T, B.T, rcond=None)[0].T
+
+
+    threshold = (np.amax(w) - np.amin(w)) / 2
+
+    for y, x in enumerate(w):
+        if w[x,y] < threshold:
+            w[x,y] = 0
+
+    return w
 
 
 def calcEta(data: np.ndarray, w: np.ndarray, alphaIn: float) -> np.ndarray:
@@ -110,6 +122,17 @@ def factorizeEstimate(data: Union[list, np.ndarray], tol=1e-3, maxiter=100, retu
 
     return w, etas
 
+def SparseFactorization1(data):
+   w, eta = factorizeEstimate(data)
+   w = csc_matrix(w)
+
+   return w, eta
+
+def SparseFactorization2(data):
+   w, eta = factorizeEstimate(data)
+   w = csr_matrix(w)
+
+   return w, eta
 
 def commonGenes(ann1, ann2):
     """

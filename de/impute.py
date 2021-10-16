@@ -1,8 +1,14 @@
 """ This file includes the functions for cross-validation based on data imputation. """
+from re import L
+import re
 import numpy as np
 from numpy import ma
+from numpy.ma.extras import average
 from scipy.special import expit
-from .factorization import alpha, factorizeEstimate
+from scipy.special.orthogonal import legendre
+
+from de.importData import importLINCS
+from .factorization import alpha, factorizeEstimate, SparseFactorization1, SparseFactorization2
 from .linearModel import runFitting
 
 
@@ -22,12 +28,8 @@ def impute(data, linear=False):
     """ Impute by repeated fitting. """
     missing = np.isnan(data)
     data = np.nan_to_num(data)
-<<<<<<< HEAD
-    for _ in range(10):
-=======
 
-    for _ in range(100):
->>>>>>> bd1f86c1314c6746dad09054057497ef49ef66fc
+    for _ in range(20):
         U = np.copy(data)
         np.fill_diagonal(U, 0.0)
 
@@ -42,19 +44,15 @@ def impute(data, linear=False):
             predictt = model.predict(U)
         else:
             predictt = eta[0][:, np.newaxis] * expit(w @ U) / alpha
-<<<<<<< HEAD
-        data[missing] = predictt[missing]
-=======
 
         dataLast = np.copy(data)
         data[missing] = predictt[missing]
         change = np.linalg.norm(data - dataLast)
 
->>>>>>> bd1f86c1314c6746dad09054057497ef49ef66fc
     return data
 
 
-def repeatImputation(data, linear=False, numIter=20):
+def repeatImputation(data, linear=False, numIter=5):
     """ Repeat imputation and calculate the average of cost for 20 iterations. """
     coefs = []
     for _ in range(numIter):
@@ -64,3 +62,17 @@ def repeatImputation(data, linear=False, numIter=20):
         coefs.append(corr_coef[0][1])
     print(f"average corr coef: {sum(coefs)/len(coefs)}")
     return coefs
+
+def repeatSparsityCheck():
+    cellLineList = ["A375", "A549", "HA1E", "MCF7", "PC3"]
+
+    cellLineCoefs = []
+    for x in cellLineList:
+      data, _= importLINCS(x)
+      coefs = repeatImputation(data, 5)
+      averagecoef = sum(coefs)/len(coefs)
+      cellLineCoefs.append(averagecoef)
+    
+    return cellLineCoefs
+
+
