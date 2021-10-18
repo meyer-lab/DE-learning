@@ -27,7 +27,6 @@ def costF(data: list, w, etas: list, alphaIn):
     for jj in range(len(data)):
         cost += np.linalg.norm(etas[jj][:, np.newaxis]
                                * expit(w @ U[jj]) - alphaIn * data[jj])
-    print(cost)
     return cost
 
 
@@ -167,8 +166,8 @@ def mergedFitting(cellLine1, cellLine2):
     index_list1, index_list2 = commonGenes(annotation1, annotation2)
     idx1 = index_list1.copy()
     idx2 = index_list2.copy()
-    # np.concatenate(idx1, (len(annotation1) + 1)) # include the control
-    # np.concatenate(idx2, (len(annotation2) + 1)) # include the control
+    np.concatenate(idx1, (len(annotation1) + 1)) # include the control
+    np.concatenate(idx2, (len(annotation2) + 1)) # include the control
 
     data1, _ = importLINCS(cellLine1)
     data2, _ = importLINCS(cellLine2)
