@@ -97,7 +97,9 @@ def factorizeEstimate(data: Union[list, np.ndarray], tol=1e-3, maxiter=100, retu
     tq = tqdm(range(maxiter), delay=0.5)
     for _ in tq:
         etas = [calcEta(x, w, alpha) for x in data]
+        cost1 = costF(data, w, etas, alpha)
         w = calcW(data, etas, alpha)
+        print("diff w before and after update ", costF(data, w, etas, alpha) - cost1)
         costLast = cost
         cost = costF(data, w, etas, alpha)
         tq.set_postfix(cost=cost, refresh=False)
@@ -163,8 +165,8 @@ def mergedFitting(cellLine1, cellLine2):
     index_list1, index_list2 = commonGenes(annotation1, annotation2)
     idx1 = index_list1.copy()
     idx2 = index_list2.copy()
-    np.concatenate(idx1, (len(annotation1) + 1)) # include the control
-    np.concatenate(idx2, (len(annotation2) + 1)) # include the control
+    # np.concatenate(idx1, (len(annotation1) + 1)) # include the control
+    # np.concatenate(idx2, (len(annotation2) + 1)) # include the control
 
     data1, _ = importLINCS(cellLine1)
     data2, _ = importLINCS(cellLine2)
