@@ -27,6 +27,7 @@ def costF(data: list, w, etas: list, alphaIn):
     for jj in range(len(data)):
         cost += np.linalg.norm(etas[jj][:, np.newaxis]
                                * expit(w @ U[jj]) - alphaIn * data[jj])
+    print(cost)
     return cost
 
 
@@ -99,6 +100,7 @@ def factorizeEstimate(data: Union[list, np.ndarray], tol=1e-3, maxiter=100, retu
         etas = [calcEta(x, w, alpha) for x in data]
         cost1 = costF(data, w, etas, alpha)
         w = calcW(data, etas, alpha)
+        print("cost1: ", cost1)
         print("diff w before and after update ", costF(data, w, etas, alpha) - cost1)
         costLast = cost
         cost = costF(data, w, etas, alpha)
