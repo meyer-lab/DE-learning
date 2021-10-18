@@ -5,6 +5,11 @@ import numpy as np
 from tqdm import tqdm
 from scipy.special import expit, logit
 from .importData import importLINCS
+import jax.numpy as jnp
+from jax import jacrev
+from jax import value_and_grad
+from jax.scipy.special import expit as jexpit
+from scipy.optimize import minimize
 
 
 alpha = 0.1
@@ -14,7 +19,7 @@ def costF(data: list, w, etas: list, alphaIn):
     """ Calculate the fitting cost. """
     assert len(data) == len(etas)
     assert w.shape == (data[0].shape[0], data[0].shape[0])
-    assert np.all(np.isfinite(w))
+    assert jnp.all(jnp.isfinite(w))
     for eta in etas:
         assert np.all(np.isfinite(eta))
         assert eta.shape == (data[0].shape[0], )
@@ -24,8 +29,7 @@ def costF(data: list, w, etas: list, alphaIn):
         np.fill_diagonal(U[ii], 0.0)
     cost = 0.0
     for jj in range(len(data)):
-        cost += np.linalg.norm(etas[jj][:, np.newaxis]
-                               * expit(w @ U[jj]) - alphaIn * data[jj])
+        cost += jnp.linalg.norm(etas[jj][:, np.newaxis] * jexpit(w @ U[jj]) - alphaIn * data[jj])
     return cost
 
 
@@ -47,8 +51,21 @@ def calcW(data: list, eta: list, alphaIn: float) -> np.ndarray:
             U = np.concatenate((U, U1), axis=1)
             B = np.concatenate((B, B1), axis=1)
 
-    # orthogonal_mp(U.T, B.T, n_nonzero_coefs=40).T
-    return np.linalg.lstsq(U.T, B.T, rcond=None)[0].T
+    w0 = np.linalg.lstsq(U.T, B.T, rcond=None)[0].T
+
+
+
+    def costFun(x):
+        return costF(data, jnp.reshape(x, w0.shape), eta, alphaIn)
+
+    def callbk(x):
+        print(costF(data, jnp.reshape(x, w0.shape), eta, alphaIn))
+
+    assert False
+    res = minimize(value_and_grad(costFun), w0, jac=True, method="BFGS", callback=callbk, options={"disp": True})
+    
+
+    return np.reshape(res.x, w0.shape)
 
 
 def calcEta(data: np.ndarray, w: np.ndarray, alphaIn: float) -> np.ndarray:
