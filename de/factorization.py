@@ -5,7 +5,6 @@ import numpy as np
 from tqdm import tqdm
 from scipy.special import expit, logit
 from .importData import importLINCS
-from sklearn.linear_model import orthogonal_mp
 
 
 alpha = 0.1
