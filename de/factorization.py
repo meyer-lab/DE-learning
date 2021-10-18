@@ -5,7 +5,6 @@ import numpy as np
 from tqdm import tqdm
 from scipy.special import expit, logit
 from .importData import importLINCS
-from sklearn.linear_model import orthogonal_mp
 
 
 alpha = 0.1
@@ -26,7 +25,7 @@ def costF(data: list, w, etas: list, alphaIn):
     cost = 0.0
     for jj in range(len(data)):
         cost += np.linalg.norm(etas[jj][:, np.newaxis]
-                               * expit(w @ U[jj]) - alphaIn * data[jj])
+                               * expit(w @ U[jj]) - alphaIn * data[jj])**2.0
     return cost
 
 
