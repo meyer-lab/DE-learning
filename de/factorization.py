@@ -6,8 +6,7 @@ from tqdm import tqdm
 from scipy.special import expit, logit
 from .importData import importLINCS
 import jax.numpy as jnp
-from jax import jacrev
-from jax import value_and_grad
+from jax import grad, value_and_grad
 from jax.scipy.special import expit as jexpit
 from scipy.optimize import minimize
 
@@ -29,11 +28,11 @@ def costF(data: list, w, etas: list, alphaIn):
         np.fill_diagonal(U[ii], 0.0)
     cost = 0.0
     for jj in range(len(data)):
-        cost += jnp.linalg.norm(etas[jj][:, np.newaxis] * jexpit(w @ U[jj]) - alphaIn * data[jj])
+        cost += jnp.linalg.norm(etas[jj][:, np.newaxis] * jexpit(w @ U[jj]) - alphaIn * data[jj])**2.0
     return cost
 
 
-def calcW(data: list, eta: list, alphaIn: float) -> np.ndarray:
+def calcW(data: list, eta: list, alphaIn: float, w0) -> np.ndarray:
     """
     Directly calculate w.
     Calculate an estimate for w based on data and current iteration of eta
@@ -51,19 +50,19 @@ def calcW(data: list, eta: list, alphaIn: float) -> np.ndarray:
             U = np.concatenate((U, U1), axis=1)
             B = np.concatenate((B, B1), axis=1)
 
-    w0 = np.linalg.lstsq(U.T, B.T, rcond=None)[0].T
-
-
+    if np.linalg.norm(w0) == 0.0:
+        w0 = np.linalg.lstsq(U.T, B.T, rcond=None)[0].T
 
     def costFun(x):
         return costF(data, jnp.reshape(x, w0.shape), eta, alphaIn)
 
-    def callbk(x):
-        print(costF(data, jnp.reshape(x, w0.shape), eta, alphaIn))
+    if costF(data, w0, eta, alphaIn) == 0.0:
+        return w0
 
-    assert False
-    res = minimize(value_and_grad(costFun), w0, jac=True, method="BFGS", callback=callbk, options={"disp": True})
-    
+    def hvp(x, v):
+        return grad(lambda x: jnp.vdot(grad(costFun)(x), v))(x)
+
+    res = minimize(value_and_grad(costFun), w0, jac=True, hessp=hvp, method="CG", options={"maxiter": 200})
 
     return np.reshape(res.x, w0.shape)
 
@@ -113,10 +112,14 @@ def factorizeEstimate(data: Union[list, np.ndarray], tol=1e-3, maxiter=100, retu
     tq = tqdm(range(maxiter), delay=0.5)
     for _ in tq:
         etas = [calcEta(x, w, alpha) for x in data]
-        w = calcW(data, etas, alpha)
+        print(f"cost1: {costF(data, w, etas, alpha)}")
+        w = calcW(data, etas, alpha, w)
+        print(f"cost2: {costF(data, w, etas, alpha)}")
         costLast = cost
         cost = costF(data, w, etas, alpha)
         tq.set_postfix(cost=cost, refresh=False)
+
+        print(f"delta: {costLast - cost}")
 
         if (costLast - cost) < tol:
             break
