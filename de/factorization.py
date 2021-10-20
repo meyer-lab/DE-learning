@@ -176,3 +176,6 @@ def mergedFitting(cellLine1, cellLine2):
     shared_data = [data1, data2]
 
     return factorizeEstimate(shared_data)
+
+def grad():
+    
