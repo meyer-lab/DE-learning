@@ -5,9 +5,6 @@ import numpy as np
 from tqdm import tqdm
 from scipy.special import expit, logit
 from .importData import importLINCS
-import jax.numpy as jnp
-from jax import grad, value_and_grad
-from jax.scipy.special import expit as jexpit
 from scipy.optimize import minimize
 
 
