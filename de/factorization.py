@@ -2,91 +2,54 @@
 
 from typing import Union
 import numpy as np
-from tqdm import tqdm
-from scipy.special import expit, logit
 from .importData import importLINCS
 import jax.numpy as jnp
-from jax import grad, value_and_grad
+from jax import value_and_grad
 from jax.scipy.special import expit as jexpit
 from scipy.optimize import minimize
+from jax.config import config
+from tqdm import tqdm
 
+
+config.update("jax_enable_x64", True)
 
 alpha = 0.1
 
 
-def costF(data: list, w, etas: list, alphaIn):
+def costF(data: list, w):
     """ Calculate the fitting cost. """
-    assert len(data) == len(etas)
     assert w.shape == (data[0].shape[0], data[0].shape[0])
     assert jnp.all(jnp.isfinite(w))
-    for eta in etas:
-        assert np.all(np.isfinite(eta))
-        assert eta.shape == (data[0].shape[0], )
+
     # Make the U matrix
     U = [np.copy(d) for d in data]
     for ii in range(len(U)):
         np.fill_diagonal(U[ii], 0.0)
     cost = 0.0
+    etas = []
     for jj in range(len(data)):
-        cost += jnp.linalg.norm(etas[jj][:, np.newaxis] * jexpit(w @ U[jj]) - alphaIn * data[jj])**2.0
-    return cost
+        expM = jexpit(w @ U[jj])
+        aData = alpha * data[jj]
+
+        # Calc eta
+        # Least squares with one coefficient and no intercept
+        xy = jnp.sum(expM * aData, axis=1)
+        xx = jnp.sum(expM * expM, axis=1)
+
+        etta = xy / xx
+        etta = jnp.clip(etta, 0.0, 1e12)
+        etas.append(etta)
+
+        cost += jnp.linalg.norm(etta[:, jnp.newaxis] * expM - alpha * data[jj])**2.0
+
+    for eta in etas:
+        assert jnp.all(jnp.isfinite(eta))
+        assert eta.shape == (data[0].shape[0], )
+
+    return cost, etas
 
 
-def calcW(data: list, eta: list, alphaIn: float, w0) -> np.ndarray:
-    """
-    Directly calculate w.
-    Calculate an estimate for w based on data and current iteration of eta
-    """
-    for i, x in enumerate(data):
-        U1 = np.copy(x)
-        np.fill_diagonal(U1, 0.0)
-        B1 = (x * alphaIn) / eta[i][:, np.newaxis]
-        B1 = logit(np.clip(B1, 0.0001, 0.9999))
-
-        if i == 0:
-            U = U1
-            B = B1
-        else:
-            U = np.concatenate((U, U1), axis=1)
-            B = np.concatenate((B, B1), axis=1)
-
-    if np.linalg.norm(w0) == 0.0:
-        w0 = np.linalg.lstsq(U.T, B.T, rcond=None)[0].T
-
-    def costFun(x):
-        return costF(data, jnp.reshape(x, w0.shape), eta, alphaIn)
-
-    if costF(data, w0, eta, alphaIn) == 0.0:
-        return w0
-
-    def hvp(x, v):
-        return grad(lambda x: jnp.vdot(grad(costFun)(x), v))(x)
-
-    res = minimize(value_and_grad(costFun), w0, jac=True, hessp=hvp, method="CG", options={"maxiter": 200})
-
-    return np.reshape(res.x, w0.shape)
-
-
-def calcEta(data: np.ndarray, w: np.ndarray, alphaIn: float) -> np.ndarray:
-    """
-    Calculate an estimate for eta based on data and current iteration of w.
-    """
-    U = np.copy(data)
-    np.fill_diagonal(U, 0.0)
-    expM = expit(w @ U)
-    aData = alphaIn * data
-
-    # Least squares with one coefficient and no intercept
-    xy = np.sum(expM * aData, axis=1)
-    xx = np.sum(expM * expM, axis=1)
-
-    etta = xy / xx
-    assert np.min(etta) >= 0.0
-    assert np.max(etta) < 1e10
-    return etta
-
-
-def factorizeEstimate(data: Union[list, np.ndarray], tol=1e-3, maxiter=100, returnCost=False):
+def factorizeEstimate(data: Union[list, np.ndarray], maxiter=100, returnCost=False):
     """
     Iteravely solve for w and eta list based on the data.
     :param data: matrix or list of matrices representing a cell line's gene expression interactions with knockdowns
@@ -104,28 +67,33 @@ def factorizeEstimate(data: Union[list, np.ndarray], tol=1e-3, maxiter=100, retu
     if isinstance(data, np.ndarray):
         data = [data]
 
-    w = np.zeros((data[0].shape[0], data[0].shape[0]))
+    w0 = np.zeros((data[0].shape[0], data[0].shape[0]))
 
-    cost = np.inf
+    def costFun(x):
+        wIn = jnp.reshape(x, w0.shape)
+        return costF(data, wIn)[0]
 
-    # Use the data to try and initialize the parameters
-    tq = tqdm(range(maxiter), delay=0.5)
-    for _ in tq:
-        etas = [calcEta(x, w, alpha) for x in data]
-        print(f"cost1: {costF(data, w, etas, alpha)}")
-        w = calcW(data, etas, alpha, w)
-        print(f"cost2: {costF(data, w, etas, alpha)}")
-        costLast = cost
-        cost = costF(data, w, etas, alpha)
-        tq.set_postfix(cost=cost, refresh=False)
+    valGrad = value_and_grad(costFun)
 
-        print(f"delta: {costLast - cost}")
+    def v_g(x):
+        a, b = valGrad(x)
+        return a, np.array(b, order="C", copy=True)
 
-        if (costLast - cost) < tol:
-            break
+    if costFun(w0.flatten()) > 1e-6:
+        with tqdm(total=maxiter) as pbar:
+            def verbose(xk):
+                pbar.update(1)
+                pbar.set_postfix(cost=costFun(xk), refresh=False)
+
+            res = minimize(v_g, w0.flatten(), jac=True, method="L-BFGS-B", callback=verbose, options={"maxiter": maxiter})
+        w = np.reshape(res.x, w0.shape)
+    else:
+        w = w0
+
+    cosst, etas = costF(data, w)
 
     if returnCost:
-        return w, etas, cost
+        return w, etas, cosst
 
     return w, etas
 
