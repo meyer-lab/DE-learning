@@ -5,6 +5,10 @@ import numpy as np
 from tqdm import tqdm
 from scipy.special import expit, logit
 from .importData import importLINCS
+import jax.numpy as jnp
+from jax import grad, value_and_grad
+from jax.scipy.special import expit as jexpit
+from scipy.optimize import minimize
 
 
 alpha = 0.1
@@ -14,7 +18,7 @@ def costF(data: list, w, etas: list, alphaIn):
     """ Calculate the fitting cost. """
     assert len(data) == len(etas)
     assert w.shape == (data[0].shape[0], data[0].shape[0])
-    assert np.all(np.isfinite(w))
+    assert jnp.all(jnp.isfinite(w))
     for eta in etas:
         assert np.all(np.isfinite(eta))
         assert eta.shape == (data[0].shape[0], )
@@ -24,12 +28,11 @@ def costF(data: list, w, etas: list, alphaIn):
         np.fill_diagonal(U[ii], 0.0)
     cost = 0.0
     for jj in range(len(data)):
-        cost += np.linalg.norm(etas[jj][:, np.newaxis]
-                               * expit(w @ U[jj]) - alphaIn * data[jj])**2.0
+        cost += jnp.linalg.norm(etas[jj][:, np.newaxis] * jexpit(w @ U[jj]) - alphaIn * data[jj])**2.0
     return cost
 
 
-def calcW(data: list, eta: list, alphaIn: float) -> np.ndarray:
+def calcW(data: list, eta: list, alphaIn: float, w0) -> np.ndarray:
     """
     Directly calculate w.
     Calculate an estimate for w based on data and current iteration of eta
@@ -47,8 +50,21 @@ def calcW(data: list, eta: list, alphaIn: float) -> np.ndarray:
             U = np.concatenate((U, U1), axis=1)
             B = np.concatenate((B, B1), axis=1)
 
-    # orthogonal_mp(U.T, B.T, n_nonzero_coefs=40).T
-    return np.linalg.lstsq(U.T, B.T, rcond=None)[0].T
+    if np.linalg.norm(w0) == 0.0:
+        w0 = np.linalg.lstsq(U.T, B.T, rcond=None)[0].T
+
+    def costFun(x):
+        return costF(data, jnp.reshape(x, w0.shape), eta, alphaIn)
+
+    if costF(data, w0, eta, alphaIn) == 0.0:
+        return w0
+
+    def hvp(x, v):
+        return grad(lambda x: jnp.vdot(grad(costFun)(x), v))(x)
+
+    res = minimize(value_and_grad(costFun), w0, jac=True, hessp=hvp, method="CG", options={"maxiter": 200})
+
+    return np.reshape(res.x, w0.shape)
 
 
 def calcEta(data: np.ndarray, w: np.ndarray, alphaIn: float) -> np.ndarray:
@@ -96,13 +112,14 @@ def factorizeEstimate(data: Union[list, np.ndarray], tol=1e-3, maxiter=100, retu
     tq = tqdm(range(maxiter), delay=0.5)
     for _ in tq:
         etas = [calcEta(x, w, alpha) for x in data]
-        cost1 = costF(data, w, etas, alpha)
-        w = calcW(data, etas, alpha)
-        print("cost1: ", cost1)
-        print("diff w before and after update ", costF(data, w, etas, alpha) - cost1)
+        print(f"cost1: {costF(data, w, etas, alpha)}")
+        w = calcW(data, etas, alpha, w)
+        print(f"cost2: {costF(data, w, etas, alpha)}")
         costLast = cost
         cost = costF(data, w, etas, alpha)
         tq.set_postfix(cost=cost, refresh=False)
+
+        print(f"delta: {costLast - cost}")
 
         if (costLast - cost) < tol:
             break
@@ -160,22 +177,35 @@ def mergedFitting(cellLine1, cellLine2):
     """
     Given two cell lines, compute the cost of fitting each of them individually and the cost of fitting a shared w matrix.
     """
-    _, annotation1 = importLINCS(cellLine1)
-    _, annotation2 = importLINCS(cellLine2)
+    data1, annotation1 = importLINCS(cellLine1)
+    data2, annotation2 = importLINCS(cellLine2)
     index_list1, index_list2 = commonGenes(annotation1, annotation2)
     idx1 = index_list1.copy()
     idx2 = index_list2.copy()
-    np.concatenate(idx1, (len(annotation1) + 1)) # include the control
-    np.concatenate(idx2, (len(annotation2) + 1)) # include the control
+    # np.concatenate(idx1, (len(annotation1) + 1)) # include the control
+    # np.concatenate(idx2, (len(annotation2) + 1)) # include the control
 
-    data1, _ = importLINCS(cellLine1)
-    data2, _ = importLINCS(cellLine2)
+    # Make sure the genes from both datasets are in the same order
+    ant1 = [annotation1[i] for i in idx1]
+    ant2 = [annotation2[i] for i in idx2]
+
+    assert ant1 == ant2
 
     # Make shared
     data1 = data1[index_list1, :]
     data2 = data2[index_list2, :]
     data1 = data1[:, idx1]
     data2 = data2[:, idx2]
-    shared_data = [data1, data2]
+    w, eta = factorizeEstimate([data1, data2])
+    w_org = w[:, idx1]
+    w_org = w_org[idx1, :]
+    eta_org = [[et[i] for i in idx1] for et in eta]
 
-    return factorizeEstimate(shared_data)
+    return w_org, eta_org, ant1
+
+
+# def grad_cost(w, eta, U, D):
+#     """
+#     the expression for the gradient of cost w.r.t. w.
+#     """
+    # return -2 eta**2 * U.T @ expit(w @ U) * (np.ones((w.shape[0], w.shape[0])) - expit(w @ U)) * expit(w @ U) + 2 * alpha * eta * np.trace( D.T @ U.T @ expit(w @ U) * (np.ones((U.shape[0], U.shape[1])) - expit(w @ U)) )

@@ -12,7 +12,10 @@ def importLINCS(cellLine):
     data = np.load(join(path_here, "de/data/", cellLine + "_RNAi_matrix.npy"))
     annotation = pd.read_csv(join(path_here, "de/data/", cellLine + "_genes.txt"), header=None, sep=" ")[0]
     assert data.shape == (len(annotation), len(annotation) + 1)
-    return data, list(annotation)
+    cutdata = np.zeros((10, 11))
+    cutdata[0:10, 0:10] = data[0:10, 0:10]
+    cutdata[0:10, 10] = data[0:10, -1]
+    return cutdata, list(annotation)[0:10]
 
 
 def importRNAseqKO():
