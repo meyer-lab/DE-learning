@@ -38,7 +38,7 @@ def calcW(data: list, eta: list, alphaIn: float) -> np.ndarray:
         U1 = np.copy(x)
         np.fill_diagonal(U1, 0.0)
         B1 = (x * alphaIn) / eta[i][:, np.newaxis]
-        B1 = logit(np.clip(B1, 0.0001, 0.9999))
+        B1 = logit(np.clip(B1, 0.001, 0.999))
 
         if i == 0:
             U = U1
@@ -47,7 +47,6 @@ def calcW(data: list, eta: list, alphaIn: float) -> np.ndarray:
             U = np.concatenate((U, U1), axis=1)
             B = np.concatenate((B, B1), axis=1)
 
-    # orthogonal_mp(U.T, B.T, n_nonzero_coefs=40).T
     return np.linalg.lstsq(U.T, B.T, rcond=None)[0].T
 
 
@@ -70,7 +69,7 @@ def calcEta(data: np.ndarray, w: np.ndarray, alphaIn: float) -> np.ndarray:
     return etta
 
 
-def factorizeEstimate(data: Union[list, np.ndarray], tol=1e-3, maxiter=100, returnCost=False):
+def factorizeEstimate(data: Union[list, np.ndarray], maxiter=100, returnCost=False):
     """
     Iteravely solve for w and eta list based on the data.
     :param data: matrix or list of matrices representing a cell line's gene expression interactions with knockdowns
@@ -89,20 +88,25 @@ def factorizeEstimate(data: Union[list, np.ndarray], tol=1e-3, maxiter=100, retu
         data = [data]
 
     w = np.zeros((data[0].shape[0], data[0].shape[0]))
+    etas = [calcEta(x, w, alpha) for x in data]
 
-    cost = np.inf
+    cost = costF(data, w, etas, alpha)
 
     # Use the data to try and initialize the parameters
     tq = tqdm(range(maxiter), delay=0.5)
     for _ in tq:
-        etas = [calcEta(x, w, alpha) for x in data]
-        w = calcW(data, etas, alpha)
-        costLast = cost
-        cost = costF(data, w, etas, alpha)
-        tq.set_postfix(cost=cost, refresh=False)
+        wProposed = calcW(data, etas, alpha)
+        etasProposed = [calcEta(x, w, alpha) for x in data]
+        costProposed = costF(data, wProposed, etasProposed, alpha)
 
-        if (costLast - cost) < tol:
+        if costProposed < cost:
+            cost = costProposed
+            etas = etasProposed
+            w = wProposed
+        else:
             break
+
+        tq.set_postfix(cost=cost, refresh=False)
 
     if returnCost:
         return w, etas, cost
