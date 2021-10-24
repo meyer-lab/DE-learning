@@ -36,11 +36,35 @@ def costF(data: list, w):
         xy = jnp.sum(expM * aData, axis=1)
         xx = jnp.sum(expM * expM, axis=1)
 
-        etta = xy / xx
-        etta = jnp.clip(etta, 0.0, 1e12)
-        etas.append(etta)
+def calcW(data: list, eta: list, alphaIn: float) -> np.ndarray:
+    """
+    Directly calculate w.
+    Calculate an estimate for w based on data and current iteration of eta
+    """
+    for i, x in enumerate(data):
+        U1 = np.copy(x)
+        np.fill_diagonal(U1, 0.0)
+        B1 = (x * alphaIn) / eta[i][:, np.newaxis]
+        B1 = logit(np.clip(B1, 0.001, 0.999))
 
-        cost += jnp.linalg.norm(etta[:, jnp.newaxis] * expM - alpha * data[jj])**2.0
+        if i == 0:
+            U = U1
+            B = B1
+        else:
+            U = np.concatenate((U, U1), axis=1)
+            B = np.concatenate((B, B1), axis=1)
+
+    return np.linalg.lstsq(U.T, B.T, rcond=None)[0].T
+
+
+def calcEta(data: np.ndarray, w: np.ndarray, alphaIn: float) -> np.ndarray:
+    """
+    Calculate an estimate for eta based on data and current iteration of w.
+    """
+    U = np.copy(data)
+    np.fill_diagonal(U, 0.0)
+    expM = expit(w @ U)
+    aData = alphaIn * data
 
     for eta in etas:
         assert jnp.all(jnp.isfinite(eta))
@@ -67,30 +91,26 @@ def factorizeEstimate(data: Union[list, np.ndarray], maxiter=100, returnCost=Fal
     if isinstance(data, np.ndarray):
         data = [data]
 
-    w0 = np.zeros((data[0].shape[0], data[0].shape[0]))
+    w = np.zeros((data[0].shape[0], data[0].shape[0]))
+    etas = [calcEta(x, w, alpha) for x in data]
 
-    def costFun(x):
-        wIn = jnp.reshape(x, w0.shape)
-        return costF(data, wIn)[0]
+    cost = costF(data, w, etas, alpha)
 
-    valGrad = value_and_grad(costFun)
+    # Use the data to try and initialize the parameters
+    tq = tqdm(range(maxiter), delay=0.5)
+    for _ in tq:
+        wProposed = calcW(data, etas, alpha)
+        etasProposed = [calcEta(x, w, alpha) for x in data]
+        costProposed = costF(data, wProposed, etasProposed, alpha)
 
-    def v_g(x):
-        a, b = valGrad(x)
-        return a, np.array(b, order="C", copy=True)
+        if costProposed < cost:
+            cost = costProposed
+            etas = etasProposed
+            w = wProposed
+        else:
+            break
 
-    if costFun(w0.flatten()) > 1e-6:
-        with tqdm(total=maxiter) as pbar:
-            def verbose(xk):
-                pbar.update(1)
-                pbar.set_postfix(cost=costFun(xk), refresh=False)
-
-            res = minimize(v_g, w0.flatten(), jac=True, method="L-BFGS-B", callback=verbose, options={"maxiter": maxiter})
-        w = np.reshape(res.x, w0.shape)
-    else:
-        w = w0
-
-    cosst, etas = costF(data, w)
+        tq.set_postfix(cost=cost, refresh=False)
 
     if returnCost:
         return w, etas, cosst
