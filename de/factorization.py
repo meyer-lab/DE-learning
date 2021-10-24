@@ -28,9 +28,6 @@ def costF(data: list, w, etas: list, alphaIn):
                                * expit(w @ U[jj]) - alphaIn * data[jj])**2.0
     return cost
 
-def cost_flattened(data, w, eta,alphaIn):
-    """flatten the matrices to use the gradient checker."""
-
 
 def calcW(data: list, eta: list, alphaIn: float) -> np.ndarray:
     """
