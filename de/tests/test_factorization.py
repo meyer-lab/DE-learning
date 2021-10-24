@@ -5,7 +5,6 @@ import pytest
 import numpy as np
 from numpy import ma
 from scipy import optimize
-import timeit
 from ..factorization import factorizeEstimate, alpha, commonGenes, mergedFitting, grad, cost_flat
 from ..impute import impute, split_data
 from ..importData import ImportMelanoma, importLINCS
