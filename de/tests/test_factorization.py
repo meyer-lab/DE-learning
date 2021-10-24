@@ -4,7 +4,9 @@ Test the factorization model.
 import pytest
 import numpy as np
 from numpy import ma
-from ..factorization import factorizeEstimate, alpha, commonGenes, mergedFitting
+from scipy import optimize
+import timeit
+from ..factorization import factorizeEstimate, alpha, commonGenes, mergedFitting, grad, cost_flat
 from ..impute import impute, split_data
 from ..importData import ImportMelanoma, importLINCS
 
@@ -81,3 +83,14 @@ def test_crossval_Melanoma():
     full_X = impute(train_X)
 
     print(ma.corrcoef(ma.masked_invalid(full_X.flatten()), ma.masked_invalid(test_X.flatten())))
+
+def test_gradient():
+    """Test whether the gradient of the cost is correctly calculated w.r.t. w """
+
+    data = 2*np.random.random((10, 11))
+    w = 2*np.random.random((10, 10))
+    eta = [np.random.random(10)]
+
+    cost1 = grad(w, data, eta[0], alpha) # handwritten gradient of cost w.r.t. w
+    cost2 = optimize.approx_fprime(w.flatten(), cost_flat, 1e-8, data.flatten(), eta[0].flatten(), alpha) # python's grad
+    np.testing.assert_almost_equal(np.sum(cost2), cost1, decimal=1)

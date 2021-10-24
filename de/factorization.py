@@ -28,6 +28,9 @@ def costF(data: list, w, etas: list, alphaIn):
                                * expit(w @ U[jj]) - alphaIn * data[jj])**2.0
     return cost
 
+def cost_flattened(data, w, eta,alphaIn):
+    """flatten the matrices to use the gradient checker."""
+
 
 def calcW(data: list, eta: list, alphaIn: float) -> np.ndarray:
     """
@@ -178,10 +181,27 @@ def mergedFitting(cellLine1, cellLine2):
     return factorizeEstimate(shared_data)
 
 
-def grad(U, w, eta):
+def grad(w, D, eta, alpha):
     """Calculate gradient of the cost w.r.t. w. """
+    U = D.copy()
+    np.fill_diagonal(U, 0.0)
     def d_expit(U, w):
         return (expit(w @ U) * (np.ones((U.shape[0], U.shape[1])) - expit(w @ U))) @ U.T
 
     first = np.trace((eta.T * d_expit(U, w).T) @ (eta[:, np.newaxis] * expit(w @ U)))
     second = np.trace((eta.T * expit(w@U).T) @ (eta * d_expit(U, w)))
+    third = -2 * alpha * np.trace((eta * d_expit(U, w) @ D))
+    return first + second + third
+
+
+def cost_flat(W, D, E, alpha):
+    """cost for flattened matrices. This is just to be able to use the python's grad calculator. """
+    # unflatten:
+    l = int(np.sqrt(len(W))) # the number of genes -- aka the number of rows in w matrix
+    w = np.zeros((l, l))
+    data = np.zeros((l, l+1)) # the added column referes to control
+    for i in range(l):
+        w[i, :] = W[l*i: l*(i + 1)]
+        data[i, :] = D[(l+1)*i : (l+1)*(i+1)]
+
+    return costF([data], w, [E], alpha)
