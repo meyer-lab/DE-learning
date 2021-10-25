@@ -91,5 +91,5 @@ def test_gradient():
     eta = [np.random.random(10)]
 
     cost1 = grad(w, data, eta[0], alpha) # handwritten gradient of cost w.r.t. w
-    cost2 = optimize.approx_fprime(w.flatten(), cost_flat, 1e-8, data.flatten(), eta[0].flatten(), alpha) # python's grad
-    np.testing.assert_almost_equal(np.sum(cost2), cost1, decimal=1)
+    cost2 = optimize.approx_fprime(w.flatten(), cost_flat, 1e-10, data.flatten(), eta[0].flatten(), alpha) # python's grad
+    np.testing.assert_almost_equal(np.sum(cost2), cost1, decimal=3)
