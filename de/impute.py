@@ -8,7 +8,7 @@ from scipy.special import expit
 from scipy.special.orthogonal import legendre
 
 from de.importData import importLINCS
-from .factorization import alpha, factorizeEstimate, SparseFactorization1, SparseFactorization2
+from .factorization import alpha, factorizeEstimate, SparseFactorization
 from .linearModel import runFitting
 
 
@@ -29,7 +29,7 @@ def impute(data, linear=False):
     missing = np.isnan(data)
     data = np.nan_to_num(data)
 
-    for _ in range(20):
+    for _ in range(50):
         U = np.copy(data)
         np.fill_diagonal(U, 0.0)
 

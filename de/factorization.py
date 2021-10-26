@@ -117,15 +117,17 @@ def factorizeEstimate(data: Union[list, np.ndarray], maxiter=100, returnCost=Fal
 
     return w, etas
 
-def SparseFactorization1(data):
+def SparseFactorization(data):
+   
    w, eta = factorizeEstimate(data)
-   w = csc_matrix(w)
 
-   return w, eta
+   threshold = (np.amax(w) - np.amin(w)) / 2
 
-def SparseFactorization2(data):
-   w, eta = factorizeEstimate(data)
-   w = csr_matrix(w)
+   for y in w:
+       for x in y:
+           if x < threshold:
+               x = 0
+               
 
    return w, eta
 

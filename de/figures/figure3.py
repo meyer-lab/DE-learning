@@ -12,12 +12,12 @@ def makeFigure():
     :type f: Figure
     """
     # Get list of axis objects
-    ax, f = getSetup((10, 8), (2, 3))
+    ax, f = getSetup((10, 8), (2, 4))
     # load w for the Melanoma dataset from Torre paper
     w = load_w()
     w = normalize(w)
     w = remove(w)
-    Network(w, ax[0])
+    Network(w, ax[3])
 
     # Plot downstream graph
     ax[0].set_title("w Network Graph (downstream)")
@@ -32,6 +32,8 @@ def makeFigure():
     w_GRNdb = load_w_GRNdb()
     Network_GRNdb(w_GRNdb, ax[3])
     ax[3].set_title("w Network Graph - GRNdb")
+
+    # Plot network with sparsity
 
     # Add subplot labels
     subplotLabel(ax)
