@@ -117,9 +117,7 @@ def factorizeEstimate(data: Union[list, np.ndarray], maxiter=100, returnCost=Fal
 
     return w, etas
 
-def SparseFactorization(data):
-   
-   w, eta = factorizeEstimate(data)
+def SparseFactorization(w):
 
    threshold = (np.amax(w) - np.amin(w)) / 2
 
@@ -129,7 +127,7 @@ def SparseFactorization(data):
                x = 0
                
 
-   return w, eta
+   return w
 
 def commonGenes(ann1, ann2):
     """

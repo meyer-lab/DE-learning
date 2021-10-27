@@ -57,10 +57,7 @@ def plot_impute_graph(cellLine):
 
     print(keep_full)
     print(keep_test)
-    _, axes = plt.subplots(nrows=1, ncols=1, figsize=(7.5 * 1, 6 * 1), 
-    squeeze=0, sharex=False, sharey=True)
-    axes = np.array(axes)
-        
+    _, axes = plt.subplots(nrows=1, ncols=1, figsize=(7.5 * 1, 6 * 1)) 
     for i, ax in enumerate(axes.reshape(-1)):
         ax.set_title('A375 Cross-Validation')
         ax.scatter(keep_full, keep_test)
@@ -72,5 +69,4 @@ def plot_impute_graph(cellLine):
         ax.plot(keep_full, p(keep_full), color='red')
 
     plt.savefig('A375_imputation.png')
-    print(np.ma.corrcoef(np.ma.masked_invalid(keep_full), np.ma.masked_invalid(keep_test))[1,0])
-    
+    print(np.ma.corrcoef(np.ma.masked_invalid(keep_full), np.ma.masked_invalid(keep_test))[1, 0])
