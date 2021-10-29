@@ -4,7 +4,7 @@ Test the factorization model.
 import pytest
 import numpy as np
 from numpy import ma
-from scipy import optimize
+from scipy.optimize import approx_fprime
 from ..factorization import factorizeEstimate, alpha, commonGenes, mergedFitting, grad, costF
 from ..impute import impute, split_data
 from ..importData import ImportMelanoma, importLINCS
@@ -91,7 +91,7 @@ def test_gradient():
     eta = [np.random.random(10)]
 
     cost1 = grad(w, data, eta[0], alpha) # handwritten gradient of cost w.r.t. w
-    cost2 = optimize.approx_fprime(w.flatten(), cost_flat, 1e-10, data, eta[0], alpha) # python's grad
+    cost2 = approx_fprime(w.flatten(), cost_flat, 1e-10, data, eta[0], alpha) # python's grad
     np.testing.assert_almost_equal(np.sum(cost2), cost1, decimal=2)
 
 def cost_flat(W, D, E, alpha):
