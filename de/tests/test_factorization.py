@@ -5,7 +5,7 @@ import pytest
 import numpy as np
 from numpy import ma
 from scipy import optimize
-from ..factorization import factorizeEstimate, alpha, commonGenes, mergedFitting, grad, cost_flat
+from ..factorization import factorizeEstimate, alpha, commonGenes, mergedFitting, grad
 from ..impute import impute, split_data
 from ..importData import ImportMelanoma, importLINCS
 
@@ -93,3 +93,12 @@ def test_gradient():
     cost1 = grad(w, data, eta[0], alpha) # handwritten gradient of cost w.r.t. w
     cost2 = optimize.approx_fprime(w.flatten(), cost_flat, 1e-10, data.flatten(), eta[0].flatten(), alpha) # python's grad
     np.testing.assert_almost_equal(np.sum(cost2), cost1, decimal=3)
+
+def cost_flat(W, D, E, alpha):
+    """cost for flattened matrices. This is just to be able to use the python's grad calculator. """
+    # unflatten:
+    l = int(np.sqrt(len(W))) # the number of genes -- aka the number of rows in w matrix
+    w = W.reshape((l, l))
+    data = D.reshape((l, l+1)) # the added column referes to control
+
+    return costF([data], w, [E], alpha)

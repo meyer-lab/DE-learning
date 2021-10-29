@@ -193,13 +193,3 @@ def grad(w, D, eta, alpha):
     second = np.trace((eta.T * expit(w@U).T) @ (eta * d_expit(U, w)))
     third = -2 * alpha * np.trace((eta * d_expit(U, w) @ D))
     return first + second + third
-
-
-def cost_flat(W, D, E, alpha):
-    """cost for flattened matrices. This is just to be able to use the python's grad calculator. """
-    # unflatten:
-    l = int(np.sqrt(len(W))) # the number of genes -- aka the number of rows in w matrix
-    w = W.reshape((l, l))
-    data = D.reshape((l, l+1)) # the added column referes to control
-
-    return costF([data], w, [E], alpha)
