@@ -199,10 +199,7 @@ def cost_flat(W, D, E, alpha):
     """cost for flattened matrices. This is just to be able to use the python's grad calculator. """
     # unflatten:
     l = int(np.sqrt(len(W))) # the number of genes -- aka the number of rows in w matrix
-    w = np.zeros((l, l))
-    data = np.zeros((l, l+1)) # the added column referes to control
-    for i in range(l):
-        w[i, :] = W[l*i: l*(i + 1)]
-        data[i, :] = D[(l+1)*i : (l+1)*(i+1)]
+    w = W.reshape((l, l))
+    data = D.reshape((l, l+1)) # the added column referes to control
 
     return costF([data], w, [E], alpha)
