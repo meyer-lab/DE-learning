@@ -186,8 +186,8 @@ def grad(w, D, eta, alpha):
     """Calculate gradient of the cost w.r.t. w. """
     U = D.copy()
     np.fill_diagonal(U, 0.0)
-    def d_expit(U, w):
-        return (expit(w @ U) * (np.ones((U.shape[0], U.shape[1])) - expit(w @ U))) @ U.T
+    def d_expit(UU, ww):
+        return (expit(ww @ UU) * (np.ones((UU.shape[0], UU.shape[1])) - expit(ww @ UU))) @ UU.T
 
     first = np.trace((eta.T * d_expit(U, w).T) @ (eta[:, np.newaxis] * expit(w @ U)))
     second = np.trace((eta.T * expit(w@U).T) @ (eta * d_expit(U, w)))
