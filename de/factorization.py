@@ -4,11 +4,10 @@ from typing import Union
 import numpy as np
 from tqdm import tqdm
 from scipy.special import expit, logit
-from scipy.sparse import csr_matrix, csc_matrix
 from .importData import importLINCS
 
 
-alpha = 0.1
+ALPHA = 0.1
 
 
 def costF(data: list, w, etas: list, alphaIn):
@@ -29,15 +28,11 @@ def costF(data: list, w, etas: list, alphaIn):
                                * expit(w @ U[jj]) - alphaIn * data[jj])**2.0
     return cost
 
-
 def calcW(data: list, eta: list, alphaIn: float) -> np.ndarray:
     """
     Directly calculate w.
     Calculate an estimate for w based on data and current iteration of eta
     """
-
-    
-
     for i, x in enumerate(data):
         U1 = np.copy(x)
         np.fill_diagonal(U1, 0.0)
@@ -72,7 +67,6 @@ def calcEta(data: np.ndarray, w: np.ndarray, alphaIn: float) -> np.ndarray:
     assert np.max(etta) < 1e10
     return etta
 
-
 def factorizeEstimate(data: Union[list, np.ndarray], maxiter=100, returnCost=False):
     """
     Iteravely solve for w and eta list based on the data.
@@ -92,16 +86,16 @@ def factorizeEstimate(data: Union[list, np.ndarray], maxiter=100, returnCost=Fal
         data = [data]
 
     w = np.zeros((data[0].shape[0], data[0].shape[0]))
-    etas = [calcEta(x, w, alpha) for x in data]
+    etas = [calcEta(x, w, ALPHA) for x in data]
 
-    cost = costF(data, w, etas, alpha)
+    cost = costF(data, w, etas, ALPHA)
 
     # Use the data to try and initialize the parameters
     tq = tqdm(range(maxiter), delay=0.5)
     for _ in tq:
-        wProposed = calcW(data, etas, alpha)
-        etasProposed = [calcEta(x, w, alpha) for x in data]
-        costProposed = costF(data, wProposed, etasProposed, alpha)
+        wProposed = calcW(data, etas, ALPHA)
+        etasProposed = [calcEta(x, w, ALPHA) for x in data]
+        costProposed = costF(data, wProposed, etasProposed, ALPHA)
 
         if costProposed < cost:
             cost = costProposed
@@ -117,17 +111,18 @@ def factorizeEstimate(data: Union[list, np.ndarray], maxiter=100, returnCost=Fal
 
     return w, etas
 
-def SparseFactorization(w):
+def SparsityAddition(w):
 
-   threshold = (np.amax(w) - np.amin(w)) / 2
+    w_flat = w.flatten()
+    dev = np.std(w_flat)
+    average = np.average(w_flat)
 
-   for y in w:
-       for x in y:
-           if x < threshold:
-               x = 0
-               
-
-   return w
+    for x in w:
+      for y in x:
+        if (y > (average + dev) or y < (average - dev)):
+           y = 0
+    
+    return w
 
 def commonGenes(ann1, ann2):
     """
@@ -139,7 +134,6 @@ def commonGenes(ann1, ann2):
     idx1 = np.array([ann1.index(x) for x in intersection], dtype=int)
     idx2 = np.array([ann2.index(x) for x in intersection], dtype=int)
     return idx1, idx2
-
 
 def MatrixSubtraction(cellLine1, cellLine2):
     """Finds the w-matrices of two different cell lines.
