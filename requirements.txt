@@ -1,5 +1,5 @@
-numpy==1.21.2
-scipy==1.7.1
+numpy==1.21.4
+scipy==1.7.2
 pytest==6.2.5
 pytest-cov==3.0.0
 manubot==0.5.1
@@ -10,7 +10,7 @@ pandoc-tablenos==2.3.0
 matplotlib==3.4.3
 seaborn==0.11.2
 svgutils==0.3.4
-scikit-learn==1.0
+scikit-learn==1.0.1
 NetworkX==2.6.3
-graphviz==0.17
+graphviz==0.18
 tqdm
