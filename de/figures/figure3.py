@@ -1,7 +1,7 @@
 """
 This creates Figure 2: w Network Graph
 """
-from de.factorization import SparseFactorization
+from de.factorization import SparsityAddition
 from .figureCommon import subplotLabel, getSetup
 from ..graph import Network, load_w, remove, normalize, bar_graph
 from ..grndb_network import load_w_GRNdb, Network_GRNdb
@@ -28,14 +28,13 @@ def makeFigure():
     # Plot upstream graph
     bar_graph(w.T, "orange", ax[2], "upstream")
     ax[2].set_title("Bar Graph (upstream)")
-
     # Plot Mia's network (GRNdb)
     w_GRNdb = load_w_GRNdb()
     Network_GRNdb(w_GRNdb, ax[3])
     ax[3].set_title("w Network Graph - GRNdb")
 
     # Plot network with sparsity
-    w_sparse = SparseFactorization(w)
+    w_sparse = SparsityAddition(w)
     Network(w_sparse, ax[4])
     ax[4].set_title("w Network Graph - Sparsity Added")
 

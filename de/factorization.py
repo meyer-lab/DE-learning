@@ -111,7 +111,7 @@ def factorizeEstimate(data: Union[list, np.ndarray], maxiter=100, returnCost=Fal
 
     return w, etas
 
-def SparsityAddition(w):
+def SparsityAddition(w: np.ndarray):
 
     w_flat = w.flatten()
     dev = np.std(w_flat)
