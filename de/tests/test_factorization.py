@@ -5,7 +5,7 @@ import pytest
 import numpy as np
 from numpy import ma
 from scipy.special import expit
-from ..factorization import factorizeEstimate, alpha, commonGenes
+from ..factorization import factorizeEstimate, ALPHA, commonGenes, mergedFitting
 from ..impute import impute, split_data
 from ..importData import ImportMelanoma, importLINCS
 
@@ -29,7 +29,7 @@ def test_factorizeBlank(level):
     w, eta = factorizeEstimate(data, maxiter=2)
 
     np.testing.assert_allclose(w, 0.0, atol=1e-9)
-    np.testing.assert_allclose(eta, 2 * level * alpha)
+    np.testing.assert_allclose(eta, 2 * level * ALPHA)
 
 
 def test_cellLines():
@@ -71,8 +71,8 @@ def test_mergedFittingBlank(level1, level2):
     w, etas = factorizeEstimate([data1, data2], maxiter=2)
 
     np.testing.assert_allclose(w, 0.0, atol=1e-9)
-    np.testing.assert_allclose(etas[0], 2 * level1 * alpha)
-    np.testing.assert_allclose(etas[1], 2 * level2 * alpha)
+    np.testing.assert_allclose(etas[0], 2 * level1 * ALPHA)
+    np.testing.assert_allclose(etas[1], 2 * level2 * ALPHA)
 
 def test_crossval_Melanoma():
     """ Tests the cross val function that creates the train and test data. """

@@ -30,7 +30,6 @@ def costF(data: list, w, etas: list, alphaIn):
 
 def calcW(data: list, eta: list, alphaIn: float) -> np.ndarray:
     """
-    Directly calculate w.
     Calculate an estimate for w based on data and current iteration of eta
     """
     for i, x in enumerate(data):
@@ -72,8 +71,6 @@ def factorizeEstimate(data: Union[list, np.ndarray], maxiter=100, returnCost=Fal
     Iteravely solve for w and eta list based on the data.
     :param data: matrix or list of matrices representing a cell line's gene expression interactions with knockdowns
     :type data: Array or Array List
-    param tol: the minimum difference between two cost iteration values necessary to stop factorization process
-    :type tol: float
     param maxiter: maximum amount of iterations for factorization process, given no tolerance break
     :type maxiter: int
     output w: finalized matrix representing gene-to-gene pertubation effects for either a singular cell line or multiple cell lines
@@ -113,6 +110,13 @@ def factorizeEstimate(data: Union[list, np.ndarray], maxiter=100, returnCost=Fal
 
 def SparsityAddition(w: np.ndarray):
 
+    """
+    Sets all entries of w-matrix within one standard deviation to 0
+    :param w: w-matrix produced from factorizeEstimate
+    :type w: np.ndarray
+    :output w: w-matrix with only strong interactions
+    :type w: np.ndarray"""
+
     w_flat = w.flatten()
     dev = np.std(w_flat)
     average = np.average(w_flat)
@@ -141,14 +145,14 @@ def MatrixSubtraction(cellLine1, cellLine2):
     """
     data1, annotation1 = importLINCS(cellLine1)
     data2, annotation2 = importLINCS(cellLine2)
-    index_list1, index_list2 = commonGenes(annotation1, annotation2)
+    idx1, idx2 = commonGenes(annotation1, annotation2)
     w1, _ = factorizeEstimate(data1)
     w2, _ = factorizeEstimate(data2)
 
-    w1 = w1[index_list1, index_list1]
-    w2 = w2[index_list2, index_list2]
+    w1 = w1[idx1, idx1]
+    w2 = w2[idx2, idx2]
+    assert w1.shape == (idx1.size, idx2.size)
     assert w1.shape == w2.shape
-    assert w1.shape == (index_list1.size, index_list1.size)
 
     norm1 = np.linalg.norm(w1)
     print(f"Norm1: {norm1}")
@@ -170,20 +174,15 @@ def mergedFitting(cellLine1, cellLine2):
     """
     Given two cell lines, compute the cost of fitting each of them individually and the cost of fitting a shared w matrix.
     """
-    _, annotation1 = importLINCS(cellLine1)
-    _, annotation2 = importLINCS(cellLine2)
-    index_list1, index_list2 = commonGenes(annotation1, annotation2)
-    idx1 = index_list1.copy()
-    idx2 = index_list2.copy()
+    data1, annotation1 = importLINCS(cellLine1)
+    data2, annotation2 = importLINCS(cellLine2)
+    idx1, idx2 = commonGenes(annotation1, annotation2)
     np.concatenate(idx1, (len(annotation1) + 1)) # include the control
     np.concatenate(idx2, (len(annotation2) + 1)) # include the control
 
-    data1, _ = importLINCS(cellLine1)
-    data2, _ = importLINCS(cellLine2)
-
     # Make shared
-    data1 = data1[index_list1, :]
-    data2 = data2[index_list2, :]
+    data1 = data1[idx1, :]
+    data2 = data2[idx2, :]
     data1 = data1[:, idx1]
     data2 = data2[:, idx2]
     shared_data = [data1, data2]
