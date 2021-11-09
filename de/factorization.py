@@ -187,8 +187,5 @@ def grad(w, D, eta, alpha):
     U = D.copy()
     np.fill_diagonal(U, 0.0)
     expR = expit(w @ U)
-    UmE = np.ones(U.shape) - expR
-
-    first = (2 * eta[:, np.newaxis] * expR * UmE) @ expR.T
-    second = (-2 * alpha * eta[:, np.newaxis] * expR * UmE) @ D.T
-    return first + second
+    EEU = 2 * eta[:, np.newaxis] * expR * (np.ones(U.shape) - expR)
+    return EEU @ expR.T - alpha * EEU @ D.T
