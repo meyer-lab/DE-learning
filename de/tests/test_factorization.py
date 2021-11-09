@@ -90,12 +90,11 @@ def test_gradient():
     w = 20*np.random.random((20, 20))
     eta = [np.random.random(20)]
 
-    cost1 = grad(w, data, eta[0], alpha) # handwritten gradient of cost w.r.t. w
-    cost2 = approx_fprime(w.flatten(), cost_flat, 1e-10, data, eta[0], alpha) # python's grad
-    np.testing.assert_allclose(cost1.flatten(), cost2)
+    # Cost for flattened matrices. This is just to be able to use the python's grad calculator.
+    def cost_flat(wIn):
+        wIn = wIn.reshape((data.shape[0], data.shape[0]))
+        return costF([data], wIn, [eta[0]], alpha)
 
-def cost_flat(W, data, eta, alpha):
-    """cost for flattened matrices. This is just to be able to use the python's grad calculator. """
-    # unflatten:
-    w = W.reshape((data.shape[0], data.shape[0]))
-    return costF([data], w, [eta], alpha)
+    cost1 = grad(w, data, eta[0], alpha) # handwritten gradient of cost w.r.t. w
+    cost2 = approx_fprime(w.flatten(), cost_flat, 1e-10) # python's grad
+    np.testing.assert_allclose(cost1.flatten(), cost2)
