@@ -166,8 +166,8 @@ def mergedFitting(cellLine1, cellLine2):
     index_list1, index_list2 = commonGenes(annotation1, annotation2)
     idx1 = index_list1.copy()
     idx2 = index_list2.copy()
-    np.concatenate(idx1, (len(annotation1) + 1)) # include the control
-    np.concatenate(idx2, (len(annotation2) + 1)) # include the control
+    np.concatenate(idx1, (len(annotation1) + 1))  # include the control
+    np.concatenate(idx2, (len(annotation2) + 1))  # include the control
 
     data1, _ = importLINCS(cellLine1)
     data2, _ = importLINCS(cellLine2)
@@ -180,3 +180,12 @@ def mergedFitting(cellLine1, cellLine2):
     shared_data = [data1, data2]
 
     return factorizeEstimate(shared_data)
+
+
+def grad(w, D, eta, alpha):
+    """Calculate gradient of the cost w.r.t. w. """
+    U = D.copy()
+    np.fill_diagonal(U, 0.0)
+    expR = expit(w @ U)
+    EEU = 2 * eta[:, np.newaxis] * expR * (np.ones(U.shape) - expR)
+    return EEU @ expR.T - alpha * EEU @ D.T
