@@ -98,4 +98,4 @@ def test_gradient():
     cost2 = approx_derivative(cost_flat, w.flatten(), method="3-point") # python's grad
     assert np.linalg.norm(cost1) > 0.0
     assert np.linalg.norm(cost2) > 0.0
-    np.testing.assert_allclose(cost1.flatten(), cost2, rtol=0.01)
+    np.testing.assert_allclose(cost1.flatten()[0:1000], cost2[0:1000], rtol=0.001)
