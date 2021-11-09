@@ -181,7 +181,9 @@ def mergedFitting(cellLine1, cellLine2):
 
     return factorizeEstimate(shared_data)
 
+
 def grad(w, D, eta, alpha):
+    """ Calculate gradient of the cost w.r.t. w. """
     U = D.copy()
     np.fill_diagonal(U, 0.0)
     expR = expit(w @ U)
