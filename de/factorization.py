@@ -166,8 +166,8 @@ def mergedFitting(cellLine1, cellLine2):
     index_list1, index_list2 = commonGenes(annotation1, annotation2)
     idx1 = index_list1.copy()
     idx2 = index_list2.copy()
-    np.concatenate(idx1, (len(annotation1) + 1)) # include the control
-    np.concatenate(idx2, (len(annotation2) + 1)) # include the control
+    np.concatenate(idx1, (len(annotation1) + 1))  # include the control
+    np.concatenate(idx2, (len(annotation2) + 1))  # include the control
 
     data1, _ = importLINCS(cellLine1)
     data2, _ = importLINCS(cellLine2)
@@ -187,8 +187,6 @@ def grad(w, D, eta, alpha):
     U = D.copy()
     np.fill_diagonal(U, 0.0)
 
-    first = (2 * eta[:, np.newaxis] * expit(w@U) * (np.ones(U.shape) - expit(w@U))) @ expit(w@U).T
-    second = (-2 * alpha * eta[:, np.newaxis] * expit(w@U) *(np.ones(U.shape) - expit(w@U))) @D.T
+    first = (2 * eta[:, np.newaxis] * expit(w @ U) * (np.ones(U.shape) - expit(w @ U))) @ expit(w @ U).T
+    second = (-2 * alpha * eta[:, np.newaxis] * expit(w @ U) * (np.ones(U.shape) - expit(w @ U))) @ D.T
     return first + second
-
-
