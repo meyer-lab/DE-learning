@@ -15,7 +15,7 @@ def test_factorizeEstimate():
     """ Test that this runs successfully with reasonable input. """
     data = ImportMelanoma()
 
-    w, eta, costOne = factorizeEstimate(data, returnCost=True)
+    w, eta, costOne = factorizeEstimate(data, maxiter=10, returnCost=True)
     assert w.shape == (data.shape[0], data.shape[0])
     assert eta[0].shape == (data.shape[0], )
 
@@ -40,7 +40,7 @@ def test_cellLines():
     _, annotation1 = importLINCS(cellLine1)
     _, annotation2 = importLINCS(cellLine2)
 
-    mergedFitting(cellLine1, cellLine2)
+    mergedFitting(cellLine1, cellLine2, maxiter=3)
 
     # assuming the function returns the list of shared genes between the two cell lines
     shared_annotation, _ = commonGenes(annotation1, annotation2)
@@ -97,4 +97,6 @@ def test_gradient():
 
     cost1 = grad(w, data, eta[0], alpha) # handwritten gradient of cost w.r.t. w
     cost2 = approx_fprime(w.flatten(), cost_flat, 1e-10) # python's grad
+    print(cost1.flatten() - cost2)
+    print(cost1)
     np.testing.assert_allclose(cost1.flatten(), cost2)

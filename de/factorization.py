@@ -3,6 +3,7 @@
 from typing import Union
 import numpy as np
 from tqdm import tqdm
+from scipy.optimize import minimize
 from scipy.special import expit, logit
 from .importData import importLINCS
 
@@ -48,6 +49,25 @@ def calcW(data: list, eta: list, alphaIn: float) -> np.ndarray:
             B = np.concatenate((B, B1), axis=1)
 
     return np.linalg.lstsq(U.T, B.T, rcond=None)[0].T
+
+
+def fitW(w0, data: list, eta: list, alphaIn: float) -> np.ndarray:
+    maxiter = 10000
+
+    def costFun(x):
+        wIn = np.reshape(x, w0.shape)
+        return costF(data, wIn, eta, alphaIn)
+
+    def gFun(x):
+        wIn = np.reshape(x, w0.shape)
+        gradOut = np.zeros_like(wIn)
+        for ii in range(len(data)):
+            gradOut += grad(wIn, data[ii], eta[ii], alphaIn)
+        return gradOut.flatten()
+
+    res = minimize(costFun, w0.flatten(), jac=gFun, method="CG", options={"maxiter": maxiter})
+    print(res)
+    return np.reshape(res.x, w0.shape)
 
 
 def calcEta(data: np.ndarray, w: np.ndarray, alphaIn: float) -> np.ndarray:
@@ -96,6 +116,7 @@ def factorizeEstimate(data: Union[list, np.ndarray], maxiter=100, returnCost=Fal
     tq = tqdm(range(maxiter), delay=0.5)
     for _ in tq:
         wProposed = calcW(data, etas, alpha)
+        # wProposed = fitW(wProposed, data, etas, alpha)
         etasProposed = [calcEta(x, w, alpha) for x in data]
         costProposed = costF(data, wProposed, etasProposed, alpha)
 
@@ -157,7 +178,7 @@ def MatrixSubtraction(cellLine1, cellLine2):
     return norm1, norm2, diff_norm, shufnorm, w1, w2
 
 
-def mergedFitting(cellLine1, cellLine2):
+def mergedFitting(cellLine1, cellLine2, maxiter=100):
     """
     Given two cell lines, compute the cost of fitting each of them individually and the cost of fitting a shared w matrix.
     """
@@ -179,7 +200,7 @@ def mergedFitting(cellLine1, cellLine2):
     data2 = data2[:, idx2]
     shared_data = [data1, data2]
 
-    return factorizeEstimate(shared_data)
+    return factorizeEstimate(shared_data, maxiter=maxiter)
 
 
 def grad(w, D, eta, alpha):
