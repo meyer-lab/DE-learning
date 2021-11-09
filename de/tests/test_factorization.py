@@ -86,15 +86,17 @@ def test_crossval_Melanoma():
 
 def test_gradient():
     """Test whether the gradient of the cost is correctly calculated w.r.t. w """
-    data = 20*np.random.random((20, 21))
-    w = 20*np.random.random((20, 20))
-    eta = [np.random.random(20)]
+    data = ImportMelanoma()
+    w = np.random.random((data.shape[0], data.shape[0]))
+    eta = np.random.random(data.shape[0])
 
     # Cost for flattened matrices. This is just to be able to use the python's grad calculator.
     def cost_flat(wIn):
         wIn = wIn.reshape((data.shape[0], data.shape[0]))
-        return costF([data], wIn, [eta[0]], alpha)
+        return costF([data], wIn, [eta], alpha)
 
-    cost1 = grad(w, data, eta[0], alpha) # handwritten gradient of cost w.r.t. w
+    cost1 = grad(w, data, eta, alpha) # handwritten gradient of cost w.r.t. w
     cost2 = approx_fprime(w.flatten(), cost_flat, 1e-10) # python's grad
+    assert np.linalg.norm(cost1) > 0.0
+    assert np.linalg.norm(cost2) > 0.0
     np.testing.assert_allclose(cost1.flatten(), cost2)
