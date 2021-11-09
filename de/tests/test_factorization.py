@@ -4,9 +4,8 @@ Test the factorization model.
 import pytest
 import numpy as np
 from numpy import ma
-from scipy.optimize import approx_fprime
-from scipy.special import expit
-from ..factorization import factorizeEstimate, alpha, commonGenes, mergedFitting, grad, costF
+from scipy.optimize._numdiff import approx_derivative
+from ..factorization import factorizeEstimate, alpha, commonGenes, mergedFitting, grad, costF, calcEta
 from ..impute import impute, split_data
 from ..importData import ImportMelanoma, importLINCS
 
@@ -86,15 +85,17 @@ def test_crossval_Melanoma():
 
 def test_gradient():
     """Test whether the gradient of the cost is correctly calculated w.r.t. w """
-    data = 20*np.random.random((20, 21))
-    w = 20*np.random.random((20, 20))
-    eta = [np.random.random(20)]
+    data = ImportMelanoma()
+    w = np.zeros((data.shape[0], data.shape[0]))
+    eta = calcEta(data, w, alpha)
 
     # Cost for flattened matrices. This is just to be able to use the python's grad calculator.
     def cost_flat(wIn):
         wIn = wIn.reshape((data.shape[0], data.shape[0]))
-        return costF([data], wIn, [eta[0]], alpha)
+        return costF([data], wIn, [eta], alpha)
 
-    cost1 = grad(w, data, eta[0], alpha) # handwritten gradient of cost w.r.t. w
-    cost2 = approx_fprime(w.flatten(), cost_flat, 1e-10) # python's grad
-    np.testing.assert_allclose(cost1.flatten(), cost2)
+    cost1 = grad(w, data, eta, alpha) # handwritten gradient of cost w.r.t. w
+    cost2 = approx_derivative(cost_flat, w.flatten(), method="3-point") # python's grad
+    assert np.linalg.norm(cost1) > 0.0
+    assert np.linalg.norm(cost2) > 0.0
+    np.testing.assert_allclose(cost1.flatten()[0:1000], cost2[0:1000], rtol=0.001)
