@@ -5,8 +5,7 @@ import pytest
 import numpy as np
 from numpy import ma
 from scipy.optimize import approx_fprime
-from scipy.special import expit
-from ..factorization import factorizeEstimate, alpha, commonGenes, mergedFitting, grad, costF
+from ..factorization import factorizeEstimate, alpha, commonGenes, mergedFitting, grad, costF, calcEta
 from ..impute import impute, split_data
 from ..importData import ImportMelanoma, importLINCS
 
@@ -87,8 +86,8 @@ def test_crossval_Melanoma():
 def test_gradient():
     """Test whether the gradient of the cost is correctly calculated w.r.t. w """
     data = ImportMelanoma()
-    w = np.random.random((data.shape[0], data.shape[0]))
-    eta = np.random.random(data.shape[0])
+    w = np.zeros((data.shape[0], data.shape[0]))
+    eta = calcEta(data, w, alpha)
 
     # Cost for flattened matrices. This is just to be able to use the python's grad calculator.
     def cost_flat(wIn):
