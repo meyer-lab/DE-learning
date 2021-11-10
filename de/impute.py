@@ -24,7 +24,9 @@ def impute(data, linear=False):
     missing = np.isnan(data)
     data = np.nan_to_num(data)
 
-    for _ in range(100):
+    # TODO: Use softimpute first
+
+    for _ in range(10):
         U = np.copy(data)
         np.fill_diagonal(U, 0.0)
 
