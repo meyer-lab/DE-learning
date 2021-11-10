@@ -52,21 +52,19 @@ def calcW(data: list, eta: list, alphaIn: float) -> np.ndarray:
 
 
 def fitW(w0, data: list, eta: list, alphaIn: float) -> np.ndarray:
-    maxiter = 10000
+    maxiter = 1000
 
     def costFun(x):
         wIn = np.reshape(x, w0.shape)
-        return costF(data, wIn, eta, alphaIn)
-
-    def gFun(x):
-        wIn = np.reshape(x, w0.shape)
         gradOut = np.zeros_like(wIn)
+        costOut = 0.0
         for ii in range(len(data)):
-            gradOut += grad(wIn, data[ii], eta[ii], alphaIn)
-        return gradOut.flatten()
+            retVal = val_grad(wIn, data[ii], eta[ii], alphaIn)
+            costOut += retVal[0]
+            gradOut += retVal[1]
+        return costOut, gradOut.flatten()
 
-    res = minimize(costFun, w0.flatten(), jac=gFun, method="CG", options={"maxiter": maxiter})
-    print(res)
+    res = minimize(costFun, w0.flatten(), jac=True, method="L-BFGS-B", options={"maxiter": maxiter})
     return np.reshape(res.x, w0.shape)
 
 
@@ -89,7 +87,7 @@ def calcEta(data: np.ndarray, w: np.ndarray, alphaIn: float) -> np.ndarray:
     return etta
 
 
-def factorizeEstimate(data: Union[list, np.ndarray], maxiter=100, returnCost=False):
+def factorizeEstimate(data: Union[list, np.ndarray], maxiter=300, returnCost=False):
     """
     Iteravely solve for w and eta list based on the data.
     :param data: matrix or list of matrices representing a cell line's gene expression interactions with knockdowns
@@ -111,21 +109,29 @@ def factorizeEstimate(data: Union[list, np.ndarray], maxiter=100, returnCost=Fal
     etas = [calcEta(x, w, alpha) for x in data]
 
     cost = costF(data, w, etas, alpha)
+    linear = True
 
     # Use the data to try and initialize the parameters
     tq = tqdm(range(maxiter), delay=0.5)
-    for _ in tq:
-        wProposed = calcW(data, etas, alpha)
-        # wProposed = fitW(wProposed, data, etas, alpha)
-        etasProposed = [calcEta(x, w, alpha) for x in data]
-        costProposed = costF(data, wProposed, etasProposed, alpha)
+    for ii in tq:
+        etas = [calcEta(x, w, alpha) for x in data]
 
-        if costProposed < cost:
-            cost = costProposed
-            etas = etasProposed
-            w = wProposed
+        if linear:
+            wProposed = calcW(data, etas, alpha)
         else:
-            break
+            wProposed = fitW(w, data, etas, alpha)
+        
+        costNew = costF(data, wProposed, etas, alpha)
+
+        if cost - costNew > 1e-3:
+            w = wProposed
+            cost = costNew
+        else:
+            if linear:
+                print(f"Switch to non-linear at {ii}.")
+                linear = False
+            else:
+                break
 
         tq.set_postfix(cost=cost, refresh=False)
 
@@ -203,9 +209,13 @@ def mergedFitting(cellLine1, cellLine2, maxiter=100):
     return factorizeEstimate(shared_data, maxiter=maxiter)
 
 
-def grad(w, D, eta, alpha):
+def val_grad(w, D, eta, alpha):
     """ Calculate gradient of the cost w.r.t. w. """
     U = D.copy()
     np.fill_diagonal(U, 0.0)
     expR = expit(w @ U)
-    return 2 * (eta[:, np.newaxis] * expR - alpha * D) * (eta[:, np.newaxis] * expR * (np.ones(U.shape) - expR)) @ U.T
+    ER = eta[:, np.newaxis] * expR
+
+    cost = np.linalg.norm(ER - alpha * D)**2.0
+    gradd = 2 * (ER - alpha * D) * (ER * (np.ones(U.shape) - expR)) @ U.T
+    return cost, gradd

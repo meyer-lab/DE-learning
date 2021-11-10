@@ -5,7 +5,7 @@ import pytest
 import numpy as np
 from numpy import ma
 from scipy.optimize._numdiff import approx_derivative
-from ..factorization import factorizeEstimate, alpha, commonGenes, mergedFitting, grad, costF, calcEta
+from ..factorization import factorizeEstimate, alpha, commonGenes, mergedFitting, val_grad, costF, calcEta
 from ..impute import impute, split_data
 from ..importData import ImportMelanoma, importLINCS
 
@@ -94,7 +94,7 @@ def test_gradient():
         wIn = wIn.reshape((data.shape[0], data.shape[0]))
         return costF([data], wIn, [eta], alpha)
 
-    cost1 = grad(w, data, eta, alpha) # handwritten gradient of cost w.r.t. w
+    cost1 = val_grad(w, data, eta, alpha)[1] # handwritten gradient of cost w.r.t. w
     cost2 = approx_derivative(cost_flat, w.flatten(), method="3-point") # python's grad
     assert np.linalg.norm(cost1) > 0.0
     assert np.linalg.norm(cost2) > 0.0
