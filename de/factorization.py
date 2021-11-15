@@ -48,7 +48,9 @@ def calcW(data: list, eta: list, alphaIn: float) -> np.ndarray:
             U = np.concatenate((U, U1), axis=1)
             B = np.concatenate((B, B1), axis=1)
 
-    return np.linalg.lstsq(U.T, B.T, rcond=None)[0].T
+    lamb = 1.0
+    # return np.linalg.lstsq(U.T, B.T, rcond=None)[0].T
+    return np.linalg.lstsq(U.dot(U.T) + lamb * np.identity(U.T.shape[1]), U.dot(B.T))[0].T
 
 
 def fitW(w0, data: list, eta: list, alphaIn: float) -> np.ndarray:
