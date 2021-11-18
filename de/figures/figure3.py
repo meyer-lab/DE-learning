@@ -1,6 +1,8 @@
 """
 This creates Figure 2: w Network Graph
 """
+from .importData import importLINCS, ImportMelanoma
+from .factorization import factorizeEstimate
 from .figureCommon import subplotLabel, getSetup
 from ..graph import Network, load_w, remove, normalize, bar_graph
 from ..grndb_network import load_w_GRNdb, Network_GRNdb

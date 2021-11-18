@@ -32,6 +32,7 @@ def importRNAseqKO():
 def ImportMelanoma():
     """ Takes in dataframe from importRNAseqKO() and forms matrix: rows = gene, columns = knockout model.
     There are 84 knockout models (including negative control) and 83 corresponding genes measured. """
+    path_here = dirname(dirname(__file__))
     data_in = importRNAseqKO()
     # average knockout replicate values and remove duplicate gene rows
     data_combined = data_in.groupby(by=data_in.columns, axis=1).mean()  # knockout replicates
@@ -52,7 +53,8 @@ def ImportMelanoma():
     matrix = matrix.T
     # Convert dataframe to numpy array for comparison with model
     matrix = matrix.to_numpy()
-    return matrix
+    annotations = np.loadtxt(join(path_here, "de/data/node_Index.csv"), dtype=str)
+    return matrix, list(annotations)
 
 
 def prepData():

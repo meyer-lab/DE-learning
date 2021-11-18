@@ -12,7 +12,7 @@ from ..importData import ImportMelanoma, importLINCS
 
 def test_factorizeEstimate():
     """ Test that this runs successfully with reasonable input. """
-    data = ImportMelanoma()
+    data, _ = ImportMelanoma()
 
     w, eta, costOne = factorizeEstimate(data, maxiter=10, returnCost=True)
     assert w.shape == (data.shape[0], data.shape[0])
@@ -49,7 +49,7 @@ def test_cellLines():
 
 def test_mergedFitting():
     """ To test if the fitting works on multiple cell lines and the shared cost has a reasonable value. """
-    data = ImportMelanoma()
+    data, _ = ImportMelanoma()
     w1, eta_list1 = factorizeEstimate(data, maxiter=3)
     eta1 = eta_list1[0]
 
@@ -77,7 +77,7 @@ def test_mergedFittingBlank(level1, level2):
 
 def test_crossval_Melanoma():
     """ Tests the cross val function that creates the train and test data. """
-    data = ImportMelanoma()
+    data, _ = ImportMelanoma()
     train_X, test_X = split_data(data)
     full_X = impute(train_X)
 
@@ -85,7 +85,7 @@ def test_crossval_Melanoma():
 
 def test_gradient():
     """Test whether the gradient of the cost is correctly calculated w.r.t. w """
-    data = ImportMelanoma()
+    data, _ = ImportMelanoma()
     w = np.zeros((data.shape[0], data.shape[0]))
     eta = calcEta(data, w, alpha)
 

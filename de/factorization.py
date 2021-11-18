@@ -208,6 +208,8 @@ def mergedFitting(cellLine1, cellLine2, maxiter=100):
 
     return factorizeEstimate(shared_data, maxiter=maxiter)
 
+def merg_fit():
+    data1, genes1 = importLINCS()
 
 def val_grad(w, D, eta, alpha):
     """ Calculate gradient of the cost w.r.t. w. """

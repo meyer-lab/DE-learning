@@ -1,5 +1,4 @@
 """ Contains functions for creating directed graph from w matrix. """
-from os.path import join, dirname
 import numpy as np
 import pandas as pd
 import matplotlib.patches as mpatches
@@ -18,9 +17,8 @@ def load_w():
     """
     path_here = dirname(dirname(__file__))
 
-    data = ImportMelanoma()
+    data, genes = ImportMelanoma()
     w, _ = factorizeEstimate(data)
-    genes = np.loadtxt(join(path_here, "de/data/node_Index.csv"), dtype=str)
 
     return pd.DataFrame(w, columns=genes, index=genes)
 
@@ -34,8 +32,8 @@ def normalize(w):
     :output w: A normalized matrix
     :type w: DataFrame
     """
-    control = ImportMelanoma()[:, -1]
-    for i in range(len(control)):
+    control = ImportMelanoma()[0][:, -1]
+    for i in range(len(w.columns)):
         w.iloc[:, i] = w.iloc[:, i] * control[i]
     return w
 
@@ -127,7 +125,7 @@ def set_edges(dir_graph, w_abs, w_max, pos, ax):
     :output dir_graph: An edited directed graph with edges of specified color and thickness
     :type dir_graph: DiGraph
     """
-    threshold = np.mean(w_abs) + 1.4 * np.std(w_abs)
+    threshold = np.mean(w_abs) + 0.2 * np.std(w_abs)
     edges = dir_graph.edges()
     colors = [dir_graph[u][v]["color"] for u, v in edges]
     thickness = [np.exp((np.abs(dir_graph[u][v]["weight"]) - threshold) / (w_max - threshold)) for u, v in edges]
@@ -196,7 +194,7 @@ def Network(w, ax):
 
     # Add edges
     w = w.to_numpy()
-    threshold = np.mean(w_abs) + 1.4 * np.std(w_abs)  # increase threshold in order to remove in-significant edges
+    threshold = np.mean(w_abs) + 0.2 * np.std(w_abs)  # increase threshold in order to remove in-significant edges
     for i, j in np.ndindex(w.shape):
         if (i != j) and (w_abs[i, j] > threshold):
             G.add_edge(j, i, color="red" if w[i, j] > 0 else "blue", weight=w[i, j])
