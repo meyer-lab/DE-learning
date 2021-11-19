@@ -166,7 +166,6 @@ def commonGenes(annots: list) -> list:
     for i in range(len(annots)):
         tmp = np.array([annots[i].index(x) for x in intersection], dtype=int)
         np.concatenate((tmp, np.array([-1]))) # add control to all
-        print(tmp)
         indexes.append(tmp)
 
     return indexes
