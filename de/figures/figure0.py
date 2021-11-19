@@ -16,7 +16,6 @@ def makeFigure():
 
     data2, genes2 = importLINCS("A375")
     # normalize to control
-    data2 /= 10.0
 
     index_list1, index_list2 = commonGenes(genes1, genes2)
     common_genes = list(np.array(genes1)[index_list1])

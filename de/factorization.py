@@ -21,8 +21,8 @@ def costF(data: list, w, etas: list, alphaIn):
         assert eta.shape == (data[0].shape[0], )
     # Make the U matrix
     U = [np.copy(d) for d in data]
-    for ii in range(len(U)):
-        np.fill_diagonal(U[ii], 0.0)
+    # for ii in range(len(U)):
+    #     np.fill_diagonal(U[ii], 0.0)
     cost = 0.0
     for jj in range(len(data)):
         cost += np.linalg.norm(etas[jj][:, np.newaxis]
@@ -37,7 +37,7 @@ def calcW(data: list, eta: list, alphaIn: float) -> np.ndarray:
     """
     for i, x in enumerate(data):
         U1 = np.copy(x)
-        np.fill_diagonal(U1, 0.0)
+        # np.fill_diagonal(U1, 0.0)
         B1 = (x * alphaIn) / eta[i][:, np.newaxis]
         B1 = logit(np.clip(B1, 0.001, 0.999))
 
@@ -73,7 +73,7 @@ def calcEta(data: np.ndarray, w: np.ndarray, alphaIn: float) -> np.ndarray:
     Calculate an estimate for eta based on data and current iteration of w.
     """
     U = np.copy(data)
-    np.fill_diagonal(U, 0.0)
+    # np.fill_diagonal(U, 0.0)
     expM = expit(w @ U)
     aData = alphaIn * data
 
