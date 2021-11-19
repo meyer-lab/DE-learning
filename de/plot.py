@@ -3,7 +3,7 @@
 from math import ceil
 import matplotlib.pyplot as plt
 import numpy as np
-from .factorization import MatrixSubtraction
+from .matrix_operations import MatrixSubtraction
 from .impute import split_data, impute
 
 

@@ -29,6 +29,17 @@ def costF(data: list, w, etas: list, alphaIn):
                                * expit(w @ U[jj]) - alphaIn * data[jj])**2.0
     return cost
 
+def val_grad(w, D, eta, alpha):
+    """ Calculate gradient of the cost w.r.t. w. """
+    U = D.copy()
+    np.fill_diagonal(U, 0.0)
+    expR = expit(w @ U)
+    ER = eta[:, np.newaxis] * expR
+
+    cost = np.linalg.norm(ER - alpha * D)**2.0
+    gradd = 2 * (ER - alpha * D) * (ER * (np.ones(U.shape) - expR)) @ U.T
+    return cost, gradd
+
 
 def calcW(data: list, eta: list, alphaIn: float) -> np.ndarray:
     """
@@ -140,48 +151,22 @@ def factorizeEstimate(data: Union[list, np.ndarray], maxiter=300, returnCost=Fal
 
     return w, etas
 
-
-def commonGenes(ann1, ann2):
+def commonGenes(annots: list) -> list:
     """
-    Uses annotation list to generate an array of common genes between two cell lines
+    Uses annotation list to generate an array of common genes between multiple cell lines
     output
     """
-    intersection = list(set(ann1) & set(ann2))
+    intersect = [set(ann) for ann in annots]
 
-    idx1 = np.array([ann1.index(x) for x in intersection], dtype=int)
-    idx2 = np.array([ann2.index(x) for x in intersection], dtype=int)
-    return idx1, idx2
+    intersection = intersect[0]
+    for i in range(len(annots)):
+        intersection = intersection & intersect[i]
 
+    indexes = []
+    for i in range(len(annots)):
+        indexes.append(np.array([annots[i].index(x) for x in intersection], dtype=int))
 
-def MatrixSubtraction(cellLine1, cellLine2):
-    """Finds the w-matrices of two different cell lines.
-    Calculates the norm of the original matrices and their difference.
-    """
-    data1, annotation1 = importLINCS(cellLine1)
-    data2, annotation2 = importLINCS(cellLine2)
-    index_list1, index_list2 = commonGenes(annotation1, annotation2)
-    w1, _ = factorizeEstimate(data1)
-    w2, _ = factorizeEstimate(data2)
-
-    w1 = w1[index_list1, index_list1]
-    w2 = w2[index_list2, index_list2]
-    assert w1.shape == w2.shape
-    assert w1.shape == (index_list1.size, index_list1.size)
-
-    norm1 = np.linalg.norm(w1)
-    print(f"Norm1: {norm1}")
-    norm2 = np.linalg.norm(w2)
-    print(f"Norm2: {norm2}")
-    diff_norm = np.linalg.norm(w2 - w1)
-    print(f"Difference norm: {diff_norm}")
-
-    w1shuff = w1.copy()
-    w2shuff = w2.copy()
-    np.random.shuffle(w1shuff)
-    np.random.shuffle(w2shuff)
-    shufnorm = np.linalg.norm(w2shuff - w1shuff)
-    print(f"Shuffled norm: {shufnorm}")
-    return norm1, norm2, diff_norm, shufnorm, w1, w2
+    return indexes
 
 
 def mergedFitting(cellLine1, cellLine2, maxiter=100):
@@ -190,7 +175,8 @@ def mergedFitting(cellLine1, cellLine2, maxiter=100):
     """
     _, annotation1 = importLINCS(cellLine1)
     _, annotation2 = importLINCS(cellLine2)
-    index_list1, index_list2 = commonGenes(annotation1, annotation2)
+    indexes = commonGenes(annotation1, annotation2)
+    index_list1, index_list2 = indexes[0], indexes[1]
     idx1 = index_list1.copy()
     idx2 = index_list2.copy()
     np.concatenate(idx1, (len(annotation1) + 1))  # include the control
@@ -207,15 +193,3 @@ def mergedFitting(cellLine1, cellLine2, maxiter=100):
     shared_data = [data1, data2]
 
     return factorizeEstimate(shared_data, maxiter=maxiter)
-
-
-def val_grad(w, D, eta, alpha):
-    """ Calculate gradient of the cost w.r.t. w. """
-    U = D.copy()
-    np.fill_diagonal(U, 0.0)
-    expR = expit(w @ U)
-    ER = eta[:, np.newaxis] * expR
-
-    cost = np.linalg.norm(ER - alpha * D)**2.0
-    gradd = 2 * (ER - alpha * D) * (ER * (np.ones(U.shape) - expR)) @ U.T
-    return cost, gradd
