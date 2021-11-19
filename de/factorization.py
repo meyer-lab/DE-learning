@@ -164,7 +164,10 @@ def commonGenes(annots: list) -> list:
 
     indexes = []
     for i in range(len(annots)):
-        indexes.append(np.array([annots[i].index(x) for x in intersection], dtype=int))
+        tmp = np.array([annots[i].index(x) for x in intersection], dtype=int)
+        np.concatenate((tmp, np.array([-1]))) # add control to all
+        print(tmp)
+        indexes.append(tmp)
 
     return indexes
 
@@ -173,23 +176,16 @@ def mergedFitting(cellLine1, cellLine2, maxiter=100):
     """
     Given two cell lines, compute the cost of fitting each of them individually and the cost of fitting a shared w matrix.
     """
-    _, annotation1 = importLINCS(cellLine1)
-    _, annotation2 = importLINCS(cellLine2)
-    indexes = commonGenes(annotation1, annotation2)
+    data1, annotation1 = importLINCS(cellLine1)
+    data2, annotation2 = importLINCS(cellLine2)
+    indexes = commonGenes([annotation1, annotation2])
     index_list1, index_list2 = indexes[0], indexes[1]
-    idx1 = index_list1.copy()
-    idx2 = index_list2.copy()
-    np.concatenate(idx1, (len(annotation1) + 1))  # include the control
-    np.concatenate(idx2, (len(annotation2) + 1))  # include the control
-
-    data1, _ = importLINCS(cellLine1)
-    data2, _ = importLINCS(cellLine2)
 
     # Make shared
-    data1 = data1[index_list1, :]
-    data2 = data2[index_list2, :]
-    data1 = data1[:, idx1]
-    data2 = data2[:, idx2]
+    data1 = data1[index_list1[0:-1], :]
+    data2 = data2[index_list2[0:-1], :]
+    data1 = data1[:, index_list1]
+    data2 = data2[:, index_list2]
     shared_data = [data1, data2]
 
     return factorizeEstimate(shared_data, maxiter=maxiter)
