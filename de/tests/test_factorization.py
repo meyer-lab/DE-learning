@@ -42,7 +42,7 @@ def test_cellLines():
     mergedFitting(cellLine1, cellLine2, maxiter=3)
 
     # assuming the function returns the list of shared genes between the two cell lines
-    shared_annotation = commonGenes(annotation1, annotation2)
+    shared_annotation = commonGenes([annotation1, annotation2])
     # make sure at least 50% of the genes in smaller cell line is shared between the two cell lines
     assert np.abs(len(shared_annotation[0])) >= 0.5 * np.min([len(annotation1), len(annotation2)])
 
