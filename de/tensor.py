@@ -38,4 +38,6 @@ def tensor() -> np.ndarray:
     Tensor[:, :, 3] = hT29
     Tensor[:, :, 4] = mCF7
     Tensor[:, :, 5] = pC3
-    return Tensor
+    # assert the genes are the same among cell line1 and 2
+    assert(np.all(np.array(gA375)[ids[0]] == np.array(gA549)[ids[1]]))
+    return Tensor, np.array(gA375)[ids[0]]
