@@ -5,7 +5,7 @@ import pytest
 import numpy as np
 from numpy import ma
 from scipy.optimize._numdiff import approx_derivative
-from ..factorization import factorizeEstimate, alpha, commonGenes, mergedFitting, val_grad, costF, calcEta
+from ..factorization import factorizeEstimate, alpha, mergedFitting, commonGenes, val_grad, costF, calcEta
 from ..impute import impute, split_data
 from ..importData import ImportMelanoma, importLINCS
 
@@ -42,9 +42,9 @@ def test_cellLines():
     mergedFitting(cellLine1, cellLine2, maxiter=3)
 
     # assuming the function returns the list of shared genes between the two cell lines
-    shared_annotation, _ = commonGenes(annotation1, annotation2)
+    shared_annotation = commonGenes([annotation1, annotation2])
     # make sure at least 50% of the genes in smaller cell line is shared between the two cell lines
-    assert np.abs(len(shared_annotation)) >= 0.5 * np.min([len(annotation1), len(annotation2)])
+    assert np.abs(len(shared_annotation[0])) >= 0.5 * np.min([len(annotation1), len(annotation2)])
 
 
 def test_mergedFitting():
