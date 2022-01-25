@@ -1,4 +1,5 @@
 """ Organizing the data into tensor format. """
+import numpy as np
 from .importData import importLINCS
 from .factorization import commonGenes
 
@@ -30,11 +31,11 @@ def tensor() -> np.ndarray:
     pC3 = PC[:, ids[5]]
 
     # create a tensor of gene expressions x gene perturbations x cell lines
-    Tensor = np.zeros((A375.shape[0], A375.shape[1], len(ids)))
-    Tensor[:, :, 1] = A375
-    Tensor[:, :, 2] = A549
-    Tensor[:, :, 3] = HA1E
-    Tensor[:, :, 4] = HT29
-    Tensor[:, :, 5] = MCF7
-    Tensor[:, :, 6] = PC3
+    Tensor = np.zeros((ids[0].shape[0]-1, ids[0].shape[0], len(ids)))
+    Tensor[:, :, 0] = a375
+    Tensor[:, :, 1] = a549
+    Tensor[:, :, 2] = hA1E
+    Tensor[:, :, 3] = hT29
+    Tensor[:, :, 4] = mCF7
+    Tensor[:, :, 5] = pC3
     return Tensor
