@@ -16,18 +16,18 @@ def tensor() -> np.ndarray:
     # find common genes between all
     ids = commonGenes([gA375, gA549, gHA1E, gHT29, gMCF7, gPC3])
     # only keep common genes
-    A375 = A375[ids[0][0:-1], :]
-    A375 = A375[:, ids[0]]
-    A549 = A549[ids[1][0:-1], :]
-    A549 = A549[:, ids[1]]
-    HA1E = HA1E[ids[2][0:-1], :]
-    HA1E = HA1E[:, ids[2]]
-    HT29 = HT29[ids[3][0:-1], :]
-    HT29 = HT29[:, ids[3]]
-    MCF7 = MCF7[ids[4][0:-1], :]
-    MCF7 = MCF7[:, ids[4]]
-    PC3 = PC3[ids[5][0:-1], :]
-    PC3 = PC3[:, ids[5]]
+    A37 = A375[ids[0][0:-1], :]
+    a375 = A37[:, ids[0]]
+    A54 = A549[ids[1][0:-1], :]
+    a549 = A54[:, ids[1]]
+    HA1 = HA1E[ids[2][0:-1], :]
+    hA1E = HA1[:, ids[2]]
+    HT2 = HT29[ids[3][0:-1], :]
+    hT29 = HT2[:, ids[3]]
+    MCF = MCF7[ids[4][0:-1], :]
+    mCF7 = MCF[:, ids[4]]
+    PC = PC3[ids[5][0:-1], :]
+    pC3 = PC[:, ids[5]]
 
     # create a tensor of gene expressions x gene perturbations x cell lines
     Tensor = np.zeros((A375.shape[0], A375.shape[1], len(ids)))
