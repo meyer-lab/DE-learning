@@ -1,5 +1,7 @@
 """ Organizing the data into tensor format. """
 import numpy as np
+from scipy.stats import zscore
+
 from .importData import importLINCS
 from .factorization import commonGenes
 
@@ -16,28 +18,28 @@ def tensor() -> np.ndarray:
 
     # find common genes between all
     ids = commonGenes([gA375, gA549, gHA1E, gHT29, gMCF7, gPC3])
-    # only keep common genes
-    A37 = A375[ids[0][0:-1], :]
-    a375 = A37[:, ids[0]]
-    A54 = A549[ids[1][0:-1], :]
-    a549 = A54[:, ids[1]]
-    HA1 = HA1E[ids[2][0:-1], :]
-    hA1E = HA1[:, ids[2]]
-    HT2 = HT29[ids[3][0:-1], :]
-    hT29 = HT2[:, ids[3]]
-    MCF = MCF7[ids[4][0:-1], :]
-    mCF7 = MCF[:, ids[4]]
-    PC = PC3[ids[5][0:-1], :]
-    pC3 = PC[:, ids[5]]
+    n = ids[0].shape[0]
 
-    # create a tensor of gene expressions x gene perturbations x cell lines
-    Tensor = np.zeros((ids[0].shape[0]-1, ids[0].shape[0], len(ids)))
-    Tensor[:, :, 0] = a375
-    Tensor[:, :, 1] = a549
-    Tensor[:, :, 2] = hA1E
-    Tensor[:, :, 3] = hT29
-    Tensor[:, :, 4] = mCF7
-    Tensor[:, :, 5] = pC3
+    Tensor = np.zeros((n, n+1, len(ids))) # the added condition in the second dimension is the control
+
+    # only keep common genes
+    A37 = A375[ids[0], :]
+    Tensor[:, :, 0] = A37[:, np.append(ids[0], [-1])]
+    A54 = A549[ids[1], :]
+    Tensor[:, :, 1] = A54[:, np.append(ids[1], [-1])]
+    HA1 = HA1E[ids[2], :]
+    Tensor[:, :, 2] = HA1[:, np.append(ids[2], [-1])]
+    HT2 = HT29[ids[3], :]
+    Tensor[:, :, 3] = HT2[:, np.append(ids[3], [-1])]
+    MCF = MCF7[ids[4], :]
+    Tensor[:, :, 4] = MCF[:, np.append(ids[4], [-1])]
+    PC = PC3[ids[5], :]
+    Tensor[:, :, 5] = PC[:, np.append(ids[5], [-1])]
+
     # assert the genes are the same among cell line1 and 2
     assert(np.all(np.array(gA375)[ids[0]] == np.array(gA549)[ids[1]]))
-    return Tensor, np.array(gA375)[ids[0]]
+
+    gene_names = np.array(gA375)[ids[0]]
+    np.append(gene_names, ['Control'])
+
+    return zscore(Tensor, axis=1), gene_names
