@@ -3,13 +3,12 @@ SHELL := /bin/bash
 .PHONY: clean test
 
 flist = $(wildcard de/figures/figure*.py)
-flistFull = $(patsubst %, output/figure%.svg, $(flist))
 
-all: $(flistFull)
+all: $(patsubst de/figures/figure%.py, output/figure%.svg, $(flist))
 
-output/figure%.svg: genFigures.py de/figures/figure%.py
+output/figure%.svg: de/figures/figure%.py
 	@ mkdir -p ./output
-	poetry run ./genFigures.py $*
+	poetry run fbuild $*
 
 test:
 	poetry run pytest -s -x -v

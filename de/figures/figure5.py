@@ -2,7 +2,7 @@
 from ..hypergeom import setvars, PMF, CDF
 from ..graph import load_w, remove, Network, normalize
 from ..grndb_network import load_w_GRNdb, Network_GRNdb
-from .figureCommon import subplotLabel, getSetup
+from .common import subplotLabel, getSetup
 
 
 def makeFigure():

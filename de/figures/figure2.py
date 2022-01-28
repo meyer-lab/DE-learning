@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import normalize
 from sklearn.decomposition import PCA
-from .figureCommon import subplotLabel, getSetup
+from .common import subplotLabel, getSetup
 from ..importData import prepData
 
 
