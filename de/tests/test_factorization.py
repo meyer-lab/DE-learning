@@ -5,6 +5,9 @@ import pytest
 import numpy as np
 from numpy import ma
 from scipy.optimize._numdiff import approx_derivative
+from tensorly.decomposition import parafac
+import tensorly as tl
+from ..tensor import form_tensor
 from ..factorization import factorizeEstimate, alpha, mergedFitting, commonGenes, val_grad, costF, calcEta
 from ..impute import impute, split_data
 from ..importData import ImportMelanoma, importLINCS
@@ -99,3 +102,10 @@ def test_gradient():
     assert np.linalg.norm(cost1) > 0.0
     assert np.linalg.norm(cost2) > 0.0
     np.testing.assert_allclose(cost1.flatten()[0:1000], cost2[0:1000], rtol=0.001)
+
+def test_randomized_svd():
+    """ Imports the tensor of union of all genes among 6 cell lines and performs parafac. """
+    tensor, _ = form_tensor()
+    tfac = parafac(tensor, rank=7, svd="randomized_svd")
+    r2x = 1 - tl.norm((tl.cp_to_tensor(tfac) - tensor)) ** 2 / (tl.norm(tensor)) ** 2
+    assert r2x > 0

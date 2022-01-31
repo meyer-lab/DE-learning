@@ -1,12 +1,14 @@
 """ Organizing the data into tensor format. """
 import numpy as np
 from scipy.stats import zscore
+import tensorly as tl
+from tensorly.decomposition import parafac
 
 from .importData import importLINCS
 from .factorization import commonGenes
 
 
-def tensor() -> np.ndarray:
+def form_tensor() -> np.ndarray:
     """ find all common genes and create a tensor format data from genes, cell lines, and gene expression levels. """
     # import
     A375, gA375 = importLINCS("A375")
@@ -20,7 +22,7 @@ def tensor() -> np.ndarray:
     ids = commonGenes([gA375, gA549, gHA1E, gHT29, gMCF7, gPC3])
     n = ids[0].shape[0]
 
-    Tensor = np.zeros((n, n+1, len(ids))) # the added condition in the second dimension is the control
+    Tensor = tl.zeros((n, n+1, len(ids))) # the added condition in the second dimension is the control
 
     # only keep common genes
     A37 = A375[ids[0], :]
@@ -43,3 +45,16 @@ def tensor() -> np.ndarray:
     np.append(gene_names, ['Control'])
 
     return zscore(Tensor, axis=1), gene_names
+
+def factorize():
+    """ Using Parafac as a tensor factorization. """
+    tensor, genes = form_tensor()
+    # perform parafac and CP decomposition
+    r2x_parafac = []
+    r2x_tucker = []
+    for i in range(1, 5):
+        # parafac
+        fac_p = parafac(tensor, rank=i, svd="randomized_svd")
+        r2x_parafac.append(1 - ((tl.norm(tl.cp_to_tensor(fac_p) - tensor) ** 2) / tl.norm(tensor) ** 2))
+
+    print("parafac ", r2x_parafac)
