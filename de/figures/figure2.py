@@ -3,16 +3,18 @@ This creates Figure 1: PCA plots
 """
 import numpy as np
 import pandas as pd
+import seaborn as sns
 from sklearn.preprocessing import normalize
 from sklearn.decomposition import PCA
 from .common import subplotLabel, getSetup
 from ..importData import prepData
+from ..tensor import factorize
 
 
 def makeFigure():
     """ Get a list of the axis objects and create a figure. """
     # Get list of axis objects
-    ax, f = getSetup((8, 4), (1, 3))
+    ax, f = getSetup((8, 8), (2, 3))
 
     # Perform PCA
     data = prepData()
@@ -26,6 +28,20 @@ def makeFigure():
 
     # Make subplots
     figureMaker(ax, pca_object, df, KO_genes_unique)
+
+    # tensor factorization
+    tfac, r2x, _, cellLines = factorize(num_comp=6)
+    cellLine_factors = pd.DataFrame(tfac.factors[2], columns=[f"Cmp. {i}" for i in np.arange(1, tfac.rank + 1)], index=cellLines)
+
+    ax[3].scatter(range(1, 7), r2x, lw=2)
+    ax[3].set_title("Tensor R2X")
+    ax[3].set_ylabel("R2x")
+    ax[3].set_xlabel("Number of Components")
+    ax[3].set_ylim((0.0, 1.0))
+    g1 = sns.heatmap(cellLine_factors, cmap="PRGn", center=0, yticklabels=True, cbar=True, ax=ax[4])
+    g1.set_yticklabels(g1.get_yticklabels(), rotation=0)
+    g1.set_title("Cell lines")
+    ax[5].axis("off")
 
     # Add subplot labels
     subplotLabel(ax)

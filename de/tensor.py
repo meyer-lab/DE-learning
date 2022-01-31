@@ -3,7 +3,6 @@ import numpy as np
 from scipy.stats import zscore
 import tensorly as tl
 from tensorly.decomposition import parafac
-
 from .importData import importLINCS
 from .factorization import commonGenes
 
@@ -43,18 +42,19 @@ def form_tensor() -> np.ndarray:
 
     gene_names = np.array(gA375)[ids[0]]
     np.append(gene_names, ['Control'])
+    cellLines = ["A375", "A549", "HA1E", "HT29", "MCF7", "PC3"]
 
-    return zscore(Tensor, axis=1), gene_names
+    return zscore(Tensor, axis=1), gene_names, cellLines
 
-def factorize():
+def factorize(num_comp=6):
     """ Using Parafac as a tensor factorization. """
-    tensor, genes = form_tensor()
+    tensor, genes, cellLines = form_tensor()
     # perform parafac and CP decomposition
     r2x_parafac = []
-    r2x_tucker = []
-    for i in range(1, 5):
+    for i in range(1, 7):
         # parafac
         fac_p = parafac(tensor, rank=i, svd="randomized_svd")
         r2x_parafac.append(1 - ((tl.norm(tl.cp_to_tensor(fac_p) - tensor) ** 2) / tl.norm(tensor) ** 2))
 
-    print("parafac ", r2x_parafac)
+    tfac = fac_p = parafac(tensor, rank=num_comp, svd="randomized_svd")
+    return tfac, r2x_parafac, genes, cellLines
