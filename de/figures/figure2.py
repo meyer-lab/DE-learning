@@ -8,7 +8,7 @@ from sklearn.preprocessing import normalize
 from sklearn.decomposition import PCA
 from .common import subplotLabel, getSetup
 from ..importData import prepData
-from ..tensor import factorize
+from ..tensor import factorize, form_tensor
 
 
 def makeFigure():
@@ -41,6 +41,7 @@ def makeFigure():
     g1 = sns.heatmap(cellLine_factors, cmap="PRGn", center=0, yticklabels=True, cbar=True, ax=ax[4])
     g1.set_yticklabels(g1.get_yticklabels(), rotation=0)
     g1.set_title("Cell lines")
+
     ax[5].axis("off")
 
     # Add subplot labels
