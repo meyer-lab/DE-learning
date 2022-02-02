@@ -107,9 +107,33 @@ def test_gradient():
     np.testing.assert_allclose(cost1.flatten()[0:1000], cost2[0:1000], rtol=0.001)
 
 
+def initialize_cp(tensor, rank):
+    factors = []
+    for mode in range(tl.ndim(tensor)):
+        # Avoid randomized_svd fallback to truncated_svd
+        if mode == 2:
+            rr = min(6, rank)
+        else:
+            rr = rank
+        U, S, _ = tl.randomized_svd(tl.unfold(tensor, mode), n_eigenvecs=rr)
+
+        # Put SVD initialization on the same scaling as the tensor
+        if mode == 0:
+            U = U @ np.diag(S)
+
+        if U.shape[1] < rank:
+            random_part = np.ones((U.shape[0], rank - U.shape[1]))
+            U = np.concatenate([U, random_part], axis=1)
+
+        factors.append(U[:, :rank])
+
+    return tl.cp_tensor.CPTensor((None, factors))
+
+
 def test_randomized_svd():
     """ Imports the tensor of union of all genes among 6 cell lines and performs parafac. """
     tensor, _, _ = form_tensor()
-    tfac = parafac(tensor, rank=7, svd="randomized_svd")
+    tInit = initialize_cp(tensor, 7)
+    tfac = parafac(tensor, rank=7, init=tInit, linesearch=True)
     r2x = 1 - tl.norm((tl.cp_to_tensor(tfac) - tensor)) ** 2 / (tl.norm(tensor)) ** 2
     assert r2x > 0
