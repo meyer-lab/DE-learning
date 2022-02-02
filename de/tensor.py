@@ -1,6 +1,7 @@
 """ Organizing the data into tensor format. """
 import numpy as np
 from scipy.stats import zscore
+import tensorly as tl
 from .importData import importLINCS
 from .factorization import commonGenes
 
