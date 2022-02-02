@@ -66,6 +66,7 @@ def test_mergedFitting():
     # w should be identical
     np.testing.assert_allclose(w1, w2)
 
+
 @pytest.mark.parametrize("level1", [2.0, 3.0])
 @pytest.mark.parametrize("level2", [1.0, 5.0])
 def test_mergedFittingBlank(level1, level2):
@@ -78,6 +79,7 @@ def test_mergedFittingBlank(level1, level2):
     np.testing.assert_allclose(etas[0], 2 * level1 * alpha)
     np.testing.assert_allclose(etas[1], 2 * level2 * alpha)
 
+
 def test_crossval_Melanoma():
     """ Tests the cross val function that creates the train and test data. """
     data = ImportMelanoma()
@@ -85,6 +87,7 @@ def test_crossval_Melanoma():
     full_X = impute(train_X)
 
     print(ma.corrcoef(ma.masked_invalid(full_X.flatten()), ma.masked_invalid(test_X.flatten())))
+
 
 def test_gradient():
     """Test whether the gradient of the cost is correctly calculated w.r.t. w """
@@ -97,11 +100,12 @@ def test_gradient():
         wIn = wIn.reshape((data.shape[0], data.shape[0]))
         return costF([data], wIn, [eta], alpha)
 
-    cost1 = val_grad(w, data, eta, alpha)[1] # handwritten gradient of cost w.r.t. w
-    cost2 = approx_derivative(cost_flat, w.flatten(), method="3-point") # python's grad
+    cost1 = val_grad(w, data, eta, alpha)[1]  # handwritten gradient of cost w.r.t. w
+    cost2 = approx_derivative(cost_flat, w.flatten(), method="3-point")  # python's grad
     assert np.linalg.norm(cost1) > 0.0
     assert np.linalg.norm(cost2) > 0.0
     np.testing.assert_allclose(cost1.flatten()[0:1000], cost2[0:1000], rtol=0.001)
+
 
 def test_randomized_svd():
     """ Imports the tensor of union of all genes among 6 cell lines and performs parafac. """
