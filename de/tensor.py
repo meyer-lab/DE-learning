@@ -1,8 +1,6 @@
 """ Organizing the data into tensor format. """
 import numpy as np
 from scipy.stats import zscore
-import tensorly as tl
-from tensorly.decomposition import parafac
 from .importData import importLINCS
 from .factorization import commonGenes
 
@@ -21,7 +19,7 @@ def form_tensor() -> np.ndarray:
     ids = commonGenes([gA375, gA549, gHA1E, gHT29, gMCF7, gPC3])
     n = ids[0].shape[0]
 
-    Tensor = tl.zeros((n, n+1, len(ids))) # the added condition in the second dimension is the control
+    Tensor = np.zeros((n, n + 1, len(ids)))  # the added condition in the second dimension is the control
 
     # only keep common genes
     A37 = A375[ids[0], :]
@@ -56,4 +54,3 @@ def form_tensor() -> np.ndarray:
     cellLines = ["A375", "A549", "HA1E", "HT29", "MCF7", "PC3"]
 
     return Tensor, gene_names, cellLines
-
