@@ -105,7 +105,7 @@ def test_gradient():
 
 def test_randomized_svd():
     """ Imports the tensor of union of all genes among 6 cell lines and performs parafac. """
-    tensor, _ = form_tensor()
+    tensor, _, _ = form_tensor()
     tfac = parafac(tensor, rank=7, svd="randomized_svd")
     r2x = 1 - tl.norm((tl.cp_to_tensor(tfac) - tensor)) ** 2 / (tl.norm(tensor)) ** 2
     assert r2x > 0
