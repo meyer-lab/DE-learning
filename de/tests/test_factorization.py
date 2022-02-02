@@ -7,7 +7,7 @@ from numpy import ma
 from scipy.optimize._numdiff import approx_derivative
 from tensorly.decomposition import parafac
 import tensorly as tl
-from ..tensor import form_tensor
+from ..tensor import form_tensor, initialize_cp
 from ..factorization import factorizeEstimate, alpha, mergedFitting, commonGenes, val_grad, costF, calcEta
 from ..impute import impute, split_data
 from ..importData import ImportMelanoma, importLINCS
@@ -105,29 +105,6 @@ def test_gradient():
     assert np.linalg.norm(cost1) > 0.0
     assert np.linalg.norm(cost2) > 0.0
     np.testing.assert_allclose(cost1.flatten()[0:1000], cost2[0:1000], rtol=0.001)
-
-
-def initialize_cp(tensor, rank):
-    factors = []
-    for mode in range(tl.ndim(tensor)):
-        # Avoid randomized_svd fallback to truncated_svd
-        if mode == 2:
-            rr = min(6, rank)
-        else:
-            rr = rank
-        U, S, _ = tl.randomized_svd(tl.unfold(tensor, mode), n_eigenvecs=rr)
-
-        # Put SVD initialization on the same scaling as the tensor
-        if mode == 0:
-            U = U @ np.diag(S)
-
-        if U.shape[1] < rank:
-            random_part = np.ones((U.shape[0], rank - U.shape[1]))
-            U = np.concatenate([U, random_part], axis=1)
-
-        factors.append(U[:, :rank])
-
-    return tl.cp_tensor.CPTensor((None, factors))
 
 
 def test_randomized_svd():

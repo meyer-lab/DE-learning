@@ -54,3 +54,25 @@ def form_tensor() -> np.ndarray:
     cellLines = ["A375", "A549", "HA1E", "HT29", "MCF7", "PC3"]
 
     return Tensor, gene_names, cellLines
+
+def initialize_cp(tensor, rank):
+    factors = []
+    for mode in range(tl.ndim(tensor)):
+        # Avoid randomized_svd fallback to truncated_svd
+        if mode == 2:
+            rr = min(6, rank)
+        else:
+            rr = rank
+        U, S, _ = tl.randomized_svd(tl.unfold(tensor, mode), n_eigenvecs=rr)
+
+        # Put SVD initialization on the same scaling as the tensor
+        if mode == 0:
+            U = U @ np.diag(S)
+
+        if U.shape[1] < rank:
+            random_part = np.ones((U.shape[0], rank - U.shape[1]))
+            U = np.concatenate([U, random_part], axis=1)
+
+        factors.append(U[:, :rank])
+
+    return tl.cp_tensor.CPTensor((None, factors))
