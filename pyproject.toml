@@ -16,6 +16,7 @@ svgutils = "^0.3"
 scikit-learn = "^1.0"
 networkx = "^2.6"
 graphviz = "^0.18"
+tensorly = "^0.7.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2"
