@@ -46,7 +46,7 @@ def form_tensor() -> np.ndarray:
 
     # zscore each gene
     for i in range(Tensor.shape[2]):
-        Tensor[:, :, i] = zscore(Tensor[:, :, i], axis=0)
+        Tensor[:, :, i] = zscore(Tensor[:, :, i], axis=1)
 
     # assert the genes are the same among cell line1 and 2
     assert(np.all(np.array(gA375)[ids[0]] == np.array(gA549)[ids[1]]))
@@ -56,7 +56,7 @@ def form_tensor() -> np.ndarray:
 
     return Tensor, gene_names, cellLines
 
-def factorize(num_comp=6):
+def factorize(num_comp=10):
     """ Using Parafac as a tensor factorization. """
     tensor, genes, cellLines = form_tensor()
     # perform parafac and CP decomposition
@@ -69,7 +69,7 @@ def factorize(num_comp=6):
         r2x[i] = 1 - ((tl.norm(tl.cp_to_tensor(fac_p) - tensor) ** 2) / tl.norm(tensor) ** 2)
         tfacs.append(fac_p)
 
-    return tfacs[np.where(r2x > 0.8)[0][0]], r2x, genes, cellLines
+    return tfacs[np.where(r2x > 0.6)[0][0]], r2x, genes, cellLines
 
 def initialize_cp(tensor, rank):
     factors = []
