@@ -4,7 +4,7 @@ from math import ceil
 import matplotlib.pyplot as plt
 import numpy as np
 from .matrix_operations import MatrixSubtraction
-from .impute import split_data, impute
+from .fancyimpute import split_data, impute
 
 
 def plot_norm_graph(cell_lines):
