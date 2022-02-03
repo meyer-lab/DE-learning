@@ -9,7 +9,7 @@ from tensorly.decomposition import parafac
 import tensorly as tl
 from ..tensor import form_tensor, initialize_cp
 from ..factorization import factorizeEstimate, alpha, mergedFitting, commonGenes, val_grad, costF, calcEta
-from ..fancyimpute import impute, split_data
+from ..impute import impute, split_data
 from ..importData import ImportMelanoma, importLINCS
 
 
