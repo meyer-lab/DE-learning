@@ -60,14 +60,16 @@ def factorize(num_comp=6):
     """ Using Parafac as a tensor factorization. """
     tensor, genes, cellLines = form_tensor()
     # perform parafac and CP decomposition
-    r2x_parafac = []
-    for i in range(1, 7):
+    r2x = np.zeros(num_comp)
+    tfacs = []
+    for i in range(num_comp):
         # parafac
-        fac_p = parafac(tensor, rank=i, svd="randomized_svd")
-        r2x_parafac.append(1 - ((tl.norm(tl.cp_to_tensor(fac_p) - tensor) ** 2) / tl.norm(tensor) ** 2))
+        tInit = initialize_cp(tensor, rank=i+1)
+        fac_p = parafac(tensor, rank=i+1, init=tInit, linesearch=True)
+        r2x[i] = 1 - ((tl.norm(tl.cp_to_tensor(fac_p) - tensor) ** 2) / tl.norm(tensor) ** 2)
+        tfacs.append(fac_p)
 
-    tfac = fac_p = parafac(tensor, rank=num_comp, svd="randomized_svd")
-    return tfac, r2x_parafac, genes, cellLines
+    return tfacs[np.where(r2x > 0.8)[0][0]], r2x, genes, cellLines
 
 def initialize_cp(tensor, rank):
     factors = []
