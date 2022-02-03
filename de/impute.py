@@ -6,10 +6,11 @@ from .factorization import alpha, factorizeEstimate
 from .linearModel import runFitting
 
 
-def split_data(X, n=20):
+def split_data(X, n=5):
     """ Prepare the test and train data. """
-    row = np.random.choice(X.shape[0], n, replace=False)
+    row = np.random.choice(X.shape[0], 1, replace=False)
     col = np.random.choice(X.shape[1], n, replace=False)
+
     train_X = np.copy(X)
     test_X = np.full_like(X, np.nan)
     train_X[row, col] = np.nan
@@ -45,6 +46,7 @@ def impute(data, linear=False):
         dataLast = np.copy(data)
         data[missing] = predictt[missing]
         change = np.linalg.norm(data - dataLast)
+        print(change, np.linalg.norm(dataLast))
 
     return data
 
