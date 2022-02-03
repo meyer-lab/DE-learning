@@ -20,8 +20,7 @@ def form_tensor() -> np.ndarray:
     # find common genes between all
     ids = commonGenes([gA375, gA549, gHA1E, gHT29, gMCF7, gPC3])
     n = ids[0].shape[0]
-
-    Tensor = tl.zeros((n, n+1, len(ids))) # the added condition in the second dimension is the control
+    Tensor = np.zeros((n, n + 1, len(ids)))  # the added condition in the second dimension is the control
 
     # only keep common genes
     A37 = A375[ids[0], :]
@@ -69,3 +68,25 @@ def factorize(num_comp=6):
 
     tfac = fac_p = parafac(tensor, rank=num_comp, svd="randomized_svd")
     return tfac, r2x_parafac, genes, cellLines
+
+def initialize_cp(tensor, rank):
+    factors = []
+    for mode in range(tl.ndim(tensor)):
+        # Avoid randomized_svd fallback to truncated_svd
+        if mode == 2:
+            rr = min(6, rank)
+        else:
+            rr = rank
+        U, S, _ = tl.randomized_svd(tl.unfold(tensor, mode), n_eigenvecs=rr)
+
+        # Put SVD initialization on the same scaling as the tensor
+        if mode == 0:
+            U = U @ np.diag(S)
+
+        if U.shape[1] < rank:
+            random_part = np.ones((U.shape[0], rank - U.shape[1]))
+            U = np.concatenate([U, random_part], axis=1)
+
+        factors.append(U[:, :rank])
+
+    return tl.cp_tensor.CPTensor((None, factors))
