@@ -34,7 +34,7 @@ def impute(data, linear=False):
         if linear:
             model = runFitting(data)
         else:
-            w, eta = factorizeEstimate(data)
+            w, eta = factorizeEstimate(data, maxiter=10)
 
         # Fill-in with model prediction
         if linear:
