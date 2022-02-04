@@ -69,7 +69,7 @@ def factorize(num_comp=10):
         r2x[i] = 1 - ((tl.norm(tl.cp_to_tensor(fac_p) - tensor) ** 2) / tl.norm(tensor) ** 2)
         tfacs.append(fac_p)
 
-    return tfacs[np.where(r2x > 0.6)[0][0]], r2x, genes, cellLines
+    return tfacs[np.where(r2x > 0.5)[0][0]], r2x, genes, cellLines
 
 def initialize_cp(tensor, rank):
     factors = []

@@ -30,10 +30,10 @@ def makeFigure():
     figureMaker(ax, pca_object, df, KO_genes_unique)
 
     # tensor factorization
-    tfac, r2x, _, cellLines = factorize(num_comp=6)
+    tfac, r2x, _, cellLines = factorize(num_comp=15)
     cellLine_factors = pd.DataFrame(tfac.factors[2], columns=[f"Cmp. {i}" for i in np.arange(1, tfac.rank + 1)], index=cellLines)
 
-    ax[3].scatter(range(1, 7), r2x, lw=2)
+    ax[3].scatter(range(1, 16), r2x, lw=2)
     ax[3].set_title("Tensor R2X")
     ax[3].set_ylabel("R2x")
     ax[3].set_xlabel("Number of Components")
