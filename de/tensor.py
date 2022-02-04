@@ -2,6 +2,7 @@
 import numpy as np
 from scipy.stats import zscore
 import tensorly as tl
+from tensorly.decomposition import parafac
 from .importData import importLINCS
 from .factorization import commonGenes
 
@@ -19,7 +20,6 @@ def form_tensor() -> np.ndarray:
     # find common genes between all
     ids = commonGenes([gA375, gA549, gHA1E, gHT29, gMCF7, gPC3])
     n = ids[0].shape[0]
-
     Tensor = np.zeros((n, n + 1, len(ids)))  # the added condition in the second dimension is the control
 
     # only keep common genes
@@ -46,7 +46,7 @@ def form_tensor() -> np.ndarray:
 
     # zscore each gene
     for i in range(Tensor.shape[2]):
-        Tensor[:, :, i] = zscore(Tensor[:, :, i], axis=0)
+        Tensor[:, :, i] = zscore(Tensor[:, :, i], axis=1)
 
     # assert the genes are the same among cell line1 and 2
     assert(np.all(np.array(gA375)[ids[0]] == np.array(gA549)[ids[1]]))
@@ -55,6 +55,21 @@ def form_tensor() -> np.ndarray:
     cellLines = ["A375", "A549", "HA1E", "HT29", "MCF7", "PC3"]
 
     return Tensor, gene_names, cellLines
+
+def factorize(num_comp=10):
+    """ Using Parafac as a tensor factorization. """
+    tensor, genes, cellLines = form_tensor()
+    # perform parafac and CP decomposition
+    r2x = np.zeros(num_comp)
+    tfacs = []
+    for i in range(num_comp):
+        # parafac
+        tInit = initialize_cp(tensor, rank=i+1)
+        fac_p = parafac(tensor, rank=i+1, init=tInit, linesearch=True)
+        r2x[i] = 1 - ((tl.norm(tl.cp_to_tensor(fac_p) - tensor) ** 2) / tl.norm(tensor) ** 2)
+        tfacs.append(fac_p)
+
+    return tfacs[np.where(r2x > 0.5)[0][0]], r2x, genes, cellLines
 
 def initialize_cp(tensor, rank):
     factors = []
