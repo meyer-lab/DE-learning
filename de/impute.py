@@ -6,7 +6,6 @@ from numpy import ma
 from numpy.ma.extras import average
 from scipy.special import expit
 from scipy.special.orthogonal import legendre
-
 from de.importData import importLINCS
 from .factorization import alpha, factorizeEstimate, SparseFactorization
 from .linearModel import runFitting
