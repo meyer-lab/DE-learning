@@ -24,7 +24,6 @@ def split_data(X, n=20):
 def impute(data, linear=False):
     """ Impute by repeated fitting. """
     missing = np.isnan(data)
-    data = np.nan_to_num(data)
 
     si = SoftImpute()
     data = si.fit_transform(data)
