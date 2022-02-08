@@ -7,7 +7,7 @@ from .linearModel import runFitting
 from .fancyimpute.soft_impute import SoftImpute
 
 
-def split_data(X, n=20):
+def split_data(X, n=10):
     """ Prepare the test and train data. """
     row = np.random.choice(X.shape[0], 1, replace=False)
     col = np.random.choice(X.shape[1], n, replace=False)
