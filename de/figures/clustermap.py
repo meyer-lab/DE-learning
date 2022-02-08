@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 
 from ..tensor import factorize
 
+
 def cluster_map():
     """ Plot the heatmap for each gene and each perturbation.  """
 

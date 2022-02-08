@@ -30,6 +30,7 @@ class SoftImpute(Solver):
     "Spectral Regularization Algorithms for Learning Large Incomplete Matrices"
     by Mazumder, Hastie, and Tibshirani.
     """
+
     def __init__(
             self,
             shrinkage_value=None,
