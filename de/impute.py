@@ -4,6 +4,7 @@ from numpy import ma
 from scipy.special import expit
 from .factorization import alpha, factorizeEstimate
 from .linearModel import runFitting
+from .fancyimpute.soft_impute import SoftImpute
 
 
 def split_data(X, n=20):
@@ -25,7 +26,8 @@ def impute(data, linear=False):
     missing = np.isnan(data)
     data = np.nan_to_num(data)
 
-    # TODO: Use softimpute first
+    si = SoftImpute()
+    data = si.fit_transform(data)
 
     for _ in range(10):
         U = np.copy(data)
@@ -35,7 +37,7 @@ def impute(data, linear=False):
         if linear:
             model = runFitting(data)
         else:
-            w, eta = factorizeEstimate(data)
+            w, eta = factorizeEstimate(data, maxiter=20)
 
         # Fill-in with model prediction
         if linear:
