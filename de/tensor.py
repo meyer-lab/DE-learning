@@ -56,6 +56,7 @@ def form_tensor() -> np.ndarray:
 
     return Tensor, gene_names, cellLines
 
+
 def factorize(num_comp=10):
     """ Using Parafac as a tensor factorization. """
     tensor, genes, cellLines = form_tensor()
@@ -64,12 +65,13 @@ def factorize(num_comp=10):
     tfacs = []
     for i in range(num_comp):
         # parafac
-        tInit = initialize_cp(tensor, rank=i+1)
-        fac_p = parafac(tensor, rank=i+1, init=tInit, linesearch=True)
+        tInit = initialize_cp(tensor, rank=i + 1)
+        fac_p = parafac(tensor, rank=i + 1, init=tInit, linesearch=True)
         r2x[i] = 1 - ((tl.norm(tl.cp_to_tensor(fac_p) - tensor) ** 2) / tl.norm(tensor) ** 2)
         tfacs.append(fac_p)
 
     return tfacs[np.where(r2x > 0.5)[0][0]], r2x, genes, cellLines
+
 
 def initialize_cp(tensor, rank):
     factors = []

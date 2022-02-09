@@ -29,6 +29,7 @@ def costF(data: list, w, etas: list, alphaIn):
                                * expit(w @ U[jj]) - alphaIn * data[jj])**2.0
     return cost
 
+
 def val_grad(w, D, eta, alpha):
     """ Calculate gradient of the cost w.r.t. w. """
     U = D.copy()
@@ -131,7 +132,7 @@ def factorizeEstimate(data: Union[list, np.ndarray], maxiter=300, returnCost=Fal
             wProposed = calcW(data, etas, alpha)
         else:
             wProposed = fitW(w, data, etas, alpha)
-        
+
         costNew = costF(data, wProposed, etas, alpha)
 
         if cost - costNew > 1e-3:
@@ -150,6 +151,7 @@ def factorizeEstimate(data: Union[list, np.ndarray], maxiter=300, returnCost=Fal
         return w, etas, cost
 
     return w, etas
+
 
 def commonGenes(annots: list) -> list:
     """

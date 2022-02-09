@@ -11,7 +11,7 @@ def importLINCS(cellLine):
 
     data = np.load(join(path_here, "de/data/", cellLine + "_RNAi_matrix.npy"))
     annotation = pd.read_csv(join(path_here, "de/data/", cellLine + "_genes.txt"), header=None, sep=" ")[0]
-    
+
     assert data.shape == (len(annotation), len(annotation) + 1)
     return data, list(annotation)
 
@@ -92,7 +92,8 @@ def determineCellTypes(inst_info):
 
 def cell_type_perturbations(data, inst_info, gene_info, cell_id):
     """ Returns matrix with rows corresponding to landmark genes measured and columns corresponding to average value of each perturbation performed. """
-    inst_info_celltype = inst_info.loc[((inst_info["cell_id"] == cell_id) | (inst_info["cell_id"] == (cell_id + ".311"))) & ((inst_info["pert_type"] == "ctl_vector") | (inst_info["pert_type"] == "trt_sh"))]
+    inst_info_celltype = inst_info.loc[((inst_info["cell_id"] == cell_id) | (inst_info["cell_id"] == (cell_id + ".311"))) &
+                                       ((inst_info["pert_type"] == "ctl_vector") | (inst_info["pert_type"] == "trt_sh"))]
     drop_cols = []
     rename_cols = []
     new_names = []
