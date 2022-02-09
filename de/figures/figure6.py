@@ -8,7 +8,7 @@ from ..impute import repeatImputation
 from .common import subplotLabel, getSetup
 
 
-def makeFigure():
+def makefigure():
     """
     Plot figure 6, plot boxplot for correlation coefficients of impution results comapring linear and nonlinear model.
     """
