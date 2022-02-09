@@ -8,7 +8,7 @@ from scipy.special import expit
 from .factorization import alpha, factorizeEstimate
 from .linearModel import runFitting
 from .fancyimpute.soft_impute import SoftImpute
-from ..importData import importLINCS, ImportMelanoma
+from .importData import importLINCS, ImportMelanoma
 
 def split_data(X, n=10):
     """ Prepare the test and train data. """
