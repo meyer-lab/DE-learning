@@ -24,33 +24,27 @@ def split_data(X, n=10):
     return train_X, test_X
 
 
-def impute(data, linear=False):
+def impute(data):
     """ Impute by repeated fitting. """
     missing = np.isnan(data)
 
     si = SoftImpute()
     data = si.fit_transform(data)
 
-    for _ in range(10):
-        U = np.copy(data)
-        np.fill_diagonal(U, 0.0)
+    
+    U = np.copy(data)
+    np.fill_diagonal(U, 0.0)
 
-        # Fit
-        if linear:
-            model = runFitting(data)
-        else:
-            w, eta = factorizeEstimate(data, maxiter=20)
+    # Fit
+    w, eta = factorizeEstimate(data, maxiter=20)
 
-        # Fill-in with model prediction
-        if linear:
-            predictt = model.predict(U)
-        else:
-            predictt = eta[0][:, np.newaxis] * expit(w @ U) / alpha
+    # Fill-in with model prediction
+    predictt = eta[0][:, np.newaxis] * expit(w @ U) / alpha
 
-        dataLast = np.copy(data)
-        data[missing] = predictt[missing]
-        change = np.linalg.norm(data - dataLast)
-        print(change, np.linalg.norm(dataLast))
+    dataLast = np.copy(data)
+    data[missing] = predictt[missing]
+    change = np.linalg.norm(data - dataLast)
+    print(change, np.linalg.norm(dataLast))
 
     return data
 
