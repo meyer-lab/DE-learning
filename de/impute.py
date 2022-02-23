@@ -4,10 +4,7 @@ from numpy import ma
 import pandas as pd
 import seaborn as sns
 import itertools
-from scipy.special import expit
-from .factorization import alpha, factorizeEstimate
-from .linearModel import runFitting
-from .fancyimpute.soft_impute import SoftImpute
+from .factorization import factorizeEstimate
 from .importData import importLINCS, ImportMelanoma
 
 def split_data(X, n=10):
@@ -26,27 +23,9 @@ def split_data(X, n=10):
 
 def impute(data):
     """ Impute by repeated fitting. """
-    missing = np.isnan(data)
-
-    si = SoftImpute()
-    data = si.fit_transform(data)
-
-    
-    U = np.copy(data)
-    np.fill_diagonal(U, 0.0)
-
     # Fit
-    w, eta = factorizeEstimate(data, maxiter=20)
-
-    # Fill-in with model prediction
-    predictt = eta[0][:, np.newaxis] * expit(w @ U) / alpha
-
-    dataLast = np.copy(data)
-    data[missing] = predictt[missing]
-    change = np.linalg.norm(data - dataLast)
-    print(change, np.linalg.norm(dataLast))
-
-    return data
+    _, _, data = factorizeEstimate(data, maxiter=50, returnData=True)
+    return data[0]
 
 
 def repeatImputation(data, linear=False, numIter=20):
@@ -54,7 +33,7 @@ def repeatImputation(data, linear=False, numIter=20):
     coefs = []
     for _ in range(numIter):
         train_X, test_X = split_data(data)
-        full_X = impute(train_X, linear)
+        full_X = impute(train_X)
         corr_coef = ma.corrcoef(ma.masked_invalid(full_X.flatten()), ma.masked_invalid(test_X.flatten()))
         coefs.append(corr_coef[0][1])
     print(f"average corr coef: {sum(coefs)/len(coefs)}")

@@ -6,6 +6,7 @@ from tqdm import tqdm
 from scipy.optimize import minimize
 from scipy.special import expit, logit
 from .importData import importLINCS
+from .fancyimpute.soft_impute import SoftImpute
 
 
 alpha = 0.1
@@ -84,6 +85,7 @@ def calcEta(data: np.ndarray, w: np.ndarray, alphaIn: float) -> np.ndarray:
     """
     Calculate an estimate for eta based on data and current iteration of w.
     """
+    assert np.all(np.isfinite(data))
     U = np.copy(data)
     np.fill_diagonal(U, 0.0)
     expM = expit(w @ U)
@@ -92,6 +94,8 @@ def calcEta(data: np.ndarray, w: np.ndarray, alphaIn: float) -> np.ndarray:
     # Least squares with one coefficient and no intercept
     xy = np.sum(expM * aData, axis=1)
     xx = np.sum(expM * expM, axis=1)
+    assert np.all(np.isfinite(xy))
+    assert np.all(np.isfinite(xx))
 
     etta = xy / xx
     assert np.min(etta) >= 0.0
@@ -99,7 +103,7 @@ def calcEta(data: np.ndarray, w: np.ndarray, alphaIn: float) -> np.ndarray:
     return etta
 
 
-def factorizeEstimate(data: Union[list, np.ndarray], maxiter=300, returnCost=False):
+def factorizeEstimate(data: Union[list, np.ndarray], maxiter=300, returnCost=False, returnData=False):
     """
     Iteravely solve for w and eta list based on the data.
     :param data: matrix or list of matrices representing a cell line's gene expression interactions with knockdowns
@@ -117,6 +121,9 @@ def factorizeEstimate(data: Union[list, np.ndarray], maxiter=300, returnCost=Fal
     if isinstance(data, np.ndarray):
         data = [data]
 
+    missing = [np.isnan(d) for d in data]
+    data = [SoftImpute(min_value=0.0, verbose=False).fit_transform(d) for d in data]
+
     w = np.zeros((data[0].shape[0], data[0].shape[0]))
     etas = [calcEta(x, w, alpha) for x in data]
 
@@ -132,6 +139,12 @@ def factorizeEstimate(data: Union[list, np.ndarray], maxiter=300, returnCost=Fal
             wProposed = calcW(data, etas, alpha)
         else:
             wProposed = fitW(w, data, etas, alpha)
+
+        for jj, dd in enumerate(data):
+            U = np.copy(dd)
+            np.fill_diagonal(U, 0.0)
+            predictt = etas[jj][:, np.newaxis] * expit(wProposed @ U) / alpha
+            data[jj][missing[jj]] = predictt[missing[jj]]
 
         costNew = costF(data, wProposed, etas, alpha)
 
@@ -149,6 +162,9 @@ def factorizeEstimate(data: Union[list, np.ndarray], maxiter=300, returnCost=Fal
 
     if returnCost:
         return w, etas, cost
+
+    if returnData:
+        return w, etas, data
 
     return w, etas
 
