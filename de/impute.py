@@ -5,6 +5,7 @@ import pandas as pd
 import seaborn as sns
 import itertools
 from .factorization import factorizeEstimate
+from .linearModel import runFitting
 from .importData import importLINCS, ImportMelanoma
 
 def split_data(X, n=10):
@@ -21,10 +22,14 @@ def split_data(X, n=10):
     return train_X, test_X
 
 
-def impute(data):
+def impute(data, linear=False):
     """ Impute by repeated fitting. """
-    # Fit
-    _, _, data = factorizeEstimate(data, maxiter=50, returnData=True)
+    if linear:
+        data = runFitting(data)
+    else:
+        # Fit nonlinear
+        _, _, data = factorizeEstimate(data, maxiter=50, returnData=True)
+
     return data[0]
 
 
@@ -33,7 +38,7 @@ def repeatImputation(data, linear=False, numIter=20):
     coefs = []
     for _ in range(numIter):
         train_X, test_X = split_data(data)
-        full_X = impute(train_X)
+        full_X = impute(train_X, linear)
         corr_coef = ma.corrcoef(ma.masked_invalid(full_X.flatten()), ma.masked_invalid(test_X.flatten()))
         coefs.append(corr_coef[0][1])
     print(f"average corr coef: {sum(coefs)/len(coefs)}")
@@ -49,6 +54,8 @@ def calc_imputation():
     for data in data_list:
         linear_coeffs.append(repeatImputation(data, linear=True))
         nonlinear_coeffs.append(repeatImputation(data))
+    print("linear ", linear_coeffs)
+    print("nonlinear ", nonlinear_coeffs)
 
     return linear_coeffs, nonlinear_coeffs
 
@@ -58,9 +65,9 @@ def plot_imputation(ax):
 
     n = len(linear[0])
     labels = 2 * [["A375"] * n, ["A549"] * n, ["HA1E"] * n, ["HT29"] * n, ["MCF7"] * n, ["PC3"] * n, ["Mel"] * n]
-    hue = [["linear"] * 5 * n, ["nonlinear"] * 5 * n]
-    df = pd.DataFrame({'correlation coef.': list(itertools.chain(linear + nonlinear)), 'cellLines': labels, 'model': hue})
-    sns.boxplot(x='cellLines', y='correlation coef', hue='model', data=df, ax=ax, split=True, jitter=0.2, palette=sns.color_palette('Paired'))
+    hue = [["linear"] * 7 * n, ["nonlinear"] * 7 * n]
+    df = pd.DataFrame({'correlation_coef.': list(itertools.chain(*(linear + nonlinear))), 'cellLines': list(itertools.chain(*labels)), 'model': list(itertools.chain(*hue))})
+    sns.boxplot(x='cellLines', y='correlation_coef.', hue='model', data=df, ax=ax, palette=sns.color_palette('Paired'))
     handles, labels = ax.get_legend_handles_labels()
     lgd = ax.legend(handles[0:2], labels[0:2],
                        loc='upper left',
