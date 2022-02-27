@@ -151,6 +151,10 @@ class SoftImpute(Solver):
 
         X_filled = X
         observed_mask = ~missing_mask
+        if np.sum(missing_mask) == 0:
+            if self.verbose:
+                print("[SoftImpute] No missing values.")
+            return X_filled
         max_singular_value = self._max_singular_value(X_filled)
         if self.verbose:
             print("[SoftImpute] Max Singular Value of X_init = %f" % (

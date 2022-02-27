@@ -4,10 +4,8 @@ from numpy import ma
 import pandas as pd
 import seaborn as sns
 import itertools
-from scipy.special import expit
-from .factorization import alpha, factorizeEstimate
+from .factorization import factorizeEstimate
 from .linearModel import runFitting
-from .fancyimpute.soft_impute import SoftImpute
 from .importData import importLINCS, ImportMelanoma
 
 def split_data(X, n=10):
@@ -26,33 +24,13 @@ def split_data(X, n=10):
 
 def impute(data, linear=False):
     """ Impute by repeated fitting. """
-    missing = np.isnan(data)
+    if linear:
+        data = runFitting(data)
+    else:
+        # Fit nonlinear
+        _, _, data = factorizeEstimate(data, maxiter=50, returnData=True)
 
-    si = SoftImpute()
-    data = si.fit_transform(data)
-
-    for _ in range(10):
-        U = np.copy(data)
-        np.fill_diagonal(U, 0.0)
-
-        # Fit
-        if linear:
-            model = runFitting(data)
-        else:
-            w, eta = factorizeEstimate(data, maxiter=20)
-
-        # Fill-in with model prediction
-        if linear:
-            predictt = model.predict(U)
-        else:
-            predictt = eta[0][:, np.newaxis] * expit(w @ U) / alpha
-
-        dataLast = np.copy(data)
-        data[missing] = predictt[missing]
-        change = np.linalg.norm(data - dataLast)
-        print(change, np.linalg.norm(dataLast))
-
-    return data
+    return data[0]
 
 
 def repeatImputation(data, linear=False, numIter=20):
@@ -76,6 +54,8 @@ def calc_imputation():
     for data in data_list:
         linear_coeffs.append(repeatImputation(data, linear=True))
         nonlinear_coeffs.append(repeatImputation(data))
+    print("linear ", linear_coeffs)
+    print("nonlinear ", nonlinear_coeffs)
 
     return linear_coeffs, nonlinear_coeffs
 
@@ -85,9 +65,9 @@ def plot_imputation(ax):
 
     n = len(linear[0])
     labels = 2 * [["A375"] * n, ["A549"] * n, ["HA1E"] * n, ["HT29"] * n, ["MCF7"] * n, ["PC3"] * n, ["Mel"] * n]
-    hue = [["linear"] * 5 * n, ["nonlinear"] * 5 * n]
-    df = pd.DataFrame({'correlation coef.': list(itertools.chain(linear + nonlinear)), 'cellLines': labels, 'model': hue})
-    sns.boxplot(x='cellLines', y='correlation coef', hue='model', data=df, ax=ax, split=True, jitter=0.2, palette=sns.color_palette('Paired'))
+    hue = [["linear"] * 7 * n, ["nonlinear"] * 7 * n]
+    df = pd.DataFrame({'correlation_coef.': list(itertools.chain(*(linear + nonlinear))), 'cellLines': list(itertools.chain(*labels)), 'model': list(itertools.chain(*hue))})
+    sns.boxplot(x='cellLines', y='correlation_coef.', hue='model', data=df, ax=ax, palette=sns.color_palette('Paired'))
     handles, labels = ax.get_legend_handles_labels()
     lgd = ax.legend(handles[0:2], labels[0:2],
                        loc='upper left',

@@ -4,6 +4,7 @@ This creates Figure 2: w Network Graph
 from .common import subplotLabel, getSetup
 from ..graph import Network, load_w, remove, normalize, bar_graph
 from ..grndb_network import load_w_GRNdb, Network_GRNdb
+from ..impute import plot_imputation
 
 
 def makeFigure():
@@ -12,7 +13,7 @@ def makeFigure():
     :type f: Figure
     """
     # Get list of axis objects
-    ax, f = getSetup((10, 8), (2, 3))
+    ax, f = getSetup((16, 8), (2, 3))
     # load w for the Melanoma dataset from Torre paper
     w = load_w()
     w = normalize(w)
@@ -32,6 +33,9 @@ def makeFigure():
     w_GRNdb = load_w_GRNdb()
     Network_GRNdb(w_GRNdb, ax[3])
     ax[3].set_title("w Network Graph - GRNdb")
+
+    # ax[4] would be the boxplot comparing linear and nonlinear fitting
+    plot_imputation(ax[4])
 
     # Add subplot labels
     subplotLabel(ax)
