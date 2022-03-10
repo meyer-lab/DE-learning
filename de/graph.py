@@ -197,7 +197,7 @@ def Network(w, ax):
 
     # Add edges
     w = w.to_numpy()
-    threshold = 0.0  # increase threshold in order to remove in-significant edges
+    threshold = np.mean(w_abs)  # increase threshold in order to remove in-significant edges
     for i, j in np.ndindex(w.shape):
         if (i != j) and (w_abs[i, j] > threshold):
             G.add_edge(j, i, color="red" if w[i, j] > 0 else "blue", weight=w[i, j])
