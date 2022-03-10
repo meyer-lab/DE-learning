@@ -68,7 +68,7 @@ def repeatImputation(data, linear=False, numIter=20):
 
 def calc_imputation():
     """ plot correlation coefficients as a boxplot. """
-    data_list = [importLINCS("A375")[0], importLINCS("A549")[0], importLINCS("HA1E")[0], importLINCS("HT29")[0], importLINCS("MCF7")[0], importLINCS("PC3")[0], ImportMelanoma()]
+    data_list = [importLINCS("A375")[0], importLINCS("A549")[0], importLINCS("HA1E")[0], importLINCS("HT29")[0], importLINCS("MCF7")[0], importLINCS("PC3")[0], ImportMelanoma().to_numpy()]
 
     # run the repeated imputation for nonlinear and linear model
     nonlinear_coeffs = []
