@@ -11,6 +11,7 @@ from scipy.integrate import odeint
 
 alpha = 0.1
 
+
 def import_factorize(cellLine, geneList):
     """ which data and which genes? """
     if cellLine == 'Melanoma':
@@ -22,7 +23,7 @@ def import_factorize(cellLine, geneList):
         colnames.append('control')
         dat = pd.DataFrame(data, index=g, columns=colnames)
         m = dat[geneList].loc[geneList[:-1]]
-    
+
     return factorizeEstimate(m.to_numpy())
 
 
@@ -36,6 +37,7 @@ def solver(w, eta, ts):
     sol = odeint(ODE, x0, ts, args=(eta, w))
     return sol
 
+
 def ODE(y, _, eta, w):
     '''The ODE system:
     Parameters = eps: Value that bound the saturation effect
@@ -45,7 +47,8 @@ def ODE(y, _, eta, w):
 
     return eta * expit(np.dot(w, y)) - alpha * y
 
-def network_odesol(ax, cellLine:str, list_gene:list):
+
+def network_odesol(ax, cellLine: str, list_gene: list):
     """ Given the list of genes and the cell line of interest plots the ode response and network. """
 
     # run factorization
