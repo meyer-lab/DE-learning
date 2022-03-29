@@ -10,6 +10,7 @@ from .linearModel import runFitting
 from .fancyimpute.soft_impute import SoftImpute
 from .importData import importLINCS, ImportMelanoma
 
+
 def split_data(X, n=10):
     """ Prepare the test and train data. """
     row = np.random.choice(X.shape[0], 1, replace=False)
@@ -66,9 +67,10 @@ def repeatImputation(data, linear=False, numIter=20):
     print(f"average corr coef: {sum(coefs)/len(coefs)}")
     return coefs
 
+
 def calc_imputation():
     """ plot correlation coefficients as a boxplot. """
-    data_list = [importLINCS("A375")[0], importLINCS("A549")[0], importLINCS("HA1E")[0], importLINCS("HT29")[0], importLINCS("MCF7")[0], importLINCS("PC3")[0], ImportMelanoma()]
+    data_list = [importLINCS("A375")[0], importLINCS("A549")[0], importLINCS("HA1E")[0], importLINCS("HT29")[0], importLINCS("MCF7")[0], importLINCS("PC3")[0], ImportMelanoma().to_numpy()]
 
     # run the repeated imputation for nonlinear and linear model
     nonlinear_coeffs = []
@@ -78,6 +80,7 @@ def calc_imputation():
         nonlinear_coeffs.append(repeatImputation(data))
 
     return linear_coeffs, nonlinear_coeffs
+
 
 def plot_imputation(ax):
     """ plots the boxplot of correlation coefficient for 6 LINCS cell lines and Melanoma in linear and nonlinear case. """
@@ -90,6 +93,6 @@ def plot_imputation(ax):
     sns.boxplot(x='cellLines', y='correlation coef', hue='model', data=df, ax=ax, split=True, jitter=0.2, palette=sns.color_palette('Paired'))
     handles, labels = ax.get_legend_handles_labels()
     lgd = ax.legend(handles[0:2], labels[0:2],
-                       loc='upper left',
-                       fontsize='large',
-                       handletextpad=0.5)
+                    loc='upper left',
+                    fontsize='large',
+                    handletextpad=0.5)

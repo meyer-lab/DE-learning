@@ -50,10 +50,8 @@ def ImportMelanoma():
     for i, gene in enumerate(data_combined.columns):
         if gene != "neg":
             matrix[gene] = data_combined.loc[gene, :]
-    matrix = matrix.T
-    # Convert dataframe to numpy array for comparison with model
-    matrix = matrix.to_numpy()
-    return matrix
+
+    return matrix.T
 
 
 def prepData():

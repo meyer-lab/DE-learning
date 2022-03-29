@@ -18,7 +18,7 @@ def load_w():
     """
     path_here = dirname(dirname(__file__))
 
-    data = ImportMelanoma()
+    data = ImportMelanoma().to_numpy()
     w, _ = factorizeEstimate(data)
     genes = np.loadtxt(join(path_here, "de/data/node_Index.csv"), dtype=str)
 
@@ -34,7 +34,7 @@ def normalize(w):
     :output w: A normalized matrix
     :type w: DataFrame
     """
-    control = ImportMelanoma()[:, -1]
+    control = ImportMelanoma().to_numpy()[:, -1]
     for i in range(len(control)):
         w.iloc[:, i] = w.iloc[:, i] * control[i]
     return w
@@ -197,7 +197,7 @@ def Network(w, ax):
 
     # Add edges
     w = w.to_numpy()
-    threshold = np.mean(w_abs) + 1.4 * np.std(w_abs)  # increase threshold in order to remove in-significant edges
+    threshold = np.mean(w_abs)  # increase threshold in order to remove in-significant edges
     for i, j in np.ndindex(w.shape):
         if (i != j) and (w_abs[i, j] > threshold):
             G.add_edge(j, i, color="red" if w[i, j] > 0 else "blue", weight=w[i, j])
